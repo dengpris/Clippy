@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { createRef, Component } from 'react';
 
-export default class PDFViewer extends React.Component {
+export default class PDFViewer extends Component {
   constructor(props) {
     super(props);
-    this.viewerRef = React.createRef();
+    this.viewerRef = createRef();
     this.backend = new props.backend();
   }
 
@@ -16,7 +16,7 @@ export default class PDFViewer extends React.Component {
   
   render() {
     return (
-      <div ref={this.viewerRef} id='viewer' style={{ width: '100%', height: '100%' }}>
+      <div ref={ this.viewerRef } id='viewer' style={{ width: '100%', height: '100%' }}>
 
       </div>
     )
