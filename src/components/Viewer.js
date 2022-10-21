@@ -44,8 +44,9 @@ const Viewer = () => {
 
     
   const nextPage = () => pdfRef && currentPage < totalPages && setCurrentPage(currentPage + 1);
-    
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+  const firstPage = () => currentPage !== 1 && setCurrentPage(1);
+  const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
     
   return (
     <>
@@ -55,6 +56,8 @@ const Viewer = () => {
         totalPageCount={ totalPages }
         nextPage={ nextPage }
         previousPage={ prevPage }
+        firstPage={ firstPage }
+        lastPage={ lastPage }
       />
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
       <br/>
