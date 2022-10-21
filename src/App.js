@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import IndexPage from './Viewer';
+import Viewer from './components/Viewer';
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
         >
           Learn React
         </a>
-        <IndexPage/>
+        <Viewer/>
       </header>
     </div>
   );

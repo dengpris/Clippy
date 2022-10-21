@@ -4,10 +4,11 @@ import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-const IndexPage = () => {
+const Viewer = () => {
   const url = myfile
   const canvasRef = useRef();
   const [pdfRef, setPdfRef] = useState();
+  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
 
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -42,8 +43,15 @@ const IndexPage = () => {
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     
   return (
-    <canvas ref={canvasRef}></canvas>
+    <>
+      <canvas ref={ canvasRef }></canvas>
+      {/* <br/>
+      <span>Page { currentPage } of { pdfRef.numPages }</span>
+      <button onClick={ () => prevPage() }>Previous Page</button>
+      <button onClick={ () => nextPage() }>Next Page</button> */}
+    </>
+    
   );
 };
 
-export default IndexPage;
+export default Viewer;
