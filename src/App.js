@@ -1,5 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
+import IndexPage from './Viewer';
 
 function App() {
   return (
@@ -17,9 +18,11 @@ function App() {
         >
           Learn React
         </a>
+        <IndexPage/>
       </header>
     </div>
   );
 }
+
 
 export default App;
