@@ -9,6 +9,7 @@
   "author": "Priscilla Deng",
   "license": "ISC",
   "devDependencies": {
-    "create-react-app": "^5.0.1"
+    "create-react-app": "^5.0.1",
+    "react-app-rewired": "^2.2.1"
   }
 }
