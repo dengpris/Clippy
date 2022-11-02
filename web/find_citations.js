@@ -5,6 +5,8 @@ var XMLHttpRequest = require('xhr2');
 
 //Crossreg URL:
 //https://api.crossref.org/works/<DOI>
+//https://api.crossref.org/works?query.title=<The+title+name>&query.author=<THE+AUTHOR+NAME>
+//http://api.crossref.org/works?query.bibliographic="Toward a Unified Theory of High-Energy Metaphysics, Josiah Carberry 2008-08-13"&rows=2
 //UnPayWall URL:
 //https://api.unpaywall.org/v2/<DOI>?email=cuevas.mariejoy@gmail.com
 
@@ -26,7 +28,7 @@ function loadJSON(path, success, error) {
     xhr.send();
   }
   //var url = "https://jsonplaceholder.typicode.com/posts";
-  var url = "https://api.unpaywall.org/v2/10.1038/nature12373?email=cuevas.mariejoy@gmail.com"
+  var url = "https://api.unpaywall.org/v2/10.1038/nature12373?email=cuevas.mariejoy@gmail.com";
   loadJSON(url, myData,'jsonp');
   
   function myData(Data)
