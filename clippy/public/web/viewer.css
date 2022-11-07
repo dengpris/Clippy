@@ -1831,6 +1831,7 @@ select {
 
 #toolbarViewerMiddle {
   position: absolute;
+  display: inline;
   left: 50%;
   transform: translateX(-50%);
 }

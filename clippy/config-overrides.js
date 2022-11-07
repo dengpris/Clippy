@@ -3,6 +3,11 @@ const webpack = require('webpack');
 
 module.exports = function override(config, env) {
     config.resolve.plugins = config.resolve.plugins.filter(plugin => !(plugin instanceof ModuleScopePlugin));
+    resolve: {
+        alias: {
+        process: "process/browser"
+      }
+    }
     const fallback = config.resolve.fallback || {};
     Object.assign(fallback, {
         "crypto": require.resolve("crypto-browserify"),
@@ -14,7 +19,8 @@ module.exports = function override(config, env) {
         "url": require.resolve("url"),
         "zlib": require.resolve("browserify-zlib"),
         "fs": require.resolve("browserify-fs"),
-        "path": require.resolve("path-browserify")
+        "path": require.resolve("path-browserify"),
+        "process/browser": require.resolve("process/browser")
     })
     config.resolve.fallback = fallback;
     config.plugins = (config.plugins || []).concat([

@@ -1,0 +1,23 @@
+iframe {
+    border: 0 none;
+    background-color: pink;
+    height: 32px;
+}
+
+body.clippy {
+    background-color: transparent;
+}
+
+.toolbarButton.generateSummary {
+    width: fit-content;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    padding: 7px;
+    margin-left: 15%;
+}
+
+.toolbarButton.generateSummary::before {
+    width: fit-content;
+    background-color: 0;
+}
