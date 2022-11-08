@@ -3,8 +3,31 @@
 <head>
     <link rel="stylesheet" href="viewer.css">
     <link rel="stylesheet" href="clippy.css">
+    <script src="../build/pdf.js"></script>
+    <script src="../build/pdf.worker.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
 </head>
 <body class="clippy">
-    <button class="toolbarButton generateSummary">Generate Summary</button>    
+    <button class="toolbarButton generateSummary" onclick="PDFToText()">Generate Summary</button>    
+    <script type="text/javascript" async>
+        async function PDFToText() {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+            let doc = await pdfjsLib.getDocument('../pdf-test.pdf').promise;
+            let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+                return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+            });
+            let result= (await Promise.all(pageTexts)).join('');
+            console.log(result);      
+            
+            var payload = new FormData();
+            payload.append('txt', result);
+        
+            axios.post(`/summarize`, payload)
+            .then((response) => (
+            console.log(response.data.summary)))
+            .catch(error => console.log('error', error))
+        }
+      </script>
 </body>
 </html>
