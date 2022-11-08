@@ -1,8 +1,8 @@
 # How to Run
-Hey all, please clone this repo and add LiveServer as extension to your Visual Studio Code
+Please run both React frontend and Flask backend when booting the PDF Viewer.
 
-Next, navigate to index.html and right click to click 'Open with LiveServer."
-
-Click the link to open the PDF. This will use the local version of our PDF.js
-
-Currently, this opens our draft proposal. Feel free to change the link in index.html if you wish to open other PDFs.
+```
+1. Navigate to clippy/ and run npm install
+2. Run npm start
+3. Open a new terminal and run pip install -r requirements.txt
+4. Navigate to clippy/backend and run flask run
