@@ -13,51 +13,74 @@ const ViewerNavbar = (props) => {
     nextPage,
     previousPage,
     firstPage,
-    lastPage
+    lastPage,
+    onZoomIn,
+    onZoomOut
   } = props;
+
+  const renderPageCounts = () => (
+    <div>
+      <Button 
+        variant='outline-secondary'
+        size='sm'
+        className='rounded-circle mx-3'
+        onClick={ () => firstPage() }
+        disabled={ currentPage === 1 ? true : false }
+      >
+        <BsArrowBarLeft/>
+      </Button> 
+      <Button 
+        variant='outline-secondary'
+        size='sm'
+        className='rounded-circle'
+        onClick={ () => previousPage() }
+        disabled={ currentPage === 1 ? true : false }
+      >
+        <BsArrowLeft/>
+      </Button>
+      <Navbar.Text className='px-3'> Page { currentPage } of { totalPageCount } </Navbar.Text>
+      <Button 
+        variant='outline-secondary'
+        size='sm'
+        className='rounded-circle'
+        onClick={ () => nextPage() }
+        disabled={ currentPage === totalPageCount ? true : false }
+      >
+        <BsArrowRight/>
+      </Button>
+      <Button 
+        variant='outline-secondary'
+        size='sm'
+        className='rounded-circle mx-3'
+        onClick={ () => lastPage() }
+        disabled={ currentPage === totalPageCount ? true : false }
+      >
+        <BsArrowBarRight/>
+      </Button>
+    </div>
+  )
+
+  const renderZoomButtons = () => (
+    <div>
+      <Button
+        onClick={ () => onZoomIn() }
+      >
+        +
+      </Button>
+      <Button
+        onClick={ () => onZoomOut() }
+      >
+        -
+      </Button>
+    </div>
+  )
+
   return (
     <>
       <Navbar bg='light' variant='light'>
         <Nav>
-          <div className='p-3'>
-            <Button 
-              variant='outline-secondary'
-              size='sm'
-              className='rounded-circle'
-              onClick={ () => firstPage() }
-              disabled={ currentPage === 1 ? true : false }
-            >
-              <BsArrowBarLeft/>
-            </Button> 
-            <Button 
-              variant='outline-secondary'
-              size='sm'
-              className='rounded-circle'
-              onClick={ () => previousPage() }
-              disabled={ currentPage === 1 ? true : false }
-            >
-              <BsArrowLeft/>
-            </Button>
-            <Navbar.Text className='pr-3 pl-3'> Page { currentPage } of { totalPageCount } </Navbar.Text>
-            <Button 
-              variant='outline-secondary'
-              size='sm'
-              className='rounded-circle'
-              onClick={ () => nextPage() }
-              disabled={ currentPage === totalPageCount ? true : false }
-            >
-              <BsArrowRight/>
-            </Button>
-            <Button 
-              variant='outline-secondary'
-              size='sm'
-              className='rounded-circle'
-              onClick={ () => lastPage() }
-              disabled={ currentPage === totalPageCount ? true : false }
-            >
-              <BsArrowBarRight/>
-            </Button>
-          </div>
+          { renderPageCounts() }
+          { renderZoomButtons() }
         </Nav>
       </Navbar>
     </>
@@ -67,10 +90,12 @@ const ViewerNavbar = (props) => {
 ViewerNavbar.propTypes = {
   currentPage: PropTypes.number,
   totalPageCount: PropTypes.number,
-  nextPage: PropTypes.func,
-  previousPage: PropTypes.func,
+  nextPage: PropTypes.func.isRequired,
+  previousPage: PropTypes.func.isRequired,
   firstPage: PropTypes.func,
-  lastPage: PropTypes.func
+  lastPage: PropTypes.func,
+  onZoomIn: PropTypes.func.isRequired,
+  onZoomOut: PropTypes.func.isRequired
 }
 
 export default ViewerNavbar;

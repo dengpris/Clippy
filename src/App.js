@@ -1,6 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
 import Viewer from './components/Viewer';
+import { searchByKeyWord } from './api/semanticScholarAPI';
+import DisplayCards from './components/semanticScholar/DisplayCards';
 
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
           Learn React
         </a> */}
         <Viewer/>
+        <button onClick={() => console.log('return ', searchByKeyWord()) }>click me</button>
       </header>
     </div>
   );

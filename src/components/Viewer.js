@@ -12,10 +12,11 @@ const Viewer = () => {
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [zoomScale, setZoomScale] = useState(1);
 
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
     pdf && pdf.getPage(pageNum).then(function(page) {
-      const viewport = page.getViewport({scale: 1.5});
+      const viewport = page.getViewport({ scale: zoomScale });
       const canvas = canvasRef.current;
       canvas.height = viewport.height;
       canvas.width = viewport.width;
@@ -25,7 +26,7 @@ const Viewer = () => {
       };
       page.render(renderContext);
     });   
-  }, [pdfRef]);
+  }, [pdfRef, zoomScale]);
     
   useEffect(() => {
     renderPage(currentPage, pdfRef);
@@ -41,7 +42,8 @@ const Viewer = () => {
     });
   },[url]);
 
-
+  const onZoomIn = () => zoomScale < 2 && setZoomScale(prevState => prevState + 0.1);
+  const onZoomOut = () => zoomScale > 0.7 && setZoomScale(prevState => prevState - 0.1);
     
   const nextPage = () => pdfRef && currentPage < totalPages && setCurrentPage(currentPage + 1);
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
@@ -50,7 +52,6 @@ const Viewer = () => {
     
   return (
     <>
-      
       <ViewerNavbar 
         currentPage={ currentPage }
         totalPageCount={ totalPages }
@@ -58,12 +59,15 @@ const Viewer = () => {
         previousPage={ prevPage }
         firstPage={ firstPage }
         lastPage={ lastPage }
+        onZoomIn={ onZoomIn }
+        onZoomOut={ onZoomOut }
       />
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
       <br/>
       <span>Page { currentPage } of { totalPages }</span>
       <button onClick={ () => prevPage() }>Previous Page</button>
       <button onClick={ () => nextPage() }>Next Page</button>
+      <span>zoom level is now { zoomScale }</span>
     </>
     
   );
