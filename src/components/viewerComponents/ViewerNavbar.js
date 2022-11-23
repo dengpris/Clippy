@@ -4,6 +4,7 @@ import './viewerComponents.css';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { BsArrowRight, BsArrowLeft, BsArrowBarRight, BsArrowBarLeft } from 'react-icons/bs';
+import { AiOutlineZoomIn, AiOutlineZoomOut } from 'react-icons/ai';
 import { Button, Nav, Navbar } from 'react-bootstrap';
 
 const ViewerNavbar = (props) => {
@@ -15,7 +16,8 @@ const ViewerNavbar = (props) => {
     firstPage,
     lastPage,
     onZoomIn,
-    onZoomOut
+    onZoomOut,
+    zoomScale
   } = props;
 
   const renderPageCounts = () => (
@@ -63,14 +65,23 @@ const ViewerNavbar = (props) => {
   const renderZoomButtons = () => (
     <div>
       <Button
+        className='rounded-circle mx-3'
+        variant='outline-secondary'
+        size='sm'
         onClick={ () => onZoomIn() }
+        disabled={ zoomScale >= 2 ? true : false }
       >
-        +
+        <AiOutlineZoomIn/>
       </Button>
+      <Navbar.Text className='px-3'>{ Math.round(zoomScale*100) }%</Navbar.Text>
       <Button
+        className='rounded-circle mx-3'
+        variant='outline-secondary'
+        size='sm'
         onClick={ () => onZoomOut() }
+        disabled={ zoomScale <= 0.7 ? true : false }
       >
-        -
+        <AiOutlineZoomOut/>
       </Button>
     </div>
   )
@@ -95,7 +106,8 @@ ViewerNavbar.propTypes = {
   firstPage: PropTypes.func,
   lastPage: PropTypes.func,
   onZoomIn: PropTypes.func.isRequired,
-  onZoomOut: PropTypes.func.isRequired
+  onZoomOut: PropTypes.func.isRequired,
+  zoomScale: PropTypes.number
 }
 
 export default ViewerNavbar;

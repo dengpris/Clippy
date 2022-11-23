@@ -1,10 +1,10 @@
-import myfile from './Draft_Proposal.pdf'
+// import myfile from './Draft_Proposal.pdf'
+import myfile from '../pdfLibrary/Draft_Proposal.pdf'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
 
 const Viewer = () => {
   const url = myfile
@@ -12,8 +12,9 @@ const Viewer = () => {
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [zoomScale, setZoomScale] = useState(1);
+  const [zoomScale, setZoomScale] = useState(1.3);
 
+  // NOT MY CODE
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
     pdf && pdf.getPage(pageNum).then(function(page) {
       const viewport = page.getViewport({ scale: zoomScale });
@@ -24,6 +25,7 @@ const Viewer = () => {
         canvasContext: canvas.getContext('2d'),
         viewport: viewport
       };
+      // setTimeout(page.render(renderContext), 1000);
       page.render(renderContext);
     });   
   }, [pdfRef, zoomScale]);
@@ -31,6 +33,7 @@ const Viewer = () => {
   useEffect(() => {
     renderPage(currentPage, pdfRef);
   },[pdfRef, currentPage, renderPage]);
+  // END NOT MY CODE
     
   useEffect(() => { 
     const loadingTask = PDFJS.getDocument(url);
@@ -61,13 +64,9 @@ const Viewer = () => {
         lastPage={ lastPage }
         onZoomIn={ onZoomIn }
         onZoomOut={ onZoomOut }
+        zoomScale={ zoomScale }
       />
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
-      <br/>
-      <span>Page { currentPage } of { totalPages }</span>
-      <button onClick={ () => prevPage() }>Previous Page</button>
-      <button onClick={ () => nextPage() }>Next Page</button>
-      <span>zoom level is now { zoomScale }</span>
     </>
     
   );
