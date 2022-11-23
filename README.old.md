@@ -68,18 +68,3 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-### Code Structure
-All code must go in src in order for the React app to run. For styling, minimize use of inline css styling and use the React Bootstrap for buttons.
-
-## api
-All backend api calls go here. Axios is used to call the api calls.
-
-## components
-Each feature (ie. citation map, hover, etc) and its corresponding helper files go in here.
-
-## pdfLibrary
-Sample pdf files go here
-
-## App.js
-Only add srs components here, do not overcrowd this file
