@@ -1,14 +1,17 @@
 
 import './viewerComponents.css';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { BsArrowRight, BsArrowLeft, BsArrowBarRight, BsArrowBarLeft } from 'react-icons/bs';
 import { AiOutlineZoomIn, AiOutlineZoomOut } from 'react-icons/ai';
 import { Button, Nav, Navbar } from 'react-bootstrap';
+import { getPDFText, getSummary } from '../meaningcloudSummary/GenerateSummary';
+
 
 const ViewerNavbar = (props) => {
   const {
+    url,
     currentPage,
     totalPageCount,
     nextPage,
@@ -19,6 +22,7 @@ const ViewerNavbar = (props) => {
     onZoomOut,
     zoomScale
   } = props;
+  
 
   const renderPageCounts = () => (
     <div>
@@ -68,20 +72,35 @@ const ViewerNavbar = (props) => {
         className='rounded-circle mx-3'
         variant='outline-secondary'
         size='sm'
+        onClick={ () => onZoomOut() }
+        disabled={ zoomScale <= 0.7 ? true : false }
+      >
+      <AiOutlineZoomOut/>
+      </Button>
+      
+      <Navbar.Text className='px-3'>{ Math.round(zoomScale*100) }%</Navbar.Text>
+      
+      <Button
+        className='rounded-circle mx-3'
+        variant='outline-secondary'
+        size='sm'
         onClick={ () => onZoomIn() }
         disabled={ zoomScale >= 2 ? true : false }
       >
         <AiOutlineZoomIn/>
       </Button>
-      <Navbar.Text className='px-3'>{ Math.round(zoomScale*100) }%</Navbar.Text>
+    </div>
+  )
+
+  const renderSummaryButton = () => (
+    <div>
       <Button
-        className='rounded-circle mx-3'
+        className='mx-3'
         variant='outline-secondary'
         size='sm'
-        onClick={ () => onZoomOut() }
-        disabled={ zoomScale <= 0.7 ? true : false }
+        onClick={ () => getSummary(url) }
       >
-        <AiOutlineZoomOut/>
+      Generate Summary
       </Button>
     </div>
   )
@@ -91,6 +110,7 @@ const ViewerNavbar = (props) => {
       <Navbar bg='light' variant='light'>
         <Nav>
           { renderPageCounts() }
+          { renderSummaryButton() }
           { renderZoomButtons() }
         </Nav>
       </Navbar>
