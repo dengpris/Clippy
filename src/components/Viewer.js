@@ -62,6 +62,8 @@ const Viewer = () => {
   
   const toggleSidebar = () => setShowSidebar(true);
 
+
+  // I DONT WANT THIS FUNCTION HERE
   async function getPDFText(url) {
     let doc = await PDFJS.getDocument(url).promise;
     let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
@@ -72,7 +74,15 @@ const Viewer = () => {
     return result;
 }
 
-  async function onSummaryClick() {
+// ONSUMMARYCLICK SHOULD ONLY CALL GETSUMMARY FROM GENERATESUMMARY.JS, THEN SETSUMMARY STATE TO THE RESULT
+// HOWEVER THAT CALLING GETSUMMARY RETURNS UNDEFINED INSTEAD OF THE SUMMARY
+// CURRENTLY SOLUTION IS TO INCLUDE THE GETSUMMARY FUNCTION CALL IN VIEWER.JS, BUT I DONT LIKE THIS WORKFLOW
+// const onSummaryClick = async() => {
+//   getSummary(url).then(response => setSummary(response))
+//   toggleSidebar();
+// } NOT WORKING
+
+async function onSummaryClick() {
     let text = await getPDFText(url)
 
     const payload = new FormData()
