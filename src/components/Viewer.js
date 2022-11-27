@@ -2,8 +2,11 @@
 import myfile from '../pdfLibrary/sample.pdf'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import Sidebar from './viewerComponents/Sidebar';
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+// import { getSummary } from './meaningcloudSummary/GenerateSummary';
+import axios from 'axios';
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const Viewer = () => {
@@ -13,6 +16,9 @@ const Viewer = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomScale, setZoomScale] = useState(1.3);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [summary, setSummary] = useState("");
+  const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // NOT MY CODE
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -45,6 +51,7 @@ const Viewer = () => {
     });
   },[url]);
 
+
   const onZoomIn = () => zoomScale < 2 && setZoomScale(prevState => prevState + 0.1);
   const onZoomOut = () => zoomScale > 0.7 && setZoomScale(prevState => prevState - 0.1);
     
@@ -52,11 +59,46 @@ const Viewer = () => {
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
   const firstPage = () => currentPage !== 1 && setCurrentPage(1);
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
+  
+  const toggleSidebar = () => setShowSidebar(true);
+
+  async function getPDFText(url) {
+    let doc = await PDFJS.getDocument(url).promise;
+    let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+        return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+    });
+    let result = (await Promise.all(pageTexts)).join('');
+
+    return result;
+}
+
+  async function onSummaryClick() {
+    let text = await getPDFText(url)
+
+    const payload = new FormData()
+    payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
+    payload.append("txt", text);
+    payload.append("sentences", 5);
+
+    axios.post(summaryURL, payload)
+    .then((response) => {
+        console.log(response.data.summary);
+        setSummary(response.data.summary);
+        toggleSidebar();
+    })
+    .catch((error) => {
+        console.log('error', error);
+    })
+}
     
   return (
     <>
       <ViewerNavbar 
         url = {url}
+        showSidebar={ showSidebar }
+        summary = { summary }
+        toggleSidebar={ toggleSidebar }
+        onSummaryClick={ onSummaryClick }
         currentPage={ currentPage }
         totalPageCount={ totalPages }
         nextPage={ nextPage }
@@ -67,6 +109,7 @@ const Viewer = () => {
         onZoomOut={ onZoomOut }
         zoomScale={ zoomScale }
       />
+      {showSidebar ? <Sidebar summary={summary}/> : null}
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
     </>
     

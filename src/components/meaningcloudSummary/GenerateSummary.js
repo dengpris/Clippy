@@ -26,7 +26,7 @@ export async function getSummary(url) {
     axios.post(summaryURL, payload)
     .then((response) => {
         console.log(response.data.summary);
-        return response.data.summary;
+        return (response.data.summary);
     })
     .catch((error) => {
         console.log('error', error);
