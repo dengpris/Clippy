@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Graph from "react-graph-vis";
+import { findCitations } from "../../api/find_citations";
 
 // import "./styles.css";
 // // need to import the vis network css in order to show tooltip
 // import "./network.css";
 
 const VisualizeGraph = () => {
+
+  const [citationInfo, setCitationInfo] = useState(null);
+
+  useEffect(() => {
+    const waitForCitations = findCitations('Nanometre-scale+thermometry+in+a+living+cell');
+    setCitationInfo(waitForCitations);
+  }, []);
+
+
   const graph = {
     nodes: [
       { id: 1, label: "Node 1", title: "node 1 tootip text" },
@@ -42,14 +52,18 @@ const VisualizeGraph = () => {
     }
   };
   return (
-    <Graph
-      graph={graph}
-      options={options}
-      events={events}
-      getNetwork={network => {
-        //  if you want access to vis.js network api you can set the state in a parent component using this property
-      }}
-    />
+    <>
+      {/* <Graph
+        graph={graph}
+        options={options}
+        events={events}
+        getNetwork={network => {
+          //  if you want access to vis.js network api you can set the state in a parent component using this property
+        }}
+      /> */}
+      <button onClick={() => findCitations('Nanometre-scale+thermometry+in+a+living+cell')}>click me</button>
+    </>
+    
   );
 
 }
