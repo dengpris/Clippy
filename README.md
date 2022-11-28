@@ -4,6 +4,14 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
+Before running the project, make sure you have the necessary modules.
+In the project directory, run:
+### `npm install`
+### `npm i pdfjs-dist`
+Will install the pdfjs modules
+### `npm install env-cmd`
+Will install the module to use the react-app API and interacts with the file `.env.stage`
+
 In the project directory, you can run:
 
 ### `npm start`
