@@ -17,8 +17,10 @@ const VisualizeGraph = () => {
   const [nodes, setNodes] = useState({});
   const [edges, setEdges] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [defaultDoi, setDefaultDoi] = useState(null);
 
   useEffect(() => {
+    setDefaultDoi('10.1038/nature12373');
     findCitations('Nanometre-scale+thermometry+in+a+living+cell')
     .then((res) => {
       setCitationInfo(res)
@@ -30,12 +32,19 @@ const VisualizeGraph = () => {
       return;
     }
     let graphNodes = [];
+    var defaultNode = {
+      id: defaultDoi,
+      title: defaultDoi,
+      label: 'Nanometre-scale thermometry in a living cell'
+    };
+    graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
-      console.log(Object.values(citationInfo)[i]);
+      // console.log(Object.values(citationInfo)[i]);
       var tmpNode = {};
       tmpNode.id = Object.keys(citationInfo)[i];
-      tmpNode.label = Object.values(citationInfo)[i].doi;
-      tmpNode.title = Object.values(citationInfo)[i].title[0];
+      tmpNode.title = Object.values(citationInfo)[i].doi;
+      tmpNode.label = Object.values(citationInfo)[i].title[0];
+      // tmpNode.widthConstraint= { maximum: 170 }
       graphNodes.push(tmpNode);
     }
     setNodes(graphNodes);
@@ -47,6 +56,11 @@ const VisualizeGraph = () => {
     }
     let graphEdges = [];
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
+      var defaultEdge = {
+        from: defaultDoi,
+        to: Object.keys(citationInfo)[i]
+      };
+      graphEdges.push(defaultEdge);
       var tmpFrom = Object.keys(citationInfo)[i];
       // loop through each connected ref
       for(let j = 0; j < Object.values(citationInfo)[i].connected_refs.length; j++) {
@@ -57,6 +71,7 @@ const VisualizeGraph = () => {
       }      
     }
     setEdges(graphEdges);
+    console.log('grpah edges is ', graphEdges);
   }
 
   const graph = {
@@ -83,16 +98,30 @@ const VisualizeGraph = () => {
       dragView: true,
     },
     layout: {
-      hierarchical: true
+      hierarchical: {
+        direction: 'LR',
+        sortMethod: 'directed',
+        levelSeparation: 300,
+      },
+    },
+    physics: {
+      hierarchicalRepulsion: {
+        nodeDistance: 140,
+      },
     },
     edges: {
       color: "#808080"
     },
     nodes: {
-
+      widthConstraint: {
+        maximum: 200,
+      },
+      shape: 'box',
+      margin: 10
     },
     height: "100%",
-    width: '100%'
+    width: '100%',
+    
   };
 
   const events = {
