@@ -76,7 +76,6 @@ export const findCitations = async (pdfTitle) => {
       urlRequest
     );
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
-    console.log("references dois is ", referenced_dois);
     var connected_references = await getRefDataByDOI(referenced_dois);
     return connected_references;
   } catch (err) {
