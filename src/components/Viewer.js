@@ -61,6 +61,7 @@ const Viewer = () => {
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
   
   const toggleSidebar = () => setShowSidebar(true);
+  const hideSidebar = () => setShowSidebar(false);
 
 
   // I DONT WANT THIS FUNCTION HERE
@@ -119,7 +120,13 @@ async function onSummaryClick() {
         onZoomOut={ onZoomOut }
         zoomScale={ zoomScale }
       />
-      {showSidebar ? <Sidebar summary={summary}/> : null}
+      { showSidebar ? 
+        <Sidebar 
+          summary={ summary }
+          hideSidebar={ hideSidebar }
+        /> 
+        : null
+      }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
     </>
     
