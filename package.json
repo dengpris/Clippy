@@ -6,15 +6,39 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.2.0",
     "bootstrap": "^5.2.2",
+    "browserify-fs": "^1.0.0",
+    "buffer": "^6.0.3",
+    "clean-text-utils": "^1.1.17",
+    "crypto": "^1.0.1",
+    "crypto-browserify": "^3.12.0",
     "env-cmd": "^10.1.0",
+    "grammarify": "^2.1.0",
+    "path": "^0.12.7",
+    "pdf-parse": "^1.1.1",
+    "pdf-text-extract": "^1.5.0",
+    "pdf2html": "^2.6.7",
     "react": "^18.2.0",
     "react-bootstrap": "^2.5.0",
     "react-dom": "^18.2.0",
     "react-graph-vis": "^1.0.7",
     "react-icons": "^4.6.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "read-text-file": "^1.1.0",
+    "sbd": "^1.0.19",
+    "sentence-tokenizer": "^1.0.1",
+    "stream-browserify": "^3.0.0",
+    "text-cleaner": "^1.2.1",
+    "url": "^0.11.0",
+    "uuid": "^8.3.2",
+    "web-vitals": "^2.1.4",
+    "xml-stream": "^0.4.5"
+  },
+  "browser": {
+    "child_process": false,
+    "fs": false,
+    "buffer": false
   },
   "scripts": {
     "start": "env-cmd -f .env.stage react-scripts start",
@@ -39,5 +63,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "pdfjs-dist": "^3.1.81"
   }
 }
