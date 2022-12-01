@@ -1,7 +1,10 @@
 // import myfile from './Draft_Proposal.pdf'
-import myfile from '../pdfLibrary/nature12373.pdf'
+// import myfile from '../pdfLibrary/nature12373.pdf'
+import myfile from '../pdfLibrary/DOI_article_ELIS3.pdf';
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
+import ChooseFile from './viewerComponents/ChooseFile';
+
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Sidebar from './viewerComponents/Sidebar';
 import * as PDFJS from 'pdfjs-dist';
@@ -11,6 +14,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 // import { getSummary } from './meaningcloudSummary/GenerateSummary';
 import axios from 'axios';
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 
 const Viewer = () => {
   const url = myfile
@@ -162,6 +166,7 @@ function summaryTokenize(summary){
         /> 
         : null
       }
+      {/* <ChooseFile/> */}
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
     </>
     
