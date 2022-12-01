@@ -108,7 +108,7 @@ async function onSummaryClick() {
     const payload = new FormData()
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", text);
-    payload.append("sentences", 3);
+    payload.append("sentences", 5);
 
     axios.post(summaryURL, payload)
     .then((response) => {
