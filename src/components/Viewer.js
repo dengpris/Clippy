@@ -1,10 +1,13 @@
 // import myfile from './Draft_Proposal.pdf'
-import myfile from '../pdfLibrary/sample.pdf'
+import myfile from '../pdfLibrary/DOI_article_ELIS3.pdf'
+import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Sidebar from './viewerComponents/Sidebar';
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
+import * as pdfjsLib from 'pdfjs-dist';
 // import { getSummary } from './meaningcloudSummary/GenerateSummary';
 import axios from 'axios';
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
@@ -32,7 +35,24 @@ const Viewer = () => {
         viewport: viewport
       };
       // setTimeout(page.render(renderContext), 1000);
-      page.render(renderContext);
+      var renderTask = page.render(renderContext);
+
+      renderTask.promise.then(function() {
+        // Returns a promise, on resolving it will return text contents of the page
+        return page.getTextContent();
+    }).then(function(textContent) {
+         // PDF canvas
+        var pdf_canvas = document.getElementById("viewer-canvas"); 
+        // Canvas offset
+        // Pass the data to the method for rendering of text over the pdf canvas.
+        PDFJS.renderTextLayer({
+            textContent: textContent,
+            container: document.getElementById("textLayer"),
+            viewport: viewport,
+            textDivs: []
+        });
+      });
+
     });   
   }, [pdfRef, zoomScale]);
     
@@ -85,21 +105,36 @@ const Viewer = () => {
 
 async function onSummaryClick() {
     let text = await getPDFText(url)
-
     const payload = new FormData()
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", text);
-    payload.append("sentences", 5);
+    payload.append("sentences", 3);
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        console.log(response.data.summary);
-        setSummary(response.data.summary);
+        //console.log(response.data.summary);
+        setSummary(summaryTokenize(response.data.summary));
         toggleSidebar();
     })
     .catch((error) => {
         console.log('error', error);
     })
+}
+
+function summaryTokenize(summary){
+  var Tokenizer = require('sentence-tokenizer');
+  var tokenizer = new Tokenizer();
+  tokenizer.setEntry(summary);
+  console.log(tokenizer.getSentences());
+  var summarySentencesArray = tokenizer.getSentences();
+
+  const TextCleaner = require('text-cleaner');
+  for(let i = 0; i < summarySentencesArray.length; i++){
+    summarySentencesArray[i] = TextCleaner(summarySentencesArray[i]).condense().removeChars().trim().valueOf()+".";
+    console.log(summarySentencesArray[i]);
+  }
+  return summarySentencesArray.join();
+
 }
     
   return (
