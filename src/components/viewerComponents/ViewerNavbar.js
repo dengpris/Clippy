@@ -111,11 +111,9 @@ const ViewerNavbar = (props) => {
     </div>
   )
 
- 
-
   return (
     <>
-      <Navbar bg='light' variant='light' className="justify-content-center">
+      <Navbar bg='dark' variant='dark' className="justify-content-center mb-3">
         <Nav>
           { renderPageCounts() }
           { renderSummaryButton() }
