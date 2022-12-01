@@ -1,0 +1,2489 @@
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN" "JATS-archivearticle1.dtd">
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta />
+    <article-meta>
+      <title-group>
+        <article-title>TLDR: Extreme Summarization of Scientific Documents</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author">
+          <string-name>Isabel Cacholay</string-name>
+        </contrib>
+        <contrib contrib-type="author">
+          <string-name>Daniel S. Weldyz</string-name>
+        </contrib>
+      </contrib-group>
+      <abstract>
+        <p>We introduce TLDR generation, a new form of extreme summarization, for scientific papers. TLDR generation involves high source compression and requires expert background knowledge and understanding of complex domain-specific language. To facilitate study on this task, we introduce SCITLDR, a new multi-target dataset of 5.4K TLDRs over 3.2K papers. SCITLDR contains both author-written and expert-derived TLDRs, where the latter are collected using a novel annotation protocol that produces high-quality summaries while minimizing annotation burden. We propose CATTS, a simple yet effective learning strategy for generating TLDRs that exploits titles as an auxiliary training signal. CATTS improves upon strong baselines under both automated metrics and human evaluations. Data and code are publicly available at https://github.com/allenai/scitldr.</p>
+      </abstract>
+    </article-meta>
+  </front>
+  <body>
+    <sec id="sec-1">
+      <title>1 Introduction</title>
+      <p>
+        We introduce TLDR1 generation for scientific
+papers. An alternative to abstracts, TLDRs focus on
+the key aspects of the paper, such as its main
+contributions, eschewing nonessential background or
+methodological details. Given the increasing pace
+of publication
+        <xref ref-type="bibr" rid="ref49">(Van Noorden, 2014)</xref>
+        and resulting
+difficulty in keeping up with the literature, TLDRs
+can enable readers to quickly discern a paper’s key
+points and decide whether it’s worth reading. The
+goal of existing work in summarization of scientific
+documents is to generate abstracts or provide
+complimentary summaries to abstracts.
+        <xref ref-type="bibr" rid="ref3 ref3 ref5 ref53 ref9">(Collins et al.,
+2017; Cohan et al., 2018; Chandrasekaran et al.,
+2019; Yasunaga et al., 2019)</xref>
+        . In contrast, TLDR
+1TLDR is an acronym that stands for “too long; didn’t read,”
+which is often used in online informal discussion (e.g., Twitter
+or Reddit) about scientific papers. For visual clarity, we omit
+the semi-colon.
+      </p>
+      <p>
+        Abstract While many approaches to make neural networks
+more fathomable have been proposed, they are restricted to
+interrogating the network with input data. [...] In this work, we
+propose neural persistence, a complexity measure for neural
+network architectures based on topological data analysis on weighted
+stratified graphs. [...]
+Intro [...] In this work, we present the following
+contributions: We introduce neural persistence, a novel measure for
+characterizing the structural complexity of neural networks that can
+be eciently computed. [...]
+Conclusion [...] However, this did not yield an early
+stopping measure because it was never triggered, thereby suggesting
+that neural persistence captures salient information that would
+otherwise be hidden among all the weights of a network [...]
+TLDR We develop a new topological complexity measure
+for deep neural networks and demonstrate that it captures their
+salient properties.
+generation seeks to produce an extreme (single
+sentence) summary
+        <xref ref-type="bibr" rid="ref31">(Narayan et al., 2018)</xref>
+        given the
+entire paper. Further, TLDR generation is a
+challenging natural language generation task. Writing
+a TLDR of a scientific paper requires expert
+background knowledge and understanding of complex
+domain-specific language to identify the salient
+aspects of the paper, while maintaining faithfulness to
+the source and correctness1 of the written summary.
+An example TLDR is provided in Figure 1.
+      </p>
+      <p>
+        To facilitate the study of TLDR generation, we
+introduce SCITLDR, a new dataset of 5,411 TLDRs
+of computer science papers. SCITLDR is built from
+a combination of TLDRs written by authors of
+submissions on OpenReview2 and TLDRs derived by a
+novel annotation protocol that asks domain experts
+to rewrite peer review comments for that
+submission. Having multiple gold summaries per paper is
+especially important for evaluation when there is
+variability in human-written gold summaries
+        <xref ref-type="bibr" rid="ref16 ref29 ref32 ref54">(Zechner, 1996; Harman and Over, 2004)</xref>
+        .
+      </p>
+      <p>
+        In addition to establishing strong extractive
+and abstractive summarization baselines using
+Transformer-based
+        <xref ref-type="bibr" rid="ref50">(Vaswani et al., 2017)</xref>
+        models, we present CATTS (Controlled Abstraction for
+TLDRs with Title Scaffolding), a simple yet
+effective learning strategy for TLDR generation. CATTS
+incorporates ideas from scaffold tasks for multitask
+learning
+        <xref ref-type="bibr" rid="ref38 ref4 ref45 ref46">(Swayamdipta et al., 2018a; Cohan et al.,
+2019)</xref>
+        and control codes in conditional language
+generation
+        <xref ref-type="bibr" rid="ref21">(Keskar et al., 2019)</xref>
+        to address the
+problem of data scarcity in the highly-specialized
+scientific domain. In particular, CATTS exploits titles
+as an auxiliary, naturally-occurring training
+signal by training the model to generate both titles
+and TLDRs indicated by control codes. We show
+that CATTS applied to BART
+        <xref ref-type="bibr" rid="ref23">(Lewis et al., 2020)</xref>
+        ,
+a state-of-the-art summarization model, results in
+performance improvement in both automated
+metrics and human evaluation.
+      </p>
+      <p>Our contributions are summarized below:
+1. We introduce TLDR generation, a new form
+of extreme summarization, for scientific papers.
+With extensive analysis of properties of TLDRs, we
+provide insight into the types of information and
+amount of variability in human-written TLDRs.</p>
+      <p>2. We release SCITLDR, a new multi-target
+dataset of 5,411 TLDRs over 3,229 scientific papers.
+SCITLDR contains both author-written and
+expertderived TLDRs, where the latter are collected
+using a novel annotation protocol that produces
+highquality summaries while avoiding the burden of
+reading the full paper.</p>
+      <p>3. We establish strong baselines on SCITLDR and
+improve them with CATTS, a simple yet effective
+learning strategy for generating TLDRs that uses
+titles as an auxiliary training signal.</p>
+      <p>4. We perform extensive analysis and human
+evaluation of system-generated TLDRs, focusing on
+informativeness and factual correctness.
+2</p>
+    </sec>
+    <sec id="sec-2">
+      <title>Dataset construction</title>
+      <p>Overview We introduce SCITLDR, a new
+multitarget dataset of 5,411 TLDRs over 3,229 scientific
+papers in the computer science domain.3 The
+training set contains 1,992 papers, each with a single
+gold TLDR. The dev and test sets contain 619 and
+618 papers each, with 1,452 and 1,967 TLDRs,
+respectively. This is unlike the majority of existing
+3See Appendix Table 9 for full venue breakdown.
+Peer review The paper proposes variance regularizing
+adversarial learning (VRAL), a new method for training GANs.
+The motivation is to ensure that the gradient for the
+generator does not vanish. [...] The discriminator itself is trained
+through two additional meta-discriminators Are the
+meta-discriminators really necessary? Have you tried matching moments
+or using other methods [...]
+Derived TLDR The paper proposes variance regularizing
+adversarial learning for training gans to ensure that the gradient
+for the generator does not vanish.
+summarization datasets that assume only one gold
+summary for a given document.</p>
+      <p>
+        As evidenced by earlier work in summarization
+evaluation
+        <xref ref-type="bibr" rid="ref7">(Cohan and Goharian, 2016)</xref>
+        ,
+variability in human-written summaries
+        <xref ref-type="bibr" rid="ref16 ref29 ref32 ref54">(Zechner, 1996;
+Harman and Over, 2004)</xref>
+        can negatively impact the
+reliability of automated summarization metrics like
+Rouge
+        <xref ref-type="bibr" rid="ref25">(Lin, 2004)</xref>
+        .4 Considering only one gold
+TLDR for each paper as a basis of automated
+evaluation might result in inaccurate system quality
+assessment because conte1nt that might appear in a
+TLDR can have large variability. In addition,
+having multiple gold summaries for each document
+enables performing more in-depth analysis and
+thorough evaluation
+        <xref ref-type="bibr" rid="ref16 ref29 ref32">(Nenkova and Passonneau, 2004)</xref>
+        .
+      </p>
+      <p>To address this, SCITLDR contains TLDRs
+written from the perspective of the author
+(“TLDRAuth”) and TLDRs written from the perspective of
+the peer reviewer(“TLDR-PR”). We describe these
+two types of TLDRs in the following paragraphs.</p>
+      <sec id="sec-2-1">
+        <title>Collecting TLDR-Auth pairs Scholar-written</title>
+        <p>TLDRs of scientific papers are available on
+various online platforms. On OpenReview.org, a
+publicly available scientific reviewing platform,
+authors submit TLDRs of their papers that summarize
+the main content for both reviewers and other
+interested scholars. Scholars also share TLDRs social
+media platforms, such as Twitter and Reddit.</p>
+        <p>We use the OpenReview API5 to collect pairs of
+papers and author-written TLDRs, along with the</p>
+        <p>4While Rouge is capable of handling multiple targets for
+a given document, most summarization datasets are single
+target. See Table 1.</p>
+        <p>
+          5https://github.com/openreview/openreview-py
+Number of Avg. words Avg. words Compression %wnoorvdesl Multi-target
+documents in document in summary ratio
+full-text PDFs6 of those papers. We use the S2ORC
+pipeline
+          <xref ref-type="bibr" rid="ref28">(Lo et al., 2020)</xref>
+          to convert PDFs to
+structured, machine-readable full text. We then split
+the papers randomly into the previously-mentioned
+train, dev, and test sets; each paper at this point has
+an associated author-written gold TLDR.
+        </p>
+      </sec>
+      <sec id="sec-2-2">
+        <title>Rewriting peer reviews into TLDR-PR pairs</title>
+        <p>Scaling up data collection in a specialized
+scientific domain is costly and challenging. To sidestep
+this problem, we use a novel annotation protocol
+that exploits natural summaries in peer review
+comments. Assuming the typical peer reviewer has
+carefully scrutinized the source paper and provided
+a faithful summary in their comment (often in the
+first paragraph), domain experts can rewrite these
+comments into TLDRs.</p>
+        <p>For this task, we recruit 28 undergraduate
+computer science students from the University of
+Washington with self-reported experience in reading
+scientific papers. Each recruited student received one
+hour of one-on-one writing training and then was
+asked to work independently. Annotators were only
+6A small fraction of those papers (&lt; 5%) did not have an
+available PDF file, so we could not parse their full body text.
+This are still included the dataset as it is possible to generate a
+TLDR from an abstract alone.
+shown the first 128 words of a sampled7 peer
+review comment. They were instructed to keep their
+TLDRs between 15-25 words (similar to the length
+of an author written TLDR) and to skip reviews that
+do not contain a summary or if they did not
+understand the content. They were also instructed to use
+the original language in the review, when possible.
+We manually assessed every written summary,
+discarding TLDRs that did not adhere to the guidelines,
+and allowed 20/28 students who performed well
+to continue work beyond the first hour. Students
+were compensated at the local median hourly wage
+of $20 USD per hour. Refer to Appendix §F for
+full annotation instructions. Figure 2 contains an
+example of a peer review and its corresponding
+TLDR-PR. We discuss differences between
+TLDRPR and TLDR-Auth throughout Section 3.</p>
+      </sec>
+    </sec>
+    <sec id="sec-3">
+      <title>Dataset analysis 3</title>
+      <p>3.1</p>
+      <sec id="sec-3-1">
+        <title>Compression and abstractiveness</title>
+        <p>Table 1 compares SCITLDR with other
+summarization datasets in both scientific and non-scientific
+domains. We observe that SCITLDR has short
+summaries, like XSUM and NewsRoom, with long
+7Multiple peer review comments can be available for each
+paper on OpenReview. We focused on ensuring that each
+paper in dev and test had at least one TLDR-PR.
+source documents, like BigPatent and the other
+scientific-domain datasets. This results in a much
+higher compression ratio compared with existing
+datasets. Summarization in higher compression
+settings is challenging as it requires capturing
+more precisely the salient aspects of the document
+(Grusky et al.).</p>
+        <p>Following Narayan et al. (2018); Grusky et al.,
+we measure abstractiveness (or novelty) by
+percentage of words in the summary that do not appear in
+the source document. We observe that SCITLDR
+is more abstractive compared with other scientific
+domain datasets but less abstractive compared with
+non-scientific domain datasets. We also observe
+that SCITLDR is smaller in comparison to
+automatically collected datasets, such as XSUM and ArXiv,
+but is larger in comparison to other manually
+collected datasets, such as SciSummNet.
+3.2</p>
+      </sec>
+      <sec id="sec-3-2">
+        <title>Information content</title>
+        <p>We analyze the information content of TLDRs using
+an approach motivated by the nugget-based
+summarization evaluation framework of Nenkova and
+Passonneau (2004). In a similar manner, we asked
+two computer science researchers to read through a
+collection of TLDRs to both define a comprehensive
+set of categories of types of information present in
+TLDRs, which we refer to as nuggets.8 We also
+label each TLDR with all represented nuggets.
+Table 2 presents this categorization, along with
+example phrases and nugget occurrence frequencies
+of SCITLDR. For simplicity, we use the category
+codes defined in the table (with brackets) to
+reference specific categories.</p>
+        <p>Most TLDRs contain between two to four
+nuggets (never all six), and will provide some
+indication of their subject area (A) and the paper’s
+contributions (C). In fact, they are the most frequently
+co-occurring nuggets, appearing in 63% of
+TLDRAuth and 71% of TLDR-PR. TLDR-Auth tend to
+include results or scientific/theoretical findings (R)
+and often signal the value of their work (V) by
+describing their contributions as novel or their results
+as strong or state-of-the-art. In contrast,
+TLDRPR focus more on articulating problems the paper
+addresses (P). Interestingly, TLDR-PR place less
+emphasis on R and V in favor of further
+methodological details in the paper D. More details about
+nuggets in Appendix §A.</p>
+        <p>
+          8While we adopt the term ‘nugget” for convenience, we
+recognize that that they traditionally correspond to factoids,
+while here they correspond to di
+          <xref ref-type="bibr" rid="ref48">scourse roles Teufel (1999</xref>
+          ).
+Category
+        </p>
+        <p>Example phrase
+[A]rea, field
+or topic of study
+[P]roblem or
+motivation
+Mode of
+[C]ontribution
+[D]etails or
+description
+[R]esults or
+findings
+[V]alue or
+significance
+reinforcement learning,
+dependency parsing
+mode collapse,
+catastrophic forgetting
+method, dataset,
+proof, theorem
+graph convolution
+operations with
+dynamically computed graphs
+improved performance
+on ImageNet,
+simple defenses work on
+MNIST but not CIFAR
+novel, state-of-the-art,
+simple yet effective,
+easily applicable
+% of TLDRs
+AUTH / PR
+To explore variability in our human-written
+summaries, we examine differences between TLDRs
+written by authors (TLDR-Auth) and TLDRs derived
+from the perspective of a peer reviewer (TLDR-PR).
+Lexical variation First, we note that TLDR-Auth
+are on average 18.9 words long, while TLDR-PR are
+slightly longer on average at 22.9 words. Despite
+similarities in length, the 1-, 2-, and 3-gram mean
+Jaccard indices between TLDR-Auth and TLDR-PR
+are 15.0%, 2.5%, and 0.7%, respectively, indicating
+extremely little lexical overlap between the two
+sources of TLDRs. We can also observe through
+qualitative examples in Figure 3 how TLDR-Auth
+and TLDR-PR can differ greatly, even when they
+contain the same information content.</p>
+        <p>Abstractiveness TLDR-PR is more abstractive
+with a novelty score of 20.2% compared with
+TLDRAuth with a novelty score of 9.6%, where novelty is
+computed as the percentage of words in the TLDR
+not in the source paper. This is not unexpected
+because TLDR-PR are derived from peer review
+comments which themselves have already gone
+through one stage of abstraction.</p>
+        <p>TLDR-Auth The authors propose a framework to learn a
+good policy through imitation learning from a noisy
+demonstration set via meta-training a demonstration suitability assessor.
+TLDR-PR Contributes a maml based algorithm for
+imitation learning which automatically determines if provided
+demonstrations are ”suitable”.</p>
+        <p>TLDR-Auth The authors evaluate the effectiveness of
+having auxiliary discriminative tasks performed on top of statistics
+of the posterior distribution learned by variational autoencoders
+to enforce speaker dependency.</p>
+        <p>TLDR-PR Propose an autoencoder model to learn a
+representation for speaker verification using short-duration analysis
+windows.
+We introduce CATTS (Controlled Abstraction for
+TLDRs with Title Scaffolding), a simple yet
+effective method for learning to generate TLDRs. Our
+approach addresses two main challenges: (1) the
+limited size of the training data and (2) the need for
+domain knowledge in order to write high-quality
+gold TLDRs. To address these challenges, we
+propose using titles of scient1ific papers as additional
+generation targets. As titles often contain key
+information about a paper, we hypothesize that training
+a model to generate titles will allow it to learn how
+to locate salient information in the paper that will
+be also useful for generating TLDRs. In addition, all
+papers have a title, and thus we have an abundant
+supply of paper-title pairs for training.</p>
+        <p>
+          Incorporating auxiliary scaffold tasks via
+multitask learning has been studied before for improving
+span-labeling and text classification
+          <xref ref-type="bibr" rid="ref31 ref4 ref45 ref46">(Swayamdipta
+et al., 2018b; Cohan et al., 2019)</xref>
+          . Similar to
+multitask learning, training on heterogenous data
+annotated with control codes has been shown to
+improve controlled generation in autoregressive
+language models
+          <xref ref-type="bibr" rid="ref1 ref13 ref2 ref21 ref24 ref43">(Keskar et al., 2019; ElSahar et al.,
+2020; Sudhakar et al., 2019; Li et al., 2020)</xref>
+          . In
+fact, it has been shown effective for generating
+biomedical abstracts
+          <xref ref-type="bibr" rid="ref47">(Sybrandt and Safro, 2020)</xref>
+          .
+We demonstrate that control codes can be used
+to effectively incorporate scaffold tasks (e.g. title
+generation) for denoising autoencoders like BART
+          <xref ref-type="bibr" rid="ref23">(Lewis et al., 2020)</xref>
+          .
+        </p>
+        <p>In order to use title generation as a scaffold
+task for TLDR generation, we propose shuffling</p>
+        <p>SCITLDR with a title generation dataset, then
+appending each source with control codes hjTLDRji
+and hjTITLEji, respectively. This allows the
+parameters of the model to learn to generate both
+TLDRs and titles. This process is visualized in
+Frigure 4. At generation time, the appropriate control
+code is appended to the source. Additionally,
+upsampling particular tasks can be viewed as applying
+task-specific weights, similar to weighting losses
+in multitask learning setups.</p>
+      </sec>
+    </sec>
+    <sec id="sec-4">
+      <title>Experiments</title>
+      <sec id="sec-4-1">
+        <title>Baselines</title>
+        <p>We establish baselines for TLDR generation on
+SCITLDR using state-of-the-art extractive and
+abstractive summarization models.</p>
+        <p>
+          Extractive methods We consider both
+unsupervised and supervised extractive methods. For our
+unsupervised baseline, we use PACSUM
+          <xref ref-type="bibr" rid="ref26 ref33 ref42 ref43 ref52 ref56">(Zheng
+and Lapata, 2019)</xref>
+          , an extension of TextRank
+          <xref ref-type="bibr" rid="ref16 ref29 ref32">(Mihalcea and Tarau, 2004)</xref>
+          that uses BERT
+          <xref ref-type="bibr" rid="ref12">(Devlin
+et al., 2019)</xref>
+          as a sentence encoder. For our
+supervised baselines, we use BERTSUMEXT
+          <xref ref-type="bibr" rid="ref26 ref27 ref33 ref42 ref43 ref52 ref56">(Liu
+and Lapata, 2019)</xref>
+          , which uses BERT as a
+sentence encoder augmented with inter-sentence
+Transformer layers to capture interactions, and
+MatchSum
+          <xref ref-type="bibr" rid="ref57">(Zhong et al., 2020)</xref>
+          , which uses a BERT
+Siamese network to score whole summaries.
+Abstractive methods Since TLDRs often contain
+information spread across multiple sentences, we
+expect abstractive summarization methods to
+produce strong results for this task. We focus on
+BART
+          <xref ref-type="bibr" rid="ref23">(Lewis et al., 2020)</xref>
+          , a Transformer-based
+denoising autoencoder for pretraining
+sequenceto-sequence models. We use BART-large, which
+achieves state-of-the-art results in summarization
+on XSUM. We additionally use BART-large
+finetuned on XSUM, hypothesizing that the task of
+extreme summarization of news articles might
+transfer to TLDR generation on SCITLDR.
+        </p>
+        <p>Oracle We define a sentence-level extractive
+oracle: Given a paper and its multiple gold TLDRs, it
+selects the single sentence in the document with the
+highest Rouge overlap for each gold TLDR. Then it
+returns the single sentence that yields the maximum
+Rouge across all gold TLDRs. This sets an
+upperbound on the performance of the sentence-level
+extractive methods under our multi-target
+evaluation (Section 5.4). Our full text oracle achieves
+54.5 Rouge-1, 30.6 Rouge-2, and 45.0 Rouge-L on
+the test set.
+5.2</p>
+      </sec>
+      <sec id="sec-4-2">
+        <title>Input space</title>
+        <p>The input space is the context provided to the
+model when generating TLDRs.</p>
+        <p>
+          Abstract-only Since the vast majority of
+scientific papers do not have open-access full text
+          <xref ref-type="bibr" rid="ref28">(Lo
+et al., 2020)</xref>
+          , it is worth considering the setting in
+which we generate TLDRs for papers given only
+their abstracts as input. The average length of an
+abstract is 159 words and resulting compression
+ratio is 7.6.
+        </p>
+        <p>
+          AIC Previous studies have found that the most
+salient information in a paper for writing a
+summary is often found in the abstract, introduction,
+and conclusion (AIC) sections
+          <xref ref-type="bibr" rid="ref42">(Sharma et al.,
+2019)</xref>
+          . An important consequence of this is the
+ability to substantially reduce computational costs9
+          <xref ref-type="bibr" rid="ref41">(Schwartz et al., 2019)</xref>
+          by supplying only these
+sections as context. The average combined length of
+these contexts is 993 words and resulting
+compression ratio is 47.3, which is still higher than other
+datasets surveyed in Table 1.
+        </p>
+        <p>Comparing oracle results in Table 3, we see that
+increasing the input space from abstract-only to
+AIC improves Rouge-1 by +4.7. Yet, this is only
+2.1 Rouge-1 lower than the full text oracle
+performance, despite requiring five times more text.
+5.3</p>
+      </sec>
+      <sec id="sec-4-3">
+        <title>Training and implementation details</title>
+        <p>All experiments use Titan V or V100 GPUs. We
+experiment on abstract-only and AIC input spaces.
+Best hyperparameters for the models are selected
+based on dev set Rouge-1. Supervised models
+like BERTSUMEXT and BART are trained on
+SCITLDR and the best model checkpoint chosen
+using dev set loss. See Appendix§D for additional
+parameter tuning details of all models.</p>
+        <p>9Especially for methods that rely on O(n2) inter-sentence
+comparisons or wrappers around Transformer-based methods
+to long contexts.</p>
+      </sec>
+      <sec id="sec-4-4">
+        <title>Extractive Methods For PACSUM, BERT</title>
+        <p>
+          SUMEXT and MatchSum we use original code
+released by the authors. The first two use BERT-base
+and the last one uses RoBERTa-base
+          <xref ref-type="bibr" rid="ref26 ref27">(Liu et al.,
+2019)</xref>
+          . For MatchSum in AIC input space,
+following the authors, we use BERTSUMEXT to first
+extract 7 highly scoring sentences as the input to
+MatchSum.10 Sentence segmentation is performed
+using ScispaCy
+          <xref ref-type="bibr" rid="ref33">(Neumann et al., 2019)</xref>
+          , and
+models select a single sentence as their predictions. We
+use the default hyperparameters for PACSUM.
+        </p>
+      </sec>
+      <sec id="sec-4-5">
+        <title>Abstractive Methods We experiment with</title>
+        <p>
+          BART-large and BART-large finetuned on XSUM,
+using the Fairseq
+          <xref ref-type="bibr" rid="ref27 ref35">(Ott et al., 2019)</xref>
+          implementation
+and the released XSUM weights. We apply the
+CATTS training method to these two models, using
+an additional 20K paper-title pairs from arXiv for
+title generation.11 We up-sample TLDR instances to
+match the size of the title scaffold data.12 For
+simplicity, we refer to these as BART, BARTXSUM,
+CATTS and CATTSXSUM, respectively. For all
+models, we use a learning rate of 3e-5, update frequency
+of 1, and max tokens per batch of 102413 chosen
+through manual tuning. We tune decoder for all
+models via grid search over five length penalties
+between 0.2 and 1.0 and 7 beam sizes 2 to 8.
+5.4
+        </p>
+      </sec>
+      <sec id="sec-4-6">
+        <title>Evaluation</title>
+        <p>
+          Automated evaluation Following recent work
+on extreme summarization
+          <xref ref-type="bibr" rid="ref23 ref31">(Narayan et al., 2018;
+Lewis et al., 2020)</xref>
+          , we use Rouge-1, Rouge-2, and
+Rouge-L
+          <xref ref-type="bibr" rid="ref25">(Lin, 2004)</xref>
+          as our automated metrics. As
+discussed in Section 2, we have multiple target
+summaries available per paper. To exploit this
+during evaluation, we calculate the Rouge score of
+the system-generated TLDR with respect to each
+of the gold TLDRs for the corresponding paper
+(including its TLDR-Auth and all of its TLDRs-PR)
+individually. We take the maximum Rouge score
+over these gold TLDRs as the final Rouge score for
+that paper. An alternative approach to aggregating
+scores would be to take the mean, but due to the
+10In abstract-only setting, MatchSum takes the full context.
+11Includes all papers on arXiv with at least one of the
+following tags CS.CL, CS.CV, CS.LG, CS.AI, CS.NE, and STAT.ML
+and have identified introduction and conclusion sections by
+S2ORC
+          <xref ref-type="bibr" rid="ref28">(Lo et al., 2020)</xref>
+          .
+        </p>
+        <p>12While this up-sampling may indicate that CATTS is
+training on more TLDRs than BART, we allow BART training up
+to 20 epochs and it quickly overfits within a few epochs.</p>
+        <p>13Fairseq reports an “average batch size” of 36, which is a
+consequence of adaptive batching of examples based on the
+update frequency and max tokens per batch.</p>
+        <p>R1</p>
+        <p>
+          R2
+variability in TLDRs shown in Section 3.3, we argue
+the maximum operation is more appropriate – That
+is, matching any of the gold TLDRs is rewarded.14
+Human evaluation While our multi-target
+setting allows us to mitigate some of the limitations
+of Rouge
+          <xref ref-type="bibr" rid="ref11 ref7">(Conroy et al., 2011; Cohan and
+Goharian, 2016)</xref>
+          , we acknowledge that relying only on
+automated metrics is insufficient for evaluating the
+quality of the models. In addition to automated
+metrics, we also have human experts in computer
+science assess system-generated TLDRs under two
+criteria – informativeness and correctness.
+        </p>
+        <p>For informativeness, we perform the
+nuggetbased analysis for information content over
+systemgenerated TLDRs for the same 76 gold papers from
+Section 3.2. We use the presence (or lack) of
+different nuggets in predicted and gold TLDRs to quantify
+differences in information content. Specifically, we
+score each gold and system-generated TLDR by the
+number of unique nuggets divided by the number
+of tokens. This length normalization handles cases
+where systems returning the source document are
+trivially more informative. For each paper, we rank
+the predicted and gold TLDRs. Then, we compute
+overall metrics for each gold or system variant by
+aggregating their ranks across papers using mean
+reciprocal rank (MRR).</p>
+        <p>Evaluating correctness requires careful reading
+and understanding the source paper. To minimize
+this burden and have reliable evaluation, we ask
+the original authors of papers to assess the
+correctness of our system-generated TLDRs. We manually
+email (first or second) authors of arXiv papers and
+ask them to score each system-generated TLDR
+14For completeness we provide mean Rouge scores in
+Appendix Table 10 to supplement our main max Rouge results in
+Table 3.</p>
+        <p>TLDR-Auth (Gold)
+TLDR-PR (Gold)
+BARTXSUM
+CATTSXSUM</p>
+        <p>MRR
+with 1 - false or misleading, 2 - partially accurate
+or 3 - mostly correct, regardless of
+comprehensiveness. We compare the mean correctness (across
+papers) for each system variant. We received
+responses from 29 unique authors with annotations
+covering 64 arXiv papers.</p>
+        <p>Extractive results We establish baseline
+results for extractive methods on our new dataset
+SCITLDR. We observe that MatchSum has the
+highest extractive performance, followed by
+BERTSUMEXT. We observe that increasing input space
+from abstract-only to AIC greatly improves
+PACSUM15 performance but decreases performance of
+both BERTSUMEXT and MatchSum. We suspect
+that increasing the input space makes it more
+difficult for these models to learn optimal parameters
+including new position embeddings in low-resource
+training. Compared to the extractive oracle scores,
+we see there is plenty of room for improvement.</p>
+        <p>
+          15PACSUM using the full text yields a Rouge-1 of 12.7,
+significantly worse than abstract-only.
+% novel
+words
+Abstractive results Abstractive methods are not
+limited to choosing exact sentences. For a given
+abstractive baseline BART or BARTXSUM, our
+CATTS learning strategy results in improvements
+in both abstract-only and AIC settings. Comparing
+CATTS variants with their corresponding BART
+baselines, we observe that in the abstract-only
+setting, CATTS and CATTSXSUM achieve +0.5 and
++1.8 Rouge-1, respectively. In the AIC setting,
+CATTS and CATTSXSUM achieve +2.0 and +0.9
+Rouge-1, respectively. We use the two-sided paired
+t-test against a null hypothesis of no difference to
+assess these differences. To address the issue of
+multiple hypothesis testing over Rouge scores, we
+perform a Holm-Bonferroni
+          <xref ref-type="bibr" rid="ref18">(Holm, 1979)</xref>
+          16
+correction for determining significant p-values in Table 3.
+6.2
+        </p>
+      </sec>
+      <sec id="sec-4-7">
+        <title>Human evaluation</title>
+        <p>We perform our human evaluation on BARTXSUM
+and CATTSXSUM using the AIC input space on 51
+sampled papers. In this setting, we have both
+chosen the strongest baseline and controlled for XSUM
+pretraining. From Table 4, we see that CATTSXSUM
+is more informative than BARTXSUM and is
+comparable to gold TLDR-Auth, though still less
+informative than TLDR-PR.</p>
+        <p>
+          In addition to informativeness, we also evaluate
+content accuracy of generated tldrs as explained in
+Section 5.4. We report no difference in correctness
+between BARTXSUM and CATTSXSUM. We
+observe 42 ties, 10 cases where BARTXSUM is more
+correct, and 12 cases where CATTSXSUM is more
+16Using the P.ADJUST library in R
+          <xref ref-type="bibr" rid="ref38">(R Core Team, 2018)</xref>
+          correct. Both models average a rating of 2.5
+(scoring between partially accurate and mostly correct).
+        </p>
+      </sec>
+      <sec id="sec-4-8">
+        <title>How abstractive are the generations? From</title>
+        <p>Table 5, we observe: (1) BART variants are less
+abstractive than CATTS variants. (2) Initial training
+on XSUM might influence models to be slightly
+less abstractive. (3) BART variants are more
+abstractive in the abstract-only setting than the longer
+AIC settings, while CATTS seems to have the same
+level of abstractiveness regardless of input space.</p>
+      </sec>
+      <sec id="sec-4-9">
+        <title>How long are the generations? From Table 5,</title>
+        <p>we see the systems all generate TLDRs of similar
+length to the average length reported in Table 1.
+How important is using the full text? To
+analyze whether one can improve abstractive model
+performance by improving the input space
+selection (compared to just using AIC), we define an
+oracle input space. That is, for each TLDR, we select
+sentences from the full text that maximize
+Rouge1 with the gold TLDRs-Auth17 and select the top
+sentences to match the length of AIC. Repeating
+the experiments in Section 5 with this input source,
+we observe some performance improvement across
+models (Table 6).</p>
+        <p>Qualitative example Table 7 contains system
+generations on the same paper (alongside the gold
+TLDRs). Curiously, despite both achieving the same
+Rouge-1, the generated TLDRs are quite different.
+BARTXSUM focuses on the methodological
+contribution while CATTSXSUM focuses on a
+scientific finding. The “two hidden layer” detail by
+BARTXSUM is from the paper introduction and
+the “defining the appropriate sampling
+distributions” from CATTSXSUM is from the conclusion.18
+7</p>
+      </sec>
+    </sec>
+    <sec id="sec-5">
+      <title>Related work</title>
+      <sec id="sec-5-1">
+        <title>Transformers for summarization Transformer</title>
+        <p>
+          based models have achieved strong results in
+extractive and abstractive summarization. PACSUM
+          <xref ref-type="bibr" rid="ref26 ref33 ref42 ref43 ref52 ref56">(Zheng and Lapata, 2019)</xref>
+          combines BERT
+sentence representation with unsupervised text
+ranking; MatchSum
+          <xref ref-type="bibr" rid="ref57">(Zhong et al., 2020)</xref>
+          uses a Siamese
+BERT model to score the entire summary instead
+of a single extraction; and Liu and Lapata (2019)
+17Only TLDRs-Auth is exists for all papers. TLDRs-PR are
+only in dev and test.
+        </p>
+        <p>18See original paper:
+https://openreview.net/pdf?id=SkGT6sRcFX
+TLDR-Auth We propose a method for the construction of
+arbitrarily deep infinite-width networks, based on which we
+derive a novel weight initialisation scheme for finite-width
+networks and demonstrate its competitive performance.
+TLDR-PR Proposes a weight initialization approach to
+enable infinitely deep and infinite-width networks with
+experimental results on small datasets.</p>
+        <p>BARTXSUM We propose a principled approach to weight
+initialisation that allows the construction of infinite-width
+networks with more than two hidden layers.</p>
+        <p>
+          CATTSXSUM We study the initialisation requirements of
+infinite-width networks and show that the main challenge
+for constructing them is defining the appropriate sampling
+distributions for the weights.
+show that BERT is effective for both extractive and
+abstractive summarization. Zhang et al. (2019);
+          <xref ref-type="bibr" rid="ref2">Bi
+et al. (2020)</xref>
+          introduce new pretraining objectives
+that improve generation. Sequence-to-sequence
+models
+          <xref ref-type="bibr" rid="ref1 ref23 ref39">(Raffel et al., 2020; Lewis et al., 2020; Bao
+et al., 2020)</xref>
+          have state-of-the-art performance on
+XSUM
+          <xref ref-type="bibr" rid="ref31">(Narayan et al., 2018)</xref>
+          , a dataset for extreme
+summarization dataset of news articles. SCITLDR
+is a new form of extreme summarization focused
+on scientific papers.
+        </p>
+      </sec>
+      <sec id="sec-5-2">
+        <title>Scientific document summarization Most</title>
+        <p>
+          work in summarization of scientific papers have
+focused on longer summaries (i.e. 150-200 words).
+Existing datasets include CSPubSum for extractive
+summarization
+          <xref ref-type="bibr" rid="ref9">(Collins et al., 2017)</xref>
+          , ArXiv and
+PubMed for abstract generation
+          <xref ref-type="bibr" rid="ref5">(Cohan et al.,
+2018)</xref>
+          , and SciSummNet
+          <xref ref-type="bibr" rid="ref3 ref53">(Yasunaga et al., 2019)</xref>
+          and CL-SciSumm
+          <xref ref-type="bibr" rid="ref19 ref3">(Jaidka et al., 2018;
+Chandrasekaran et al., 2019)</xref>
+          datasets, which incorporate
+citation contexts into human-written summaries.
+TalkSumm
+          <xref ref-type="bibr" rid="ref22">(Lev et al., 2019)</xref>
+          uses recordings of
+conference talks to create a distantly-supervised
+training set for the CL-SciSumm task.
+        </p>
+        <p>
+          Modeling approaches in scientific document
+summarization include models that exploit citation
+contexts
+          <xref ref-type="bibr" rid="ref10 ref20 ref37 ref55 ref6 ref8 ref9">(Qazvinian et al., 2013; Cohan and
+Goharian, 2015, 2017; Zerva et al., 2020)</xref>
+          , automated
+survey generation
+          <xref ref-type="bibr" rid="ref14 ref20 ref30 ref51">(Mohammad et al., 2009; Jha
+et al., 2015; Fabbri et al., 2018; Wang et al., 2018)</xref>
+          ,
+and other techniques focusing on exploiting the
+unique properties of scientific documents such as
+long length and structure
+          <xref ref-type="bibr" rid="ref10 ref26 ref33 ref34 ref42 ref43 ref5 ref52 ref56 ref8 ref9">(Conroy and Davis, 2017;
+Nikolov et al., 2018; Cohan et al., 2018; Xiao and
+Carenini, 2019)</xref>
+          . Yet, such methods have not been
+studied in the setting of extreme summarization
+(i.e. short target summaries, high compression,
+high abstraction), and SCITLDR is the first dataset
+to facilitate such research.
+8
+        </p>
+      </sec>
+    </sec>
+    <sec id="sec-6">
+      <title>Conclusion</title>
+      <p>We introduce TLDR generation for scientific
+papers, and release SCITLDR, a multi-target dataset
+of TLDR-paper pairs. We also present CATTS, a
+simple yet effective learning strategy for improving
+TLDR generation that exploits auxiliary training
+signal from paper titles. We show that our approach
+improves over strong modeling baselines.</p>
+      <p>Existing methods for scientific document
+summarization often make use of properties unique to
+those papers, like sections, citation contexts or
+scientific discourse roles. Future work can examine
+how best to incorporate these properties to improve
+TLDR generation models. Additionally, while our
+experiments are limited to abstract-only and AIC
+input spaces, we provide the full text of the source
+papers to support research into using longer input
+contexts. Furthermore, the multiple target
+summaries in SCITLDR reflect diverse perspectives and
+can be used to support summarization research into
+training and evaluation techniques previously
+unavailable with existing datasets. Finally, the idea
+of a TLDR can differ between academic disciplines,
+and we leave such exploration open for future work.</p>
+    </sec>
+    <sec id="sec-7">
+      <title>Acknowledgments</title>
+      <p>We thank the Semantic Scholar Research team and
+John Bohannon and Oleg Vasilyev from Primer for
+helpful feedback and discussions. This work was
+supported in part by NSF Convergence
+Accelerator award 1936940, NSF RAPID award 2040196,
+ONR grant N00014-18-1-2193, and the University
+of Washington WRF/Cable Professorship.</p>
+      <p>Hao Zheng and Mirella Lapata. 2019. Sentence
+centrality revisited for unsupervised summarization. In
+ACL.</p>
+    </sec>
+    <sec id="sec-8">
+      <title>How many nuggets in TLDRs?</title>
+      <p># categories 0
+TLDR-Auth 2.6%
+TLDR-PR 0.0%
+# categories 4
+TLDR-Auth 18.4%
+TLDR-PR 26.3%</p>
+    </sec>
+    <sec id="sec-9">
+      <title>Background knowledge for TLDRs</title>
+      <p>What a paper’s TLDR looks like or what
+information it should include is subjective and follows
+(community-specific) commonsense rather than
+any formally-defined procedure. Since TLDRs are
+inherently ultra-short, they are not necessarily
+selfcontained statements, and understanding them
+requires background expertise within their
+respective scientific domain. Therefore, when designing
+SCITLDR, we assume readers have sufficient
+background knowledge to follow a general research
+topic in a given domain. This eliminates the need
+for TLDRs to include explanations or clarifications
+of common domain-specific terms (e.g., “bounds,”
+“LSTM,” or “teacher”).</p>
+      <p>D</p>
+    </sec>
+    <sec id="sec-10">
+      <title>Additional model training details</title>
+      <p>PACSUM The default hyperparameters are beta
+and lambda1 set to 0. We did some initial tuning
+of the hyperparameters using the provided tuning
+code, which performs a search over 10 beta values
+and 10 lambda1 values. This did not result in a
+significant difference in performance. PACSUM
+had a total runtime of 12 minutes on abstracts and
+6.5 hours on AIC. We used the released code by
+authors.19
+19https://github.com/mswellhao/PacSum
+BERTSUMEXT We trained with a batch size of
+1 sentence per batch and for 5,000 total steps for
+a total training time of 30 min. We use a learning
+rate of 2e-3 and a dropout rate of 0.1, which are
+the reported parameters used for XSUM.
+BERTSumExt also requires a max token length for
+initializing position embeddings. For the abstract-only
+setting, we use the default number of max tokens
+512, which fits the full length of all of abstracts in
+SCITLDR. For AIC, we first attempted 3 different
+truncation lengths – 1024 (double the max tokens
+for abstracts), 1500 (90th percentile length), and
+1800 (95th percentile length) tokens. We found that
+truncation at 1500 performs best on AIC. We used
+the released code by authors.20
+MatchSum We trained MatchSum with a batch
+size of 32, learning rate of 2e-5 with a linear
+warmup and decay scheduler, and trained the model
+for 15 epochs. We chose the best checkpoint based
+on linear combination of Rouge-1, Rouge-2 and
+Rouge-L. We manually tuned hyperparameters –
+For learning rate, we tried 2e-5 and 3e-5 and for
+number of epochs, we tried 5, 15, and 20. For
+AIC, as MatchSum requires few salient sentences
+as input for candidate generation, we used
+BERTSUMEXT to score sentences and chose the top 7
+ones as input to MatchSum. This is according to
+instructions by authors21. Instead of training the
+model from scratch we used the authors released
+checkpoint based on the CNN/DM dataset. This
+resulted in about 1 Rouge-1 point improvement.
+BART For BART and BARTXSUM finetuning
+experiments, we train all the models for 500 steps
+with 20% warm-up for an approximate training
+time of 45 minutes. This is equivalent to 5 epochs,
+though we initially allowed BART to train for up
+to 20 epochs and found that the model quickly
+overfits to the training set (as evidenced by poor
+performance on the dev set).</p>
+      <p>Through manual tuning, we achieved the best
+results by reducing the training time. Also in manual
+tuning, we first ran the experiments on four
+learning rates, 2e-5, 3e-5, 4e-5, and 5e-5 and controlled
+for all other hyperparameters. We then tested three
+different seeds, again controlling for all other
+parameters. Finally, we tested two batch sizes, 2048
+tokens per batch and 1024 tokens per batch.
+20https://github.com/nlpyang/PreSumm
+21https://github.com/maszhongming/
+MatchSum
+CATTS In the abstract-only setting, we train
+CATTS for 11,000 total steps for a total training
+time of 2.5 hours. For AIC, we train CATTS for
+45,000 total steps for a total training time of 10
+hours. This also equivalent to 5 epochs of training.
+We do not perform tuning on the training
+hyperparameters for CATTS, instead opting to use the same
+parameters as the baseline BART models.
+E</p>
+    </sec>
+    <sec id="sec-11">
+      <title>Mean ROUGE test results</title>
+      <p>R1
+R2
+RL
+R1
+AIC
+R2
+RL
+F</p>
+    </sec>
+    <sec id="sec-12">
+      <title>TLDR-PR annotation instructions</title>
+      <p>Below are the instructions provided to annotators
+rewriting peer-review comments.</p>
+      <p>Task: We want to collect a dataset of short
+summaries of CS papers, but it’s hard to get people
+to read and write summaries about entire papers.
+Instead, we collected a dataset of peer reviewer
+comments, in which many CS researchers have
+read and written reviews of papers. Often, a
+reviewer’s comments will also include a summary of
+the paper they’ve read. Our task is given the title
+and first 128 words of a reviewer comment about a
+paper, re-write the summary (if it exists) into a
+single sentence or an incomplete phrase. Summaries
+must be no more than one sentence. Most
+summaries are between 15 and 25 words. The average
+rewritten summary is 20 words long.</p>
+      <sec id="sec-12-1">
+        <title>What might be included in your re-write?</title>
+        <p>1. What subfield is their work in?
+2. What problem are they trying to solve?
+3. What did the paper do?
+4. Why should you care/how is it novel?</p>
+      </sec>
+      <sec id="sec-12-2">
+        <title>What to exclude when re-writing a comment:</title>
+        <p>Not everything in the reviewer comment belongs
+in the summary. We purposefully leave out:
+– “Whereas node2vec may sample walks
+that have context windows containing the
+same node, the proposed method does
+not as it uses a random permutation of...”
+Enter “None” for the summary for the
+following conditions:
+• The comment is entirely the reviewer’s
+opinions about the paper
+• The reviewer’s summary carries heavy
+sentiment about the paper
+– “This paper presents a method that is not
+novel or interesting”
+– This applies when the sentiment is so
+heavy that you are unable to write a
+summary.
+• If the comment is about a paper that is out of
+your domain of expertise.</p>
+      </sec>
+    </sec>
+  </body>
+  <back>
+    <ref-list>
+      <ref id="ref1">
+        <mixed-citation>
+          <string-name>
+            <given-names>Hangbo</given-names>
+            <surname>Bao</surname>
+          </string-name>
+          , Li Dong, Furu Wei, Wenhui Wang,
+          <string-name>
+            <surname>Nan Yang</surname>
+          </string-name>
+          , Xiulei Liu,
+          <string-name>
+            <surname>Yu</surname>
+            <given-names>Wang</given-names>
+          </string-name>
+          , Songhao Piao,
+          <string-name>
+            <given-names>Jianfeng</given-names>
+            <surname>Gao</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Ming Zhou</surname>
+          </string-name>
+          , and
+          <string-name>
+            <surname>Hsiao-Wuen Hon</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Unilmv2: Pseudo-masked language models for unified language model pre-training</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>2002</year>
+          .12804.
+        </mixed-citation>
+      </ref>
+      <ref id="ref2">
+        <mixed-citation>
+          <string-name>
+            <given-names>Bin</given-names>
+            <surname>Bi</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Chenliang</given-names>
+            <surname>Li</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Chen Wu</surname>
+          </string-name>
+          , Ming Yan, and
+          <string-name>
+            <given-names>Wei</given-names>
+            <surname>Wang</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Palm: Pre-training an autoencoding and autoregressive language model for contextconditioned generation</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>2004</year>
+          .07159.
+        </mixed-citation>
+      </ref>
+      <ref id="ref3">
+        <mixed-citation>
+          <string-name>
+            <given-names>Muthu</given-names>
+            <surname>Kumar</surname>
+          </string-name>
+          <string-name>
+            <given-names>Chandrasekaran</given-names>
+            , Michihiro Yasunaga, Dragomir Radev, Dayne Freitag, and
+            <surname>Min-Yen Kan</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Overview and results: Cl-scisumm shared task 2019</article-title>
+          . In Workshop on Bibliometric-
+          <article-title>enhanced Information Retrieval and NLP for Digital Libraries (BIRNDL).</article-title>
+        </mixed-citation>
+      </ref>
+      <ref id="ref4">
+        <mixed-citation>
+          <string-name>
+            <given-names>Arman</given-names>
+            <surname>Cohan</surname>
+          </string-name>
+          , Waleed Ammar, Madeleine van Zuylen,
+          <string-name>
+            <given-names>and Field</given-names>
+            <surname>Cady</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Structural scaffolds for citation intent classification in scientific publications</article-title>
+          .
+          <source>In NAACL-HLT.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref5">
+        <mixed-citation>
+          <string-name>
+            <given-names>Arman</given-names>
+            <surname>Cohan</surname>
+          </string-name>
+          , Franck Dernoncourt, Doo Soon Kim, Trung Bui, Seokhwan Kim,
+          <string-name>
+            <given-names>Walter</given-names>
+            <surname>Chang</surname>
+          </string-name>
+          , and
+          <string-name>
+            <given-names>Nazli</given-names>
+            <surname>Goharian</surname>
+          </string-name>
+          .
+          <year>2018</year>
+          .
+          <article-title>A discourse-aware attention model for abstractive summarization of long documents</article-title>
+          .
+          <source>In NAACL-HLT.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref6">
+        <mixed-citation>
+          <string-name>
+            <given-names>Arman</given-names>
+            <surname>Cohan</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Nazli</given-names>
+            <surname>Goharian</surname>
+          </string-name>
+          .
+          <year>2015</year>
+          .
+          <article-title>Scientific article summarization using citation-context and article's discourse structure</article-title>
+          .
+          <source>In EMNLP.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref7">
+        <mixed-citation>
+          <string-name>
+            <given-names>Arman</given-names>
+            <surname>Cohan</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Nazli</given-names>
+            <surname>Goharian</surname>
+          </string-name>
+          .
+          <year>2016</year>
+          .
+          <article-title>Revisiting summarization evaluation for scientific articles</article-title>
+          .
+          <source>ArXiv, abs/1604</source>
+          .00400.
+        </mixed-citation>
+      </ref>
+      <ref id="ref8">
+        <mixed-citation>
+          <string-name>
+            <given-names>Arman</given-names>
+            <surname>Cohan</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Nazli</given-names>
+            <surname>Goharian</surname>
+          </string-name>
+          .
+          <year>2017</year>
+          .
+          <article-title>Scientific document summarization via citation contextualization and scientific discourse</article-title>
+          .
+          <source>International Journal on Digital Libraries</source>
+          ,
+          <volume>19</volume>
+          :
+          <fpage>287</fpage>
+          -
+          <lpage>303</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref9">
+        <mixed-citation>
+          Ed Collins, Isabelle Augenstein, and
+          <string-name>
+            <given-names>Sebastian</given-names>
+            <surname>Riedel</surname>
+          </string-name>
+          .
+          <year>2017</year>
+          .
+          <article-title>A supervised approach to extractive summarisation of scientific papers</article-title>
+          .
+          <source>CoNLL, abs/1706</source>
+          .03946.
+        </mixed-citation>
+      </ref>
+      <ref id="ref10">
+        <mixed-citation>
+          <string-name>
+            <surname>John M. Conroy</surname>
+            and
+            <given-names>Sashka</given-names>
+          </string-name>
+          <string-name>
+            <surname>Davis</surname>
+          </string-name>
+          .
+          <year>2017</year>
+          .
+          <article-title>Section mixture models for scientific document summarization</article-title>
+          .
+          <source>IJDL</source>
+          ,
+          <volume>19</volume>
+          :
+          <fpage>305</fpage>
+          -
+          <lpage>322</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref11">
+        <mixed-citation>
+          <string-name>
+            <surname>John M Conroy</surname>
+            ,
+            <given-names>Judith D Schlesinger</given-names>
+          </string-name>
+          , and
+          <string-name>
+            <surname>Dianne P O'Leary</surname>
+          </string-name>
+          .
+          <year>2011</year>
+          .
+          <article-title>Nouveau-rouge: A novelty metric for update summarization</article-title>
+          .
+          <source>Computational Linguistics</source>
+          ,
+          <volume>37</volume>
+          (
+          <issue>1</issue>
+          ):
+          <fpage>1</fpage>
+          -
+          <lpage>8</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref12">
+        <mixed-citation>
+          <string-name>
+            <given-names>Jacob</given-names>
+            <surname>Devlin</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Ming-Wei</surname>
+            <given-names>Chang</given-names>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Kenton</given-names>
+            <surname>Lee</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>and Kristina</given-names>
+            <surname>Toutanova</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Bert: Pre-training of deep bidirectional transformers for language understanding</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>1810</year>
+          .04805.
+        </mixed-citation>
+      </ref>
+      <ref id="ref13">
+        <mixed-citation>
+          <string-name>
+            <surname>Hady</surname>
+            <given-names>ElSahar</given-names>
+          </string-name>
+          , Maximin Coavoux, Matthias Galle´, and
+          <string-name>
+            <given-names>Jos</given-names>
+            <surname>Rozen</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Self-supervised and controlled multi-document opinion summarization</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>2004</year>
+          .14754.
+        </mixed-citation>
+      </ref>
+      <ref id="ref14">
+        <mixed-citation>
+          <string-name>
+            <given-names>Alexander</given-names>
+            <surname>Fabbri</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Irene</given-names>
+            <surname>Li</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Prawat</given-names>
+            <surname>Trairatvorakul</surname>
+          </string-name>
+          , Yijiao He, Weitai Ting, Robert Tung, Caitlin Westerfield, and
+          <string-name>
+            <given-names>Dragomir</given-names>
+            <surname>Radev</surname>
+          </string-name>
+          .
+          <year>2018</year>
+          .
+          <article-title>TutorialBank: A manually-collected corpus for prerequisite chains, survey extraction and resource recommendation</article-title>
+          .
+          <source>In ACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref15">
+        <mixed-citation>
+          <string-name>
+            <given-names>Max</given-names>
+            <surname>Grusky</surname>
+          </string-name>
+          , Mor Naaman, and
+          <string-name>
+            <given-names>Yoav</given-names>
+            <surname>Artzi</surname>
+          </string-name>
+          .
+          <article-title>Newsroom: A dataset of 1.3 million summaries with diverse extractive strategies</article-title>
+          .
+          <source>In NAACL-HLT.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref16">
+        <mixed-citation>
+          <string-name>
+            <given-names>Donna</given-names>
+            <surname>Harman</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Paul</given-names>
+            <surname>Over</surname>
+          </string-name>
+          .
+          <year>2004</year>
+          .
+          <article-title>The effects of human variation in DUC summarization evaluation</article-title>
+          .
+          <source>In Text Summarization Branches Out</source>
+          , pages
+          <fpage>10</fpage>
+          -
+          <lpage>17</lpage>
+          , Barcelona, Spain. Association for Computational Linguistics.
+        </mixed-citation>
+      </ref>
+      <ref id="ref17">
+        <mixed-citation>
+          <string-name>
+            <surname>Karl Moritz</surname>
+            <given-names>Hermann</given-names>
+          </string-name>
+          , Tomas Kocisky, Edward Grefenstette, Lasse Espeholt, Will Kay, Mustafa Suleyman, and
+          <string-name>
+            <given-names>Phil</given-names>
+            <surname>Blunsom</surname>
+          </string-name>
+          .
+          <year>2015</year>
+          .
+          <article-title>Teaching machines to read and comprehend</article-title>
+          .
+          <source>In Advances in neural information processing systems</source>
+          , pages
+          <fpage>1693</fpage>
+          -
+          <lpage>1701</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref18">
+        <mixed-citation>
+          <string-name>
+            <given-names>Sture</given-names>
+            <surname>Holm</surname>
+          </string-name>
+          .
+          <year>1979</year>
+          .
+          <article-title>A simple sequentially rejective multiple test procedure</article-title>
+          .
+          <source>Scandinavian Journal of Statistics</source>
+          ,
+          <volume>6</volume>
+          (
+          <issue>2</issue>
+          ):
+          <fpage>65</fpage>
+          -
+          <lpage>70</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref19">
+        <mixed-citation>
+          <string-name>
+            <given-names>Kokil</given-names>
+            <surname>Jaidka</surname>
+          </string-name>
+          , Muthu Kumar Chandrasekaran, Sajal Rustagi, and
+          <string-name>
+            <surname>Min-Yen Kan</surname>
+          </string-name>
+          .
+          <year>2018</year>
+          .
+          <article-title>Insights from clscisumm 2016: the faceted scientific document summarization shared task</article-title>
+          .
+          <source>IJDL</source>
+          ,
+          <volume>19</volume>
+          (
+          <issue>2-3</issue>
+          ):
+          <fpage>163</fpage>
+          -
+          <lpage>171</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref20">
+        <mixed-citation>
+          <string-name>
+            <given-names>Rahul</given-names>
+            <surname>Jha</surname>
+          </string-name>
+          , Reed Coke, and
+          <string-name>
+            <surname>Dragomir</surname>
+            <given-names>R.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Radev</surname>
+          </string-name>
+          .
+          <year>2015</year>
+          .
+          <article-title>Surveyor: A system for generating coherent survey articles for scientific topics</article-title>
+          .
+          <source>In AAAI.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref21">
+        <mixed-citation>
+          <string-name>
+            <given-names>Nitish</given-names>
+            <surname>Shirish</surname>
+          </string-name>
+          <string-name>
+            <given-names>Keskar</given-names>
+            ,
+            <surname>Bryan</surname>
+          </string-name>
+          <string-name>
+            <given-names>McCann</given-names>
+            ,
+            <surname>Lav R. Varshney</surname>
+          </string-name>
+          , Caiming Xiong, and Richard Socher.
+          <year>2019</year>
+          .
+          <article-title>CTRL: A Conditional Transformer Language Model for Controllable Generation</article-title>
+          . ArXiv, abs/
+          <year>1909</year>
+          .05858.
+        </mixed-citation>
+      </ref>
+      <ref id="ref22">
+        <mixed-citation>
+          <string-name>
+            <given-names>Guy</given-names>
+            <surname>Lev</surname>
+          </string-name>
+          , Michal Shmueli-Scheuer, Jonathan Herzig, Achiya Jerbi, and
+          <string-name>
+            <given-names>David</given-names>
+            <surname>Konopnicki</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Talksumm: A dataset and scalable annotation method for scientific paper summarization based on conference talks</article-title>
+          .
+          <source>In ACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref23">
+        <mixed-citation>
+          <string-name>
+            <given-names>Mike</given-names>
+            <surname>Lewis</surname>
+          </string-name>
+          , Yinhan Liu, Naman Goyal, Marjan Ghazvininejad, Abdelrahman Mohamed,
+          <string-name>
+            <surname>Omer Levy</surname>
+          </string-name>
+          , Ves Stoyanov, and
+          <string-name>
+            <given-names>Luke</given-names>
+            <surname>Zettlemoyer</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Bart: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension</article-title>
+          . ACL.
+        </mixed-citation>
+      </ref>
+      <ref id="ref24">
+        <mixed-citation>
+          <string-name>
+            <given-names>Kun</given-names>
+            <surname>Li</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Chengbo</given-names>
+            <surname>Chen</surname>
+          </string-name>
+          , Xiaojun Quan, Qing Ling, and
+          <string-name>
+            <given-names>Yan</given-names>
+            <surname>Song</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Conditional augmentation for aspect term extraction via masked sequence-tosequence generation</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>2004</year>
+          .14769.
+        </mixed-citation>
+      </ref>
+      <ref id="ref25">
+        <mixed-citation>
+          <string-name>
+            <surname>Chin-Yew Lin</surname>
+          </string-name>
+          .
+          <year>2004</year>
+          .
+          <article-title>ROUGE: A package for automatic evaluation of summaries</article-title>
+          .
+          <source>In Text Summarization Branches Out</source>
+          , pages
+          <fpage>74</fpage>
+          -
+          <lpage>81</lpage>
+          , Barcelona, Spain. Association for Computational Linguistics.
+        </mixed-citation>
+      </ref>
+      <ref id="ref26">
+        <mixed-citation>
+          <string-name>
+            <given-names>Yang</given-names>
+            <surname>Liu</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Mirella</given-names>
+            <surname>Lapata</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Text summarization with pretrained encoders</article-title>
+          .
+          <source>In EMNLP/IJCNLP.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref27">
+        <mixed-citation>
+          <string-name>
+            <given-names>Yinhan</given-names>
+            <surname>Liu</surname>
+          </string-name>
+          , Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen,
+          <string-name>
+            <surname>Omer Levy</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Mike</given-names>
+            <surname>Lewis</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Luke</given-names>
+            <surname>Zettlemoyer</surname>
+          </string-name>
+          , and
+          <string-name>
+            <given-names>Veselin</given-names>
+            <surname>Stoyanov</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Roberta: A robustly optimized bert pretraining approach</article-title>
+          . arXiv preprint arXiv:
+          <year>1907</year>
+          .11692.
+        </mixed-citation>
+      </ref>
+      <ref id="ref28">
+        <mixed-citation>
+          <string-name>
+            <given-names>Kyle</given-names>
+            <surname>Lo</surname>
+          </string-name>
+          , Lucy Lu Wang,
+          <string-name>
+            <given-names>Mark</given-names>
+            <surname>Neumann</surname>
+          </string-name>
+          , Rodney Kinney, and
+          <string-name>
+            <surname>Daniel</surname>
+            <given-names>S.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Weld</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>S2orc: The semantic scholar open research corpus</article-title>
+          .
+          <source>In Proceedings of ACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref29">
+        <mixed-citation>
+          <string-name>
+            <given-names>Rada</given-names>
+            <surname>Mihalcea</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Paul</given-names>
+            <surname>Tarau</surname>
+          </string-name>
+          .
+          <year>2004</year>
+          .
+          <article-title>Textrank: Bringing order into texts</article-title>
+          .
+          <source>In EMNLP.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref30">
+        <mixed-citation>
+          <string-name>
+            <surname>Saif M. Mohammad</surname>
+            ,
+            <given-names>Bonnie J.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Dorr</surname>
+          </string-name>
+          , Melissa Egan, Ahmed Hassan Awadallah, Pradeep Muthukrishnan, Vahed Qazvinian,
+          <string-name>
+            <surname>Dragomir R. Radev</surname>
+            , and
+            <given-names>David M.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Zajic</surname>
+          </string-name>
+          .
+          <year>2009</year>
+          .
+          <article-title>Using citations to generate surveys of scientific paradigms</article-title>
+          .
+          <source>In HLT-NAACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref31">
+        <mixed-citation>
+          <string-name>
+            <given-names>Shashi</given-names>
+            <surname>Narayan</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Shay</surname>
+            <given-names>B.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Cohen</surname>
+            , and
+            <given-names>Mirella</given-names>
+          </string-name>
+          <string-name>
+            <surname>Lapata</surname>
+          </string-name>
+          .
+          <year>2018</year>
+          .
+          <article-title>Don't give me the details, just the summary! topic-aware convolutional neural networks for extreme summarization</article-title>
+          . pages
+          <fpage>1797</fpage>
+          -
+          <lpage>1807</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref32">
+        <mixed-citation>
+          <string-name>
+            <given-names>Ani</given-names>
+            <surname>Nenkova and Rebecca J Passonneau</surname>
+          </string-name>
+          .
+          <year>2004</year>
+          .
+          <article-title>Evaluating content selection in summarization: The pyramid method</article-title>
+          .
+          <source>In NAACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref33">
+        <mixed-citation>
+          <string-name>
+            <given-names>Mark</given-names>
+            <surname>Neumann</surname>
+          </string-name>
+          , Daniel King, Iz Beltagy, and
+          <string-name>
+            <given-names>Waleed</given-names>
+            <surname>Ammar</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Scispacy: Fast and robust models for biomedical natural language processing</article-title>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref34">
+        <mixed-citation>
+          <string-name>
+            <surname>Nikola</surname>
+            <given-names>I. Nikolov</given-names>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Michael</given-names>
+            <surname>Pfeiffer</surname>
+          </string-name>
+          , and
+          <string-name>
+            <surname>Richard</surname>
+            <given-names>H. R.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Hahnloser</surname>
+          </string-name>
+          .
+          <year>2018</year>
+          .
+          <article-title>Data-driven summarization of scientific articles</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>1804</year>
+          .08875.
+        </mixed-citation>
+      </ref>
+      <ref id="ref35">
+        <mixed-citation>
+          <string-name>
+            <given-names>Myle</given-names>
+            <surname>Ott</surname>
+          </string-name>
+          , Sergey Edunov, Alexei Baevski, Angela Fan, Sam Gross, Nathan Ng, David Grangier,
+          <string-name>
+            <given-names>and Michael</given-names>
+            <surname>Auli</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>fairseq: a fast, extensible toolkit for sequence modeling</article-title>
+          .
+          <source>In NAACL-HLT</source>
+          ,
+          <year>Demonstrations</year>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref36">
+        <mixed-citation>
+          <string-name>
+            <given-names>Paul</given-names>
+            <surname>Over</surname>
+          </string-name>
+          .
+          <year>2003</year>
+          .
+          <article-title>An introduction to duc 2003: Intrinsic evaluation of generic news text summarization systems</article-title>
+          .
+          <source>In Proceedings of Document Understanding Conference</source>
+          <year>2003</year>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref37">
+        <mixed-citation>
+          <string-name>
+            <given-names>Vahed</given-names>
+            <surname>Qazvinian</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Dragomir R. Radev</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Saif M. Mohammad</surname>
+            ,
+            <given-names>Bonnie J.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Dorr</surname>
+            ,
+            <given-names>David M.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Zajic</surname>
+            ,
+            <given-names>Michael</given-names>
+          </string-name>
+          <string-name>
+            <surname>Whidby</surname>
+          </string-name>
+          , and Taesun Moon.
+          <year>2013</year>
+          .
+          <article-title>Generating extractive summaries of scientific paradigms</article-title>
+          .
+          <source>J. Artif. Intell. Res.</source>
+          ,
+          <volume>46</volume>
+          :
+          <fpage>165</fpage>
+          -
+          <lpage>201</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref38">
+        <mixed-citation>
+          <string-name>
+            <given-names>R Core</given-names>
+            <surname>Team</surname>
+          </string-name>
+          .
+          <year>2018</year>
+          .
+          <article-title>R: A Language and Environment for Statistical Computing</article-title>
+          . R Foundation for Statistical Computing, Vienna, Austria.
+        </mixed-citation>
+      </ref>
+      <ref id="ref39">
+        <mixed-citation>
+          <string-name>
+            <given-names>Colin</given-names>
+            <surname>Raffel</surname>
+          </string-name>
+          , Noam Shazeer, Adam Roberts,
+          <string-name>
+            <given-names>Katherine</given-names>
+            <surname>Lee</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Sharan</given-names>
+            <surname>Narang</surname>
+          </string-name>
+          , Michael Matena,
+          <string-name>
+            <surname>Yanqi Zhou</surname>
+            ,
+            <given-names>Wei</given-names>
+          </string-name>
+          <string-name>
+            <surname>Li</surname>
+          </string-name>
+          , and
+          <string-name>
+            <surname>Peter J. Liu</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Exploring the limits of transfer learning with a unified text-to-text transformer</article-title>
+          .
+          <source>JMLR</source>
+          ,
+          <volume>21</volume>
+          (
+          <issue>140</issue>
+          ):
+          <fpage>1</fpage>
+          -
+          <lpage>67</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref40">
+        <mixed-citation>
+          <string-name>
+            <given-names>Evan</given-names>
+            <surname>Sandhaus</surname>
+          </string-name>
+          .
+          <year>2008</year>
+          .
+          <article-title>The new york times annotated corpus</article-title>
+          .(october
+          <year>2008</year>
+          ).
+          <article-title>ldc catalog no.: Ldc2008t19.</article-title>
+        </mixed-citation>
+      </ref>
+      <ref id="ref41">
+        <mixed-citation>
+          <string-name>
+            <given-names>Roy</given-names>
+            <surname>Schwartz</surname>
+          </string-name>
+          , Jesse Dodge, Noah A.
+          <string-name>
+            <surname>Smith</surname>
+            ,
+            <given-names>and Oren</given-names>
+          </string-name>
+          <string-name>
+            <surname>Etzioni</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Green ai</article-title>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref42">
+        <mixed-citation>
+          <string-name>
+            <given-names>Eva</given-names>
+            <surname>Sharma</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Chen</given-names>
+            <surname>Li</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>and Lu</given-names>
+            <surname>Wang</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Bigpatent: A large-scale dataset for abstractive and coherent summarization</article-title>
+          .
+          <source>In ACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref43">
+        <mixed-citation>
+          <string-name>
+            <given-names>Akhilesh</given-names>
+            <surname>Sudhakar</surname>
+          </string-name>
+          , Bhargav Upadhyay, and
+          <string-name>
+            <given-names>Arjun</given-names>
+            <surname>Maheswaran</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>“transforming” delete, retrieve, generate approach for controlled text style transfer</article-title>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref44">
+        <mixed-citation>
+          <source>In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)</source>
+          , pages
+          <fpage>3269</fpage>
+          -
+          <lpage>3279</lpage>
+          ,
+          <string-name>
+            <surname>Hong</surname>
+            <given-names>Kong</given-names>
+          </string-name>
+          , China. Association for Computational Linguistics.
+        </mixed-citation>
+      </ref>
+      <ref id="ref45">
+        <mixed-citation>
+          <string-name>
+            <given-names>Swabha</given-names>
+            <surname>Swayamdipta</surname>
+          </string-name>
+          , Sam Thomson,
+          <string-name>
+            <given-names>Kenton</given-names>
+            <surname>Lee</surname>
+          </string-name>
+          , Luke Zettlemoyer, Chris Dyer, and
+          <string-name>
+            <surname>Noah</surname>
+            <given-names>A.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Smith</surname>
+          </string-name>
+          . 2018a.
+          <article-title>Syntactic scaffolds for semantic structures</article-title>
+          .
+          <source>In EMNLP.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref46">
+        <mixed-citation>
+          <string-name>
+            <given-names>Swabha</given-names>
+            <surname>Swayamdipta</surname>
+          </string-name>
+          , Sam Thomson,
+          <string-name>
+            <given-names>Kenton</given-names>
+            <surname>Lee</surname>
+          </string-name>
+          , Luke Zettlemoyer, Chris Dyer, and
+          <string-name>
+            <surname>Noah</surname>
+            <given-names>A.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Smith</surname>
+          </string-name>
+          . 2018b.
+          <article-title>Syntactic scaffolds for semantic structures</article-title>
+          .
+          <source>In EMNLP.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref47">
+        <mixed-citation>
+          <string-name>
+            <given-names>Justin</given-names>
+            <surname>Sybrandt</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Ilya</given-names>
+            <surname>Safro</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Cbag: Conditional biomedical abstract generation</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>2002</year>
+          .05637.
+        </mixed-citation>
+      </ref>
+      <ref id="ref48">
+        <mixed-citation>
+          <string-name>
+            <given-names>S.</given-names>
+            <surname>Teufel</surname>
+          </string-name>
+          .
+          <year>1999</year>
+          .
+          <article-title>Argumentative zoning information extraction from scientific text</article-title>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref49">
+        <mixed-citation>
+          <string-name>
+            <surname>Richard Van Noorden</surname>
+          </string-name>
+          .
+          <year>2014</year>
+          .
+          <article-title>Global scientific output doubles every nine years</article-title>
+          .
+          <source>Nature news blog.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref50">
+        <mixed-citation>
+          <string-name>
+            <given-names>Ashish</given-names>
+            <surname>Vaswani</surname>
+          </string-name>
+          , Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez,
+          <article-title>Ł ukasz Kaiser, and</article-title>
+          <string-name>
+            <given-names>Illia</given-names>
+            <surname>Polosukhin</surname>
+          </string-name>
+          .
+          <year>2017</year>
+          .
+          <article-title>Attention is all you need</article-title>
+          . In I. Guyon,
+          <string-name>
+            <given-names>U. V.</given-names>
+            <surname>Luxburg</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>S.</given-names>
+            <surname>Bengio</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>H.</given-names>
+            <surname>Wallach</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>R.</given-names>
+            <surname>Fergus</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>S.</given-names>
+            <surname>Vishwanathan</surname>
+          </string-name>
+          , and R. Garnett, editors,
+          <source>NeurIPS.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref51">
+        <mixed-citation>
+          <string-name>
+            <given-names>Jie</given-names>
+            <surname>Wang</surname>
+          </string-name>
+          , Chengzhi Zhang, Mengying Zhang, and
+          <string-name>
+            <given-names>Sanhong</given-names>
+            <surname>Deng</surname>
+          </string-name>
+          .
+          <year>2018</year>
+          .
+          <article-title>Citationas: A tool of automatic survey generation based on citation content</article-title>
+          .
+          <source>Journal of Data and Information Science</source>
+          ,
+          <volume>3</volume>
+          (
+          <issue>2</issue>
+          ):
+          <fpage>20</fpage>
+          -
+          <lpage>37</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref52">
+        <mixed-citation>
+          <string-name>
+            <given-names>Wen</given-names>
+            <surname>Xiao</surname>
+          </string-name>
+          and
+          <string-name>
+            <given-names>Giuseppe</given-names>
+            <surname>Carenini</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Extractive summarization of long documents by combining global and local context</article-title>
+          .
+          <source>In EMNLP/IJCNLP.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref53">
+        <mixed-citation>
+          <string-name>
+            <given-names>Michihiro</given-names>
+            <surname>Yasunaga</surname>
+          </string-name>
+          , Jungo Kasai, Rui Zhang, Alexander Richard Fabbri,
+          <string-name>
+            <given-names>Irene</given-names>
+            <surname>Li</surname>
+          </string-name>
+          ,
+          <string-name>
+            <given-names>Dan</given-names>
+            <surname>Friedman</surname>
+          </string-name>
+          , and
+          <string-name>
+            <surname>Dragomir</surname>
+            <given-names>R.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Radev</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Scisummnet: A large annotated corpus and content-impact models for scientific paper summarization with citation networks</article-title>
+          .
+          <source>In AAAI.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref54">
+        <mixed-citation>
+          <string-name>
+            <given-names>Klaus</given-names>
+            <surname>Zechner</surname>
+          </string-name>
+          .
+          <year>1996</year>
+          .
+          <article-title>Fast generation of abstracts from general domain text corpora by extracting relevant sentences</article-title>
+          .
+          <source>In Proceedings of the 16th conference on Computational linguistics-Volume</source>
+          <volume>2</volume>
+          , pages
+          <fpage>986</fpage>
+          -
+          <lpage>989</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref55">
+        <mixed-citation>
+          <string-name>
+            <given-names>Chrysoula</given-names>
+            <surname>Zerva</surname>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Minh-Quoc</surname>
+            <given-names>Nghiem</given-names>
+          </string-name>
+          ,
+          <string-name>
+            <surname>Nhung</surname>
+            <given-names>T. H.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Nguyen</surname>
+            , and
+            <given-names>S.</given-names>
+          </string-name>
+          <string-name>
+            <surname>Ananiadou</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Cited text span identification for scientific summarisation using pretrained encoders</article-title>
+          .
+          <source>Scientometrics</source>
+          , pages
+          <fpage>1</fpage>
+          -
+          <lpage>29</lpage>
+          .
+        </mixed-citation>
+      </ref>
+      <ref id="ref56">
+        <mixed-citation>
+          <string-name>
+            <given-names>Jingqing</given-names>
+            <surname>Zhang</surname>
+          </string-name>
+          , Yao Zhao,
+          <string-name>
+            <given-names>Mohammad</given-names>
+            <surname>Saleh</surname>
+          </string-name>
+          , and
+          <string-name>
+            <surname>Peter J. Liu</surname>
+          </string-name>
+          .
+          <year>2019</year>
+          .
+          <article-title>Pegasus: Pre-training with extracted gap-sentences for abstractive summarization</article-title>
+          .
+          <source>ArXiv</source>
+          , abs/
+          <year>1912</year>
+          .08777.
+        </mixed-citation>
+      </ref>
+      <ref id="ref57">
+        <mixed-citation>
+          <string-name>
+            <given-names>Ming</given-names>
+            <surname>Zhong</surname>
+          </string-name>
+          , Pengfei Liu, Yiran Chen, Danqing Wang,
+          <string-name>
+            <surname>Xipeng Qiu</surname>
+            , and
+            <given-names>Xuanjing</given-names>
+          </string-name>
+          <string-name>
+            <surname>Huang</surname>
+          </string-name>
+          .
+          <year>2020</year>
+          .
+          <article-title>Extractive summarization as text matching</article-title>
+          .
+          <source>ACL.</source>
+        </mixed-citation>
+      </ref>
+      <ref id="ref58">
+        <mixed-citation>
+          <article-title>- “The authors propose a method for learning node representations which, like previous work (e.g. node2vec, DeepWalk), is based on the skip-gram model</article-title>
+          .”
+        </mixed-citation>
+      </ref>
+      <ref id="ref59">
+        <mixed-citation>
+          <article-title>- “In particular, when node2vec has its restart probability set pretty high, the random walks tend to stay within the local neighborhood (near the starting node</article-title>
+          ).”
+        </mixed-citation>
+      </ref>
+    </ref-list>
+  </back>
+</article>
