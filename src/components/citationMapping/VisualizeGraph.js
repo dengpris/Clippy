@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Graph from "react-graph-vis";
-import { findCitations } from "../../api/find_citations";
+//import { findCitations_withTitle } from "../../api/find_citations";
+import { findCitations_withDOI } from "../../api/find_citations";
 import { v4 as uuidv4 } from "uuid";
 
 import Button from 'react-bootstrap/Button';
@@ -10,6 +11,9 @@ import './citationMappingStyle.css'
 // import "./styles.css";
 // // need to import the vis network css in order to show tooltip
 // import "./network.css";
+const title = 'Digital Object Identifier (DOI) System'
+const titlePlus = 'Digital+Object+Identifier+(DOI)+System';
+const doi = '10.1081/E-ELIS3-120044418';
 
 const VisualizeGraph = () => {
 
@@ -21,8 +25,9 @@ const VisualizeGraph = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setDefaultDoi('10.1038/nature12373');
-    findCitations('Nanometre-scale+thermometry+in+a+living+cell')
+    setDefaultDoi(doi);
+    //findCitations_withTitle(titlePlus)
+    findCitations_withDOI(doi)
     .then((res) => {
       setCitationInfo(res)
     });
@@ -44,7 +49,7 @@ const VisualizeGraph = () => {
     var defaultNode = {
       id: defaultDoi,
       title: defaultDoi,
-      label: 'Nanometre-scale thermometry in a living cell'
+      label: title
     };
     graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
@@ -149,7 +154,7 @@ const VisualizeGraph = () => {
       <>
         <Button 
           onClick={() => {
-            findCitations('Nanometre-scale+thermometry+in+a+living+cell')
+            findCitations_withDOI(doi)
             .then((res) => {
               setCitationInfo(res)
               getNodes();
