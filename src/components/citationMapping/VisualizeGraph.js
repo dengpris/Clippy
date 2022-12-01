@@ -13,13 +13,13 @@ import './citationMappingStyle.css'
 // import "./network.css";
 
 //WORKING WITH THE PDF FOR DEMO
-//const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
-//const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
-//const doi = '10.1371/journal.pclm.0000093';
+const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
+const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
+const doi = '10.1371/journal.pclm.0000093';
 
-const title = 'Nanometre-scale thermometry in a living cell'
-const titlePlus = 'Nanometre-scale+thermometry+in+a+living+cell'
-const doi = '10.1038/nature12373'
+//const title = 'Nanometre-scale thermometry in a living cell'
+//const titlePlus = 'Nanometre-scale+thermometry+in+a+living+cell'
+//const doi = '10.1038/nature12373'
 
 const VisualizeGraph = () => {
 
