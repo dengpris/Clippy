@@ -1,5 +1,5 @@
 // import myfile from './Draft_Proposal.pdf'
-import myfile from '../pdfLibrary/Draft_Proposal.pdf'
+import myfile from '../pdfLibrary/nature12373.pdf'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import * as PDFJS from 'pdfjs-dist';

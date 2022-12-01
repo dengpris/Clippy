@@ -18,6 +18,7 @@ const VisualizeGraph = () => {
   const [edges, setEdges] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [defaultDoi, setDefaultDoi] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setDefaultDoi('10.1038/nature12373');
@@ -26,6 +27,14 @@ const VisualizeGraph = () => {
       setCitationInfo(res)
     });
   }, []);
+
+  useEffect(() => {
+    if(citationInfo === null) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  }, [citationInfo])
 
   const getNodes = () => { // creates the node in the graph
     if(citationInfo == null) {
@@ -39,12 +48,10 @@ const VisualizeGraph = () => {
     };
     graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
-      // console.log(Object.values(citationInfo)[i]);
       var tmpNode = {};
       tmpNode.id = Object.keys(citationInfo)[i];
       tmpNode.title = Object.values(citationInfo)[i].doi;
       tmpNode.label = Object.values(citationInfo)[i].title[0];
-      // tmpNode.widthConstraint= { maximum: 170 }
       graphNodes.push(tmpNode);
     }
     setNodes(graphNodes);
@@ -71,24 +78,10 @@ const VisualizeGraph = () => {
       }      
     }
     setEdges(graphEdges);
-    console.log('grpah edges is ', graphEdges);
   }
 
   const graph = {
     nodes: nodes,
-    // nodes: [
-    //   { id: 1, label: "Node 1", title: "node 1 tootip text" },
-    //   { id: 2, label: "Node 2", title: "node 2 tootip text" },
-    //   { id: 3, label: "Node 3", title: "node 3 tootip text" },
-    //   { id: 4, label: "Node 4", title: "node 4 tootip text" },
-    //   { id: 5, label: "Node 5", title: "node 5 tootip text" }
-    // ],
-    // edges: [
-    //   { from: 1, to: 2, title: 'hello' },
-    //   { from: 1, to: 3 },
-    //   { from: 2, to: 4 },
-    //   { from: 2, to: 5 }
-    // ]
     edges: edges
   };
 
@@ -96,6 +89,7 @@ const VisualizeGraph = () => {
     interaction: {
       dragNodes:true,
       dragView: true,
+      hover: true
     },
     layout: {
       hierarchical: {
@@ -119,8 +113,8 @@ const VisualizeGraph = () => {
       shape: 'box',
       margin: 10
     },
-    height: "100%",
-    width: '100%',
+    height: '600',
+    width: '700',
     
   };
 
@@ -129,6 +123,26 @@ const VisualizeGraph = () => {
       var { nodes, edges } = event;
     }
   };
+
+  const renderConditionalGraph = () => {
+    if(!loading) {
+      return (
+        <Graph
+          key={ uuidv4() } // need to generate unique key for graph each render
+          graph={graph}
+          options={options}
+          events={events}
+          // getNetwork={network => {
+          //   //  if you want access to vis.js network api you can set the state in a parent component using this property
+          // }}
+        />
+      )
+    } else {
+      return (
+        <p>Loading...</p>
+      )
+    }
+  }
 
   const renderModal = () => {
     return (
@@ -144,7 +158,7 @@ const VisualizeGraph = () => {
             setShowModal(true);
           }}
           variant='secondary'
-          className="mb-5"
+          className="m-5"
           >
           Generate Citation Graph
         </Button>
@@ -164,15 +178,7 @@ const VisualizeGraph = () => {
               Hover over nodes to see DOI!
             </p>
             <div className='vis-graph'>
-              <Graph
-                key={ uuidv4() } // need to generate unique key for graph each render
-                graph={graph}
-                options={options}
-                events={events}
-                // getNetwork={network => {
-                //   //  if you want access to vis.js network api you can set the state in a parent component using this property
-                // }}
-              />
+              { renderConditionalGraph() }
             </div>
             
 
@@ -184,15 +190,6 @@ const VisualizeGraph = () => {
 
   return (
     <>
-      {/* <Graph
-        key={ uuidv4() } // need to generate unique key for graph each render
-        graph={graph}
-        options={options}
-        events={events}
-        // getNetwork={network => {
-        //   //  if you want access to vis.js network api you can set the state in a parent component using this property
-        // }}
-      /> */}
       { renderModal() }      
     </>
     
