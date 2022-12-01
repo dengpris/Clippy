@@ -13,7 +13,7 @@ const Sidebar = (props) => {
             <p>{ summary }</p>
             <Button 
               id="close"
-              onClick={() => { hideSidebar }}
+              onClick={() => { hideSidebar() }}
             >Close
             </Button>
         </div>
