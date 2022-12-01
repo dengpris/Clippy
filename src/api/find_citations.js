@@ -69,13 +69,31 @@ const getRefDataByDOI = async(referenced_dois) => {
 // const url_query = "https://api.crossref.org/works";
 // const url_title_query = url_query + "?query.title=" + pdf_title;
 
-export const findCitations = async (pdfTitle) => {
+export const findCitations_withTitle = async (pdfTitle) => {
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
   try {
     const res = await axios.get(
       urlRequest
     );
+    //console.log(res.data.message);
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
+    //console.log(referenced_dois);
+    var connected_references = await getRefDataByDOI(referenced_dois);
+    return connected_references;
+  } catch (err) {
+    return console.log('error calling findCitations', err);
+  }
+}
+
+export const findCitations_withDOI = async (PDFdoi) => {
+  let urlRequest = 'https://api.crossref.org/works/' + PDFdoi
+  try {
+    const res = await axios.get(
+      urlRequest
+    );
+    console.log(res.data.message);
+    var referenced_dois = getDOIofReferences(res.data.message);
+    console.log(referenced_dois);
     var connected_references = await getRefDataByDOI(referenced_dois);
     return connected_references;
   } catch (err) {
