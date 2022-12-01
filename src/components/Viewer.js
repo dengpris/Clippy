@@ -1,9 +1,15 @@
 // import myfile from './Draft_Proposal.pdf'
 import myfile from '../pdfLibrary/nature12373.pdf'
+import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import Sidebar from './viewerComponents/Sidebar';
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
+import * as pdfjsLib from 'pdfjs-dist';
+// import { getSummary } from './meaningcloudSummary/GenerateSummary';
+import axios from 'axios';
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const Viewer = () => {
@@ -13,6 +19,9 @@ const Viewer = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomScale, setZoomScale] = useState(1.3);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [summary, setSummary] = useState("");
+  const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // NOT MY CODE
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -26,7 +35,24 @@ const Viewer = () => {
         viewport: viewport
       };
       // setTimeout(page.render(renderContext), 1000);
-      page.render(renderContext);
+      var renderTask = page.render(renderContext);
+
+      renderTask.promise.then(function() {
+        // Returns a promise, on resolving it will return text contents of the page
+        return page.getTextContent();
+    }).then(function(textContent) {
+         // PDF canvas
+        var pdf_canvas = document.getElementById("viewer-canvas"); 
+        // Canvas offset
+        // Pass the data to the method for rendering of text over the pdf canvas.
+        PDFJS.renderTextLayer({
+            textContent: textContent,
+            container: document.getElementById("textLayer"),
+            viewport: viewport,
+            textDivs: []
+        });
+      });
+
     });   
   }, [pdfRef, zoomScale]);
     
@@ -45,6 +71,7 @@ const Viewer = () => {
     });
   },[url]);
 
+
   const onZoomIn = () => zoomScale < 2 && setZoomScale(prevState => prevState + 0.1);
   const onZoomOut = () => zoomScale > 0.7 && setZoomScale(prevState => prevState - 0.1);
     
@@ -52,10 +79,72 @@ const Viewer = () => {
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
   const firstPage = () => currentPage !== 1 && setCurrentPage(1);
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
+  
+  const toggleSidebar = () => setShowSidebar(true);
+  const hideSidebar = () => setShowSidebar(false);
+
+
+  // I DONT WANT THIS FUNCTION HERE
+  async function getPDFText(url) {
+    let doc = await PDFJS.getDocument(url).promise;
+    let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+        return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+    });
+    let result = (await Promise.all(pageTexts)).join('');
+
+    return result;
+}
+
+// ONSUMMARYCLICK SHOULD ONLY CALL GETSUMMARY FROM GENERATESUMMARY.JS, THEN SETSUMMARY STATE TO THE RESULT
+// HOWEVER THAT CALLING GETSUMMARY RETURNS UNDEFINED INSTEAD OF THE SUMMARY
+// CURRENTLY SOLUTION IS TO INCLUDE THE GETSUMMARY FUNCTION CALL IN VIEWER.JS, BUT I DONT LIKE THIS WORKFLOW
+// const onSummaryClick = async() => {
+//   getSummary(url).then(response => setSummary(response))
+//   toggleSidebar();
+// } NOT WORKING
+
+async function onSummaryClick() {
+    let text = await getPDFText(url)
+    const payload = new FormData()
+    payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
+    payload.append("txt", text);
+    payload.append("sentences", 3);
+
+    axios.post(summaryURL, payload)
+    .then((response) => {
+        //console.log(response.data.summary);
+        setSummary(summaryTokenize(response.data.summary));
+        toggleSidebar();
+    })
+    .catch((error) => {
+        console.log('error', error);
+    })
+}
+
+function summaryTokenize(summary){
+  var Tokenizer = require('sentence-tokenizer');
+  var tokenizer = new Tokenizer();
+  tokenizer.setEntry(summary);
+  console.log(tokenizer.getSentences());
+  var summarySentencesArray = tokenizer.getSentences();
+
+  const TextCleaner = require('text-cleaner');
+  for(let i = 0; i < summarySentencesArray.length; i++){
+    summarySentencesArray[i] = TextCleaner(summarySentencesArray[i]).condense().removeChars().trim().valueOf()+".";
+    console.log(summarySentencesArray[i]);
+  }
+  return summarySentencesArray.join();
+
+}
     
   return (
     <>
       <ViewerNavbar 
+        url = {url}
+        showSidebar={ showSidebar }
+        summary = { summary }
+        toggleSidebar={ toggleSidebar }
+        onSummaryClick={ onSummaryClick }
         currentPage={ currentPage }
         totalPageCount={ totalPages }
         nextPage={ nextPage }
@@ -66,6 +155,13 @@ const Viewer = () => {
         onZoomOut={ onZoomOut }
         zoomScale={ zoomScale }
       />
+      { showSidebar ? 
+        <Sidebar 
+          summary={ summary }
+          hideSidebar={ hideSidebar }
+        /> 
+        : null
+      }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
     </>
     
