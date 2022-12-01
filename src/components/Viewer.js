@@ -81,6 +81,7 @@ const Viewer = () => {
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
   
   const toggleSidebar = () => setShowSidebar(true);
+  const hideSidebar = () => setShowSidebar(false);
 
 
   // I DONT WANT THIS FUNCTION HERE
@@ -154,10 +155,14 @@ function summaryTokenize(summary){
         onZoomOut={ onZoomOut }
         zoomScale={ zoomScale }
       />
-      {showSidebar ? <Sidebar summary={summary}/> : null}
-      <canvas id='viewer-canvas' ref={ canvasRef }>
-      </canvas>
-      <div id="textLayer"></div>
+      { showSidebar ? 
+        <Sidebar 
+          summary={ summary }
+          hideSidebar={ hideSidebar }
+        /> 
+        : null
+      }
+      <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
     </>
     
   );
