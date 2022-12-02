@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Graph from "react-graph-vis";
 import { findCitations_withTitle } from "../../api/find_citations";
-//import { findCitations_withDOI } from "../../api/find_citations";
 import { v4 as uuidv4 } from "uuid";
 
 import Button from 'react-bootstrap/Button';
@@ -17,10 +16,6 @@ const title = 'The value of standing forests for birds and people in a biodivers
 const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
 const doi = '10.1371/journal.pclm.0000093';
 
-//const title = 'Nanometre-scale thermometry in a living cell'
-//const titlePlus = 'Nanometre-scale+thermometry+in+a+living+cell'
-//const doi = '10.1038/nature12373'
-
 const VisualizeGraph = () => {
 
   const [citationInfo, setCitationInfo] = useState(null);
@@ -33,7 +28,6 @@ const VisualizeGraph = () => {
   useEffect(() => {
     setDefaultDoi(doi);
     findCitations_withTitle(titlePlus)
-    //findCitations_withDOI(doi)
     .then((res) => {
       setCitationInfo(res)
     });
@@ -191,8 +185,6 @@ const VisualizeGraph = () => {
             <div className='vis-graph'>
               { renderConditionalGraph() }
             </div>
-            
-
           </Modal.Body>
         </Modal>
       </>

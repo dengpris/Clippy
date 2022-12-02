@@ -1,6 +1,5 @@
 // import myfile from './Draft_Proposal.pdf'
-// import myfile from '../pdfLibrary/nature12373.pdf'
-import myfile from '../pdfLibrary/DOI_article_ELIS3.pdf';
+import myfile from '../pdfLibrary/Test3.pdf'
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import ChooseFile from './viewerComponents/ChooseFile';
@@ -112,7 +111,7 @@ async function onSummaryClick() {
     const payload = new FormData()
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", text);
-    payload.append("sentences", 3);
+    payload.append("sentences", 5);
 
     axios.post(summaryURL, payload)
     .then((response) => {
@@ -134,10 +133,10 @@ function summaryTokenize(summary){
 
   const TextCleaner = require('text-cleaner');
   for(let i = 0; i < summarySentencesArray.length; i++){
-    summarySentencesArray[i] = TextCleaner(summarySentencesArray[i]).condense().removeChars().trim().valueOf()+".";
+    summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
     console.log(summarySentencesArray[i]);
   }
-  return summarySentencesArray.join();
+  return summarySentencesArray.join(' ');
 
 }
     

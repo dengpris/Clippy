@@ -6,21 +6,19 @@ function compareTwoListsOfDOIReferences(origList, tempList){
   var similar_dois = [];
   let k = 0;
   for(let i = 0 ; i< origList.length ; i++){
-      for(let j = 0; j<tempList.length; j++){
-          if(origList[i] === tempList[j]){
-              similar_dois[k] = tempList[j];
-              k++
-          }
+    for(let j = 0; j<tempList.length; j++){
+      if(origList[i] === tempList[j]){
+        similar_dois[k] = tempList[j];
+        k++;
       }
+    }
   }
   return similar_dois;
 }
 
 function getListOfConnectedRefs(pdf_refs, temp_refs,index){
-  // const currRefDOI = pdf_refs[index];
   var connected_refs = [];
   //Make sure that DOI from origList used to make tempList is listed as a similar ref
-  // temp_refs[temp_refs.length] = currRefDOI;
   //Compare the two lists of refs
   connected_refs = compareTwoListsOfDOIReferences(pdf_refs, temp_refs);
   return connected_refs;
@@ -75,9 +73,7 @@ export const findCitations_withTitle = async (pdfTitle) => {
     const res = await axios.get(
       urlRequest
     );
-    //console.log(res.data.message);
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
-    //console.log(referenced_dois);
     var connected_references = await getRefDataByDOI(referenced_dois);
     return connected_references;
   } catch (err) {
@@ -100,12 +96,3 @@ export const findCitations_withDOI = async (PDFdoi) => {
     return console.log('error calling findCitations', err);
   }
 }
-
-// export const findCitations = async (pdfTitle) => {
-//   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
-//   return axios.get(
-//     urlRequest
-//   )
-//   .then((res) => console.log(res))
-//   .catch((err) => console.log(err))
-// }
