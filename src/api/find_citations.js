@@ -5,6 +5,9 @@ const url_query = "https://api.crossref.org/works";
 function compareTwoListsOfDOIReferences(origList, tempList){
   var similar_dois = [];
   let k = 0;
+  if(origList.length === undefined || tempList.length === undefined) {
+    return;
+  }
   for(let i = 0 ; i< origList.length ; i++){
     for(let j = 0; j<tempList.length; j++){
       if(origList[i] === tempList[j]){
@@ -26,6 +29,9 @@ function getListOfConnectedRefs(pdf_refs, temp_refs,index){
 
 function getDOIofReferences(pdf_data){
   var list_of_references = pdf_data.reference;
+  if(list_of_references === undefined) {
+    return;
+  }
   let list_of_doi_refs = [];
   for(let i = 0; i < list_of_references.length; i++){
     if(list_of_references[i].DOI !== undefined){

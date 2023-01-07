@@ -115,7 +115,6 @@ async function onSummaryClick() {
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        //console.log(response.data.summary);
         setSummary(summaryTokenize(response.data.summary));
         toggleSidebar();
     })

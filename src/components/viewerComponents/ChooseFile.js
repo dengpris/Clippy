@@ -1,34 +1,30 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 
 const ChooseFile = (props) => {
-  const inputFile = useRef(null);
 
-  const handleClick = () => {
-    inputFile.current.click();
-  }
+  const [imageUrl, setImageUrl] = useState("");
+  
+  const getPDFname = (event) => {
+    console.log(event.target.files[0].name)
+    let value = event.target.files[0].name;
+    setImageUrl([value]);
+  };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files && event.target.files[0];
-    if(!file) {
-      return;
-    }
-    event.target.value = null;
-    console.log('name is ', file.name);
-  }
+  useEffect(() => {
+    console.log('image url changed ', imageUrl)
+  }, [imageUrl])
 
   return (
-    <div>
-      <input
-        type='file'
-        onChange={ () => handleFileChange() }
-        ref={ inputFile }
-      />
-      <Button
-        onClick={ () => handleClick() }
-      >Get file
-      </Button>
-    </div>
+    <form>
+      <div>
+        <input 
+          type="file" 
+          onChange={ getPDFname }
+          accept='.pdf'
+        />
+      </div>
+    </form>
   )
 };
 
