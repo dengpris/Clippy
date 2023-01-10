@@ -1,22 +1,26 @@
-// import myfile from './Draft_Proposal.pdf'
-import myfile from '../pdfLibrary/Test3.pdf'
-import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
-import ViewerNavbar from './viewerComponents/ViewerNavbar';
-import ChooseFile from './viewerComponents/ChooseFile';
-
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import axios from 'axios';
+
+import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import Sidebar from './viewerComponents/Sidebar';
+import { getPdf } from '../pdfLibrary/getPdf';
+
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import * as pdfjsLib from 'pdfjs-dist';
 // import { getSummary } from './meaningcloudSummary/GenerateSummary';
-import axios from 'axios';
+
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 
-const Viewer = () => {
-  const url = myfile
+const Viewer = (props) => {
+  const {
+    pdfUrl
+  } = props;
+
+  const url = getPdf(pdfUrl);
   const canvasRef = useRef();
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
@@ -164,11 +168,14 @@ function summaryTokenize(summary){
         /> 
         : null
       }
-      {/* <ChooseFile/> */}
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
     </>
     
   );
+};
+
+Viewer.propTypes = {
+  pdfUrl: PropTypes.string
 };
 
 export default Viewer;

@@ -1,31 +1,47 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import Button from 'react-bootstrap/Button';
+import PropTypes from 'prop-types';
 
 const ChooseFile = (props) => {
+  const {
+    setPdfUrl
+  } = props;
 
-  const [imageUrl, setImageUrl] = useState("");
-  
-  const getPDFname = (event) => {
-    console.log(event.target.files[0].name)
-    let value = event.target.files[0].name;
-    setImageUrl([value]);
-  };
+  const inputFile = useRef(null);
 
-  useEffect(() => {
-    console.log('image url changed ', imageUrl)
-  }, [imageUrl])
+  const handleClick = () => {
+    inputFile.current.click();
+    if(inputFile.current.value) {
+      const url = inputFile.current.value;
+      const indexStart = url.search('path') + 5;
+      //console.log(url.substring(indexStart));
+      setPdfUrl(url.substring(indexStart));
+    }
+  }
+
 
   return (
-    <form>
-      <div>
-        <input 
-          type="file" 
-          onChange={ getPDFname }
-          accept='.pdf'
-        />
-      </div>
-    </form>
+    <>
+      <input 
+        type='file' 
+        id='file' 
+        ref={ inputFile } 
+        style={{ display: 'none' }}
+        onChange={ handleClick }
+      />
+      <Button 
+        onClick={ handleClick }
+        variant='secondary'
+        className="m-5"
+      >
+        Choose File
+      </Button>
+    </>
   )
+};
+
+ChooseFile.propTypes = {
+  setPdfUrl: PropTypes.func.isRequired
 };
 
 export default ChooseFile;
