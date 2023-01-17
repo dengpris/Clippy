@@ -1,4 +1,5 @@
 import './App.css';
+import './viewer.css';
 import Viewer from './components/Viewer';
 import VisualizeGraph from './components/citationMapping/VisualizeGraph';
 

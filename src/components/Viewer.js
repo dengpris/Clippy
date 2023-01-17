@@ -1,5 +1,5 @@
 // import myfile from './Draft_Proposal.pdf'
-import myfile from '../pdfLibrary/Test3.pdf'
+import myfile from '../pdfLibrary/nature12373.pdf'
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
@@ -42,12 +42,15 @@ const Viewer = () => {
         return page.getTextContent();
     }).then(function(textContent) {
          // PDF canvas
-        var pdf_canvas = document.getElementById("viewer-canvas"); 
-        // Canvas offset
+        var textLayer = document.querySelector(".textLayer");
+        textLayer.style.left = canvas.offsetLeft + 'px';
+        textLayer.style.top = canvas.offsetTop + 'px';
+        textLayer.style.height = canvas.offsetHeight + 'px';
+        textLayer.style.width = canvas.offsetWidth + 'px';
         // Pass the data to the method for rendering of text over the pdf canvas.
         PDFJS.renderTextLayer({
             textContent: textContent,
-            container: document.getElementById("textLayer"),
+            container: textLayer,
             viewport: viewport,
             textDivs: []
         });
@@ -163,6 +166,7 @@ function summaryTokenize(summary){
         : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
+      <div class="textLayer"></div>
     </>
     
   );
