@@ -1,10 +1,12 @@
 import React, { useRef } from 'react';
 import Button from 'react-bootstrap/Button';
 import PropTypes from 'prop-types';
+import { getTitle } from '../hovering/GetDocInfo';
 
 const ChooseFile = (props) => {
   const {
-    setPdfUrl
+    setPdfUrl,
+    setPdfTitle
   } = props;
 
   const inputFile = useRef(null);
@@ -14,7 +16,6 @@ const ChooseFile = (props) => {
     if(inputFile.current.value) {
       const url = inputFile.current.value;
       const indexStart = url.search('path') + 5;
-      //console.log(url.substring(indexStart));
       setPdfUrl(url.substring(indexStart));
     }
   }
@@ -41,7 +42,8 @@ const ChooseFile = (props) => {
 };
 
 ChooseFile.propTypes = {
-  setPdfUrl: PropTypes.func.isRequired
+  setPdfUrl: PropTypes.func.isRequired,
+  setPdfTitle: PropTypes.func.isRequired
 };
 
 export default ChooseFile;

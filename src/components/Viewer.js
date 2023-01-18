@@ -5,12 +5,14 @@ import axios from 'axios';
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import Sidebar from './viewerComponents/Sidebar';
 import { getPdf } from '../pdfLibrary/getPdf';
+import { getPDFText } from './meaningcloudSummary/GenerateSummary';
+import GetText from './hovering/GetText';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import * as pdfjsLib from 'pdfjs-dist';
-// import { getSummary } from './meaningcloudSummary/GenerateSummary';
+
 
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -92,15 +94,14 @@ const Viewer = (props) => {
 
 
   // I DONT WANT THIS FUNCTION HERE
-  async function getPDFText(url) {
-    let doc = await PDFJS.getDocument(url).promise;
-    let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
-        return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
-    });
-    let result = (await Promise.all(pageTexts)).join('');
-
-    return result;
-}
+//   async function getPDFText(url) {
+//     let doc = await PDFJS.getDocument(url).promise;
+//     let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+//         return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+//     });
+//     let result = (await Promise.all(pageTexts)).join('');
+//     return result;
+// }
 
 // ONSUMMARYCLICK SHOULD ONLY CALL GETSUMMARY FROM GENERATESUMMARY.JS, THEN SETSUMMARY STATE TO THE RESULT
 // HOWEVER THAT CALLING GETSUMMARY RETURNS UNDEFINED INSTEAD OF THE SUMMARY
@@ -110,38 +111,37 @@ const Viewer = (props) => {
 //   toggleSidebar();
 // } NOT WORKING
 
-async function onSummaryClick() {
-    let text = await getPDFText(url)
-    const payload = new FormData()
-    payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
-    payload.append("txt", text);
-    payload.append("sentences", 5);
+  async function onSummaryClick() {
+      let text = await getPDFText(url)
+      const payload = new FormData()
+      payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
+      payload.append("txt", text);
+      payload.append("sentences", 5);
 
-    axios.post(summaryURL, payload)
-    .then((response) => {
-        setSummary(summaryTokenize(response.data.summary));
-        toggleSidebar();
-    })
-    .catch((error) => {
-        console.log('error', error);
-    })
-}
-
-function summaryTokenize(summary){
-  var Tokenizer = require('sentence-tokenizer');
-  var tokenizer = new Tokenizer();
-  tokenizer.setEntry(summary);
-  console.log(tokenizer.getSentences());
-  var summarySentencesArray = tokenizer.getSentences();
-
-  const TextCleaner = require('text-cleaner');
-  for(let i = 0; i < summarySentencesArray.length; i++){
-    summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
-    console.log(summarySentencesArray[i]);
+      axios.post(summaryURL, payload)
+      .then((response) => {
+          setSummary(summaryTokenize(response.data.summary));
+          toggleSidebar();
+      })
+      .catch((error) => {
+          console.log('error', error);
+      })
   }
-  return summarySentencesArray.join(' ');
 
-}
+  function summaryTokenize(summary){
+    var Tokenizer = require('sentence-tokenizer');
+    var tokenizer = new Tokenizer();
+    tokenizer.setEntry(summary);
+    console.log(tokenizer.getSentences());
+    var summarySentencesArray = tokenizer.getSentences();
+
+    const TextCleaner = require('text-cleaner');
+    for(let i = 0; i < summarySentencesArray.length; i++){
+      summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
+      console.log(summarySentencesArray[i]);
+    }
+    return summarySentencesArray.join(' ');
+  }
     
   return (
     <>
@@ -168,6 +168,7 @@ function summaryTokenize(summary){
         /> 
         : null
       }
+      <GetText url={ url }/>
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
     </>
     

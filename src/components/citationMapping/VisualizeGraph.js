@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Graph from "react-graph-vis";
-import { findCitations_withTitle } from "../../api/find_citations";
 import { v4 as uuidv4 } from "uuid";
+import PropTypes from 'prop-types';
 
+import { findCitations_withTitle } from "../../api/find_citations";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import './citationMappingStyle.css'

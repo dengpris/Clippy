@@ -6,6 +6,7 @@ import ChooseFile from './components/viewerComponents/ChooseFile';
 
 function App() {
   const [pdfUrl, setPdfUrl] = useState();
+  const [pdfTitle, setPdfTitle] = useState();
 
   return (
     <div className="App">
@@ -15,11 +16,14 @@ function App() {
             <Viewer
               pdfUrl={ pdfUrl }
             />
-            <VisualizeGraph/>
+            <VisualizeGraph
+              pdfTitle={ pdfTitle }
+            />
           </>
         : 
           <ChooseFile
             setPdfUrl={ setPdfUrl }
+            setPdfTitle={ setPdfTitle }
           />
         }
       </header>
