@@ -12,7 +12,7 @@ import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import * as pdfjsLib from 'pdfjs-dist';
-
+import './viewerComponents/viewerComponents.css';
 
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -31,6 +31,8 @@ const Viewer = (props) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [summary, setSummary] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
+  const [textStyle, setTextStyle] = useState(
+    { left: '0px', top: '0px', height: '0px', width: '0px' })
 
   // NOT MY CODE
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -49,20 +51,23 @@ const Viewer = (props) => {
       renderTask.promise.then(function() {
         // Returns a promise, on resolving it will return text contents of the page
         return page.getTextContent();
-    }).then(function(textContent) {
-         // PDF canvas
-        var pdf_canvas = document.getElementById("viewer-canvas"); 
-        // Canvas offset
-        // Pass the data to the method for rendering of text over the pdf canvas.
+    })
+    .then(function(textContent) {
+
+        var context = document.getElementById('viewer-canvas');
+        console.log('context offset is ', context.offsetLeft, context.offsetTop, context.offsetHeight, context.offsetWidth);
+
+        // document.getElementById('text-layer').style = { left: context.offsetLeft + 'px', top: context.offsetTop + 'px', height: context.offsetHeight + 'px', width: context.offsetWidth + 'px' }
+
         PDFJS.renderTextLayer({
             textContent: textContent,
-            container: document.getElementById("textLayer"),
+            container: document.getElementById("text-layer"),
             viewport: viewport,
             textDivs: []
         });
       });
 
-    });   
+    }); 
   }, [pdfRef, zoomScale]);
     
   useEffect(() => {
@@ -170,6 +175,9 @@ const Viewer = (props) => {
       }
       <GetText url={ url }/>
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
+      <div id='text-layer' style={ {left: '293px', top: '269px', height: '1016px', width: '773px' }}></div>
+
+
     </>
     
   );
