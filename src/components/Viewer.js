@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
-import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import Sidebar from './viewerComponents/Sidebar';
 import { getPdf } from '../pdfLibrary/getPdf';
 import { getPDFText } from './meaningcloudSummary/GenerateSummary';
@@ -51,17 +50,17 @@ const Viewer = (props) => {
       renderTask.promise.then(function() {
         // Returns a promise, on resolving it will return text contents of the page
         return page.getTextContent();
-    })
-    .then(function(textContent) {
-
-        var context = document.getElementById('viewer-canvas');
-        console.log('context offset is ', context.offsetLeft, context.offsetTop, context.offsetHeight, context.offsetWidth);
-
-        // document.getElementById('text-layer').style = { left: context.offsetLeft + 'px', top: context.offsetTop + 'px', height: context.offsetHeight + 'px', width: context.offsetWidth + 'px' }
-
+    }).then(function(textContent) {
+         // PDF canvas
+        var textLayer = document.querySelector(".textLayer");
+        textLayer.style.left = canvas.offsetLeft + 'px';
+        textLayer.style.top = canvas.offsetTop + 'px';
+        textLayer.style.height = canvas.offsetHeight + 'px';
+        textLayer.style.width = canvas.offsetWidth + 'px';
+        // Pass the data to the method for rendering of text over the pdf canvas.
         PDFJS.renderTextLayer({
             textContent: textContent,
-            container: document.getElementById("text-layer"),
+            container: text-layer,
             viewport: viewport,
             textDivs: []
         });
@@ -175,9 +174,6 @@ const Viewer = (props) => {
       }
       <GetText url={ url }/>
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
-      <div id='text-layer' style={ {left: '293px', top: '269px', height: '1016px', width: '773px' }}></div>
-
-
     </>
     
   );

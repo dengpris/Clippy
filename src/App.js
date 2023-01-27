@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
+import './viewer.css';
 import Viewer from './components/Viewer';
 import VisualizeGraph from './components/citationMapping/VisualizeGraph';
 import ChooseFile from './components/viewerComponents/ChooseFile';
