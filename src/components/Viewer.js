@@ -1,20 +1,19 @@
+
+import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
 import Sidebar from './viewerComponents/Sidebar';
+import myfile from '../pdfLibrary/nature12373.pdf'
+import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import { getPdf } from '../pdfLibrary/getPdf';
-import { getPDFText } from './meaningcloudSummary/GenerateSummary';
-import GetText from './hovering/GetText';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import * as pdfjsLib from 'pdfjs-dist';
-import './viewerComponents/viewerComponents.css';
-
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
 
 const Viewer = (props) => {
   const {
@@ -30,8 +29,6 @@ const Viewer = (props) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [summary, setSummary] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
-  const [textStyle, setTextStyle] = useState(
-    { left: '0px', top: '0px', height: '0px', width: '0px' })
 
   // NOT MY CODE
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -60,13 +57,13 @@ const Viewer = (props) => {
         // Pass the data to the method for rendering of text over the pdf canvas.
         PDFJS.renderTextLayer({
             textContent: textContent,
-            container: text-layer,
+            container: textLayer,
             viewport: viewport,
             textDivs: []
         });
       });
 
-    }); 
+    });   
   }, [pdfRef, zoomScale]);
     
   useEffect(() => {
@@ -98,14 +95,15 @@ const Viewer = (props) => {
 
 
   // I DONT WANT THIS FUNCTION HERE
-//   async function getPDFText(url) {
-//     let doc = await PDFJS.getDocument(url).promise;
-//     let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
-//         return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
-//     });
-//     let result = (await Promise.all(pageTexts)).join('');
-//     return result;
-// }
+  async function getPDFText(url) {
+    let doc = await PDFJS.getDocument(url).promise;
+    let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+        return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+    });
+    let result = (await Promise.all(pageTexts)).join('');
+
+    return result;
+}
 
 // ONSUMMARYCLICK SHOULD ONLY CALL GETSUMMARY FROM GENERATESUMMARY.JS, THEN SETSUMMARY STATE TO THE RESULT
 // HOWEVER THAT CALLING GETSUMMARY RETURNS UNDEFINED INSTEAD OF THE SUMMARY
@@ -115,37 +113,39 @@ const Viewer = (props) => {
 //   toggleSidebar();
 // } NOT WORKING
 
-  async function onSummaryClick() {
-      let text = await getPDFText(url)
-      const payload = new FormData()
-      payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
-      payload.append("txt", text);
-      payload.append("sentences", 5);
+async function onSummaryClick() {
+    let text = await getPDFText(url)
+    const payload = new FormData()
+    payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
+    payload.append("txt", text);
+    payload.append("sentences", 5);
 
-      axios.post(summaryURL, payload)
-      .then((response) => {
-          setSummary(summaryTokenize(response.data.summary));
-          toggleSidebar();
-      })
-      .catch((error) => {
-          console.log('error', error);
-      })
+    axios.post(summaryURL, payload)
+    .then((response) => {
+        //console.log(response.data.summary);
+        setSummary(summaryTokenize(response.data.summary));
+        toggleSidebar();
+    })
+    .catch((error) => {
+        console.log('error', error);
+    })
+}
+
+function summaryTokenize(summary){
+  var Tokenizer = require('sentence-tokenizer');
+  var tokenizer = new Tokenizer();
+  tokenizer.setEntry(summary);
+  console.log(tokenizer.getSentences());
+  var summarySentencesArray = tokenizer.getSentences();
+
+  const TextCleaner = require('text-cleaner');
+  for(let i = 0; i < summarySentencesArray.length; i++){
+    summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
+    console.log(summarySentencesArray[i]);
   }
+  return summarySentencesArray.join(' ');
 
-  function summaryTokenize(summary){
-    var Tokenizer = require('sentence-tokenizer');
-    var tokenizer = new Tokenizer();
-    tokenizer.setEntry(summary);
-    console.log(tokenizer.getSentences());
-    var summarySentencesArray = tokenizer.getSentences();
-
-    const TextCleaner = require('text-cleaner');
-    for(let i = 0; i < summarySentencesArray.length; i++){
-      summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
-      console.log(summarySentencesArray[i]);
-    }
-    return summarySentencesArray.join(' ');
-  }
+}
     
   return (
     <>
@@ -172,8 +172,8 @@ const Viewer = (props) => {
         /> 
         : null
       }
-      <GetText url={ url }/>
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
+      <div className="textLayer"></div>
     </>
     
   );
