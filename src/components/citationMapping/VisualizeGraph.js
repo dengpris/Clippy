@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Graph from "react-graph-vis";
 import { findCitations_withTitle } from "../../api/find_citations";
-//import { findCitations_withDOI } from "../../api/find_citations";
+import { randomfunc } from "../../api/find_citations";
 import { v4 as uuidv4 } from "uuid";
 
 import Button from 'react-bootstrap/Button';
@@ -24,18 +24,23 @@ const doi = '10.1371/journal.pclm.0000093';
 const VisualizeGraph = () => {
 
   const [citationInfo, setCitationInfo] = useState(null);
+  const [abstractFosInfo, setAbstractFosInfo] = useState(null);
   const [nodes, setNodes] = useState({});
   const [edges, setEdges] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
 
+
+  //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.
   useEffect(() => {
     setDefaultDoi(doi);
     findCitations_withTitle(titlePlus)
     //findCitations_withDOI(doi)
     .then((res) => {
-      setCitationInfo(res)
+      setCitationInfo(res.connected_references)
+      setAbstractFosInfo(res.fosAndAbstract)
+      //getAbstract()
     });
   }, []);
 
@@ -46,6 +51,10 @@ const VisualizeGraph = () => {
       setLoading(false);
     }
   }, [citationInfo])
+
+  const getFOS = () => {
+    console.log(Object.values(abstractFosInfo)[0].fos[0])
+  }
 
   const getNodes = () => { // creates the node in the graph
     if(citationInfo == null) {
@@ -76,7 +85,8 @@ const VisualizeGraph = () => {
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       var defaultEdge = {
         from: defaultDoi,
-        to: Object.keys(citationInfo)[i]
+        to: Object.keys(citationInfo)[i],
+        label: Object.values(abstractFosInfo)[0].fos[0]
       };
       graphEdges.push(defaultEdge);
       var tmpFrom = Object.keys(citationInfo)[i];
@@ -162,7 +172,9 @@ const VisualizeGraph = () => {
           onClick={() => {
             findCitations_withTitle(titlePlus)
             .then((res) => {
-              setCitationInfo(res)
+              setCitationInfo(res.connected_references)
+              setAbstractFosInfo(res.fosAndAbstract)
+              getFOS();
               getNodes();
               getEdges();
             });

@@ -1,8 +1,6 @@
 import axios from 'axios';
 
 const url_query = "https://api.crossref.org/works";
-const ss_url_query = "https://api.semanticscholar.org/graph/v1/paper/" 
-const abstract_query = "?fields=abstract"
 
 function compareTwoListsOfDOIReferences(origList, tempList){
   var similar_dois = [];
@@ -41,10 +39,9 @@ function getDOIofReferences(pdf_data){
 
 const getRefDataByDOI = async(referenced_dois) => {
   let connected_refs = {};
-  var keys = {}
   for(let i = 0; i < referenced_dois.length; i++) {
     const url_doi_query = url_query + "/" + referenced_dois[i];
-    let ref_info = [];
+    let ref_info = {};
     axios.get(
       url_doi_query
     )
@@ -61,100 +58,11 @@ const getRefDataByDOI = async(referenced_dois) => {
       ref_info.connected_refs = connected_refs_for_i;
       //Add this doi's info on the connected_refs list
       connected_refs[referenced_dois[i]] = ref_info;  
-      //console.log(i)
-      //console.log(Object.values(connected_refs))
-      keys = Object.keys(connected_refs)
     })
     .catch((err)=>console.log(err)); 
   }
-  //console.log(connected_refs)
-  //console.log("Here")
-  //console.log(Object.values(connected_refs)[0])
-  //console.log(Object.getOwnPropertyNames(connected_refs))
+  // await new Promise(r => setTimeout(r, 2000));
   return connected_refs;
-}
-
-const getAbstracts = async(ref_dois) => {
-  let abstracts = {};
-  for(let i = 0; i < ref_dois.length; i++){
-    var url_abstract_query = ss_url_query + ref_dois[i] + abstract_query;
-    let ref_info = {}
-    axios.get(
-      url_abstract_query
-    )
-    .then(res => {
-      //console.log(res.data.abstract)
-      //ref_info.doi = ref_dois[i]
-      ref_info.abstract = res.data.abstract;
-      //console.log(res.data.abstract)
-      abstracts[ref_dois[i]] = ref_info
-    })
-    .catch((err)=>console.log(err));
-  }
-  console.log(abstracts[ref_dois[0]])
-  return abstracts
-}
-
-function getSimilarWords(abstracts_list, org_doi){
-/*   console.log("LOOKING FOR SIM WRD")
-  console.log(abstracts_list)
-  console.log(org_doi)
-  console.log(typeof(abstracts_list))
-  console.log(Object.keys(abstracts_list)) */
-  const org_abstract_words = abstracts_list[org_doi].split(' ')
-  /*  */
-  //console.log(org_abstract_words)
-  /* const topWord = {}
-
-  Object.keys(abstracts_list).forEach(key => {
-    const temp = {}
-    if( typeof abstracts_list[key] !== 'string'){
-      console.log("NO ABSTRACT FOR", abstracts_list[key])
-      topWord.key = "none"
-    }
-    const abstract = abstracts_list[key].split(' ')
-    console.log(abstract)
-    abstract.forEach(word => {
-      temp[word.toLocaleLowerCase()] = temp[word.toLocaleLowerCase()] + 1 || 1
-    })
-    const max = Object.keys(temp).reduce((n, word) => {
-      
-      if (temp[word] > n.count) 
-      { 
-        topWord.key = { word, count: temp[word] } 
-      } 
-      else 
-      { 
-        topWord.key = n 
-      }
-    }, { word: '', count: 0 })
-    topWord.key = max.word
-  })
-
-  return topWord */
-
-  return org_abstract_words
-}
-
-const getFieldsOfStudy = async(ref_dois) => {
-  //console.log(Object.keys(connected_refs))
-  let fosAndAbstract = {};
-  for(let i = 0; i < ref_dois.length; i++){
-    var url_abstract_query = ss_url_query + ref_dois[i] + "?fields=fieldsOfStudy,abstract";
-    let ref_info = {}
-    axios.get(
-      url_abstract_query
-    )
-    .then(res => {
-      ref_info.fos = res.data.fieldsOfStudy;
-      ref_info.abstract = res.data.abstract;
-      //ref_info.title = res.data.title;
-      fosAndAbstract[ref_dois[i]] = ref_info
-    })
-    .catch((err)=>console.log(err));
-  }
-  //console.log(fosAndAbstract[ref_dois[0]])
-  return fosAndAbstract
 }
 
 // const pdf_title = "Nanometre-scale+thermometry+in+a+living+cell";
@@ -163,39 +71,18 @@ const getFieldsOfStudy = async(ref_dois) => {
 
 export const findCitations_withTitle = async (pdfTitle) => {
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
-  let citationData = {}
-  //const org_doi = "10.1371/journal.pclm.0000093"
-  console.log("HELLO4")
   try {
     const res = await axios.get(
       urlRequest
     );
+    //console.log(res.data.message);
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
-    //var connected_references = await getRefDataByDOI(referenced_dois);
-    citationData.connected_references = await getRefDataByDOI(referenced_dois);
-
-    var new_referenced_dois = referenced_dois
-
-    const org_doi = res.data.message.items[0].DOI
-    new_referenced_dois.push(org_doi)
-
-    citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois)
-    console.log(citationData)
-    //var abstracts_from_dois = await getAbstracts(new_referenced_dois);
-    //citationData.abstracts_from_dois = await getAbstracts(new_referenced_dois);
-    //console.log(citationData.abstracts_from_dois['10.1002/fee.1950'])
-    //console.log(Object.values(citationData.abstracts_from_dois[0]).abstract)
-    //var connected_subjects = getSimilarWords(abstracts_from_dois, org_doi);
-    
-    return citationData;
+    //console.log(referenced_dois);
+    var connected_references = await getRefDataByDOI(referenced_dois);
+    return connected_references;
   } catch (err) {
     return console.log('error calling findCitations', err);
   }
-}
-
-export const randomfunc = async (doi) => {
-  let toreturn = 'idek i just need to return something from useEffectFunction ' + doi
-  return toreturn
 }
 
 export const findCitations_withDOI = async (PDFdoi) => {
@@ -223,7 +110,9 @@ export const findCitations_withDOI = async (PDFdoi) => {
 //   .catch((err) => console.log(err))
 // }
 
- /*
+/* const ss_url_query = "https://api.semanticscholar.org/graph/v1/paper/" 
+const abstract_query = "?fields=abstract"
+
 function getPaperID(pdf_data){
   var paperID = pdf_data.data[0].paperId; //check if it's the right shape EX: https://api.semanticscholar.org/graph/v1/paper/search?query=title:%20(The+Role+of+Sensation+Seeking+in+Political+Violence)
   return paperID;
@@ -294,10 +183,10 @@ export const findSimilarSubjects = async (pdfTitle) => {
   } catch (err) {
     return console.log('error calling findCitations', err);
   }
-} */
+}
 
 //Search by DOI/paperID:
 // https://api.semanticscholar.org/graph/v1/paper/<DOI/PaperID>?fields=abstract
 //Search by Title:
 // https://api.semanticscholar.org/graph/v1/paper/search?query=title:%20(The+Role+of+Sensation+Seeking+in+Political+Violence)&limit=1
-//
+// */
