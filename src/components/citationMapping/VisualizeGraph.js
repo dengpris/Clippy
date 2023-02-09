@@ -34,6 +34,7 @@ const VisualizeGraph = () => {
 
   //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.
   useEffect(() => {
+    console.log("use effect ran");
     setDefaultDoi(doi);
     findCitations_withTitle(titlePlus)
     //findCitations_withDOI(doi)
@@ -83,10 +84,19 @@ const VisualizeGraph = () => {
     }
     let graphEdges = [];
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
+      var field="";
+      if(Object.values(abstractFosInfo)[i].fos == null) {
+        console.log(Object.keys(abstractFosInfo)[i]);
+        field = "Unknown";
+      }
+      else {
+        field = Object.values(abstractFosInfo)[i].fos[0];
+      }
+      
       var defaultEdge = {
         from: defaultDoi,
         to: Object.keys(citationInfo)[i],
-        label: Object.values(abstractFosInfo)[0].fos[0]
+        label: field
       };
       graphEdges.push(defaultEdge);
       var tmpFrom = Object.keys(citationInfo)[i];
