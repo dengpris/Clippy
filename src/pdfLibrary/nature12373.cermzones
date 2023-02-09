@@ -1,0 +1,813 @@
+<document>
+  <zone label="MET_AFFILIATION">a
+b</zone>
+  <zone label="MET_BIB_INFO">Excited state</zone>
+  <zone label="BODY_CONTENT">δ</zone>
+  <zone label="BODY_HEADING">Ground state</zone>
+  <zone label="MET_BIB_INFO">LETTER
+doi:10.1038/nature12373</zone>
+  <zone label="MET_TITLE">Nanometre-scale thermometry in a living cell</zone>
+  <zone label="MET_AUTHOR">G. Kucsko1*, P. C. Maurer1*, N. Y. Yao1, M. Kubo2, H. J. Noh3, P. K. Lo4, H. Park1,2,3 &amp; M. D. Lukin1</zone>
+  <zone label="MET_ABSTRACT">Sensitive probing of temperature variations on nanometre scales is
+an outstanding challenge in many areas of modern science and
+technology1. In particular, a thermometer capable of subdegree
+temperature resolution over a large range of temperatures as well
+as integration within a living system could provide a powerful new
+tool in many areas of biological, physical and chemical research.
+Possibilities range from the temperature-induced control of gene
+expression2-5 and tumour metabolism6 to the cell-selective treatment
+of disease7,8 and the study of heat dissipation in integrated
+circuits1. By combining local light-induced heat sources with sensitive
+nanoscale thermometry, it may also be possible to engineer
+biological processes at the subcellular level2-5. Here we demonstrate
+a new approach to nanoscale thermometry that uses coherent manipulation
+of the electronic spin associated with nitrogen-vacancy
+colour centres in diamond. Our technique makes it possible to detect
+temperature variations as small as 1.8 mK (a sensitivity of 9 mK Hz21/2)
+in an ultrapure bulk diamond sample. Using nitrogen-vacancy centres
+in diamond nanocrystals (nanodiamonds), we directly measure the
+local thermal environment on length scales as short as 200 nanometres.
+Finally, by introducing both nanodiamonds and gold nanoparticles
+into a single human embryonic fibroblast, we demonstrate</zone>
+  <zone label="BODY_CONTENT">temperature-gradient control and mapping at the subcellular level,
+enabling unique potential applications in life sciences.
+Many promising approaches to local temperature sensing1 are being
+explored at present. These include scanning probe microscopy1,9,
+Raman spectroscopy10, and fluorescence-based measurements using
+nanoparticles11,12 and organic dyes13,14. Fluorescent polymers13 and green
+fluorescent proteins14 have recently been used for temperature mapping
+within a living cell. However, many of these existing methods are
+limited by drawbacks such as low sensitivity and systematic errors
+due to fluctuations in the fluorescence rate11,12, the local chemical
+environment13 and the optical properties of the surrounding medium14.
+Moreover, although promising, methods based on green fluorescent
+proteins rely on cellular transfection14 that proves to be difficult to
+achieve in certain primary cell types15. Our new approach to nanoscale
+thermometry uses the quantum mechanical spin associated with nitrogenvacancy
+colour centres in diamond. As illustrated in Fig. 1b, in its
+electronic ground state each nitrogen-vacancy centre constitutes a
+spin-1 system. These spin states can be coherently manipulated using
+microwave pulses and efficiently initialized and detected by means of
+laser illumination (Supplementary Information). In the absence of an
+external magnetic field, the precise value of the transition frequency
+ms = -1
+ms = +1
+ms = 0
+Δ(T)
+0.001
+0.01</zone>
+  <zone label="BODY_HEADING">Projected nanodiamond
+0.1
+1
+Sensor size (μm)</zone>
+  <zone label="BODY_CONTENT">Figure 1 | Nitrogen-vacancy-based nanoscale thermometry. a, Schematic
+image depicting nanodiamonds (grey diamonds) and a gold nanoparticle
+(yellow sphere) within a living cell (central blue object; others are similar) with
+coplanar waveguide (yellow stripes) in the background. The controlled
+application of local heat is achieved by laser illumination of the gold
+nanoparticle, and nanoscale thermometry is achieved by precision
+spectroscopy of the nitrogen-vacancy spins in the nanodiamonds. b, Simplified
+nitrogen-vacancy level diagram showing a ground-state spin triplet and an
+excited state. At zero magnetic field, the | 61ae sublevels are split from the | 0ae
+state by a temperature-dependent zero field splitting D(T). Pulsed microwave
+radiation is applied (detuning, d) to perform Ramsey-type spectroscopy.
+c, Comparison of sensor sizes and temperature accuracies for the nitrogenvacancy
+quantum thermometer and other reported techniques. Red circles
+indicate methods that are biologically compatible. The open red circle indicates
+the ultimate expected accuracy for our measurement technique in solution
+(Methods).
+1Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA. 2Department of Chemistry and Chemical Biology, Harvard University, Cambridge, Massachusetts 02138, USA. 3Broad
+Institute of MIT and Harvard University, 7 Cambridge Center, Cambridge, Massachusetts 02142, USA. 4Department of Biology and Chemistry, City University of Hong Kong, Tat Chee Avenue, Kowloon, Hong
+Kong SAR, China.
+*These authors contributed equally to this work.</zone>
+  <zone label="MET_AFFILIATION">5 4 | N A T U R E | V O L 5 0 0 | 1 A U G U S T 2 0 1 3
+©2013 Macmillan Publishers Limited. All rights reserved</zone>
+  <zone label="MET_ABSTRACT">c</zone>
+  <zone label="GEN_OTHER">)
+K
+(
+y
+c
+a
+r
+u
+c
+c
+a
+e
+r
+u
+t
+a
+r
+e
+p
+m
+e
+T
+10
+1</zone>
+  <zone label="BODY_CONTENT">0.1
+0.01</zone>
+  <zone label="BODY_HEADING">CdSe quantum dot
+SThM
+Nanodiamond
+Infrared
+Raman
+Green fluorescent protein
+Liquid crystal
+Seebeck
+Bulk diamond
+10</zone>
+  <zone label="BODY_CONTENT">(D) between the jms 5 0ae and jms 5 61ae states (ms, spin projection) has
+a temperature dependence (dD/dT 5 22p 3 77 kHz K21) due to thermally
+induced lattice strains16-18.
+The operational principle of nitrogen-vacancy-based thermometry
+relies on the accurate measurement of this transition frequency, which
+can be optically detected with high spatial resolution (Fig. 1). For a
+sensor containing N colour centres, the temperature sensitivity is given
+by
+g~
+1 1
+CdD=dT pffiTffifficffiffioffihffiffiffiNffiffiffitffi
+where Tcoh is the nitrogen-vacancy spin coherence time and t is the
+integration time. Here we also introduce a factor, C, to account for
+imperfections in readout and initialization19. If Tcoh is of the order of a
+few milliseconds and C &lt; 0.03 (ref. 19), then a single nitrogen-vacancy
+can potentially exhibit a sensitivity better than 1 mK Hz21/2. Apart
+from high sensitivity, nitrogen-vacancy-based thermometry also offers
+several distinct advantages over existing methods in biological and
+chemical temperature sensing. First, owing to diamond's chemical
+inertness, it is generally robust to changes in the local chemical environment.
+Second, it can be applied over a wide range of temperatures
+(200-600 K; refs 17, 18), which is of particular interest in the study
+of nanoscale chemical reactions20.
+As a benchmark experiment, we demonstrate the high temperature
+sensitivity of nitrogen-vacancy-based thermometry in a bulk diamond
+sample. Although the nitrogen-vacancy's magnetic sensitivity has rendered
+it a competitive magnetometer21,22, to determine the temperature
+accurately it is necessary to decouple the nitrogen-vacancy electronic
+spin from fluctuating external magnetic fields. This is achieved using a
+modified spin-echo sequence that makes use of the spin-1 nature of the
+nitrogen-vacancy defect23, allowing us to eliminate the effects of an
+external, slowly varying magnetic field. Specifically, we apply a microwave
+pulse at frequency v (Fig. 1b) to create a coherent superposition
+(j0izjBi)=pffi2ffi, where jBi~(jz1izj{1i)=pffi2ffi. After half the total
+evolution time, t, we apply a 2p echo pulse that swaps the population of
+the j11ae and j21ae states (Fig. 2a). Following another period of free
+evolution for time t, quasistatic, magnetic-field-induced shifts of these
+j61ae levels are eliminated, allowing for accurate temperature sensing.
+In the experiment, we use a sample of isotopically pure diamond (99.99%
+spinless 12C isotope) grown by chemical vapour deposition24 to further
+reduce magnetic field fluctuations originating from the intrinsic 13C
+nuclear spin bath. As shown in Fig. 2a, this allows us to observe coherence</zone>
+  <zone label="MET_BIB_INFO">LETTER RESEARCH</zone>
+  <zone label="BODY_CONTENT">fringes for up to 0.5 ms. Notably, for all nitrogen-vacancies tested, we
+observe a characteristic low-frequency beating of the fluorescence signal
+that varies from defect to defect, which is most probably due to
+locally fluctuating charge traps25. Despite this beating, for a fixed evolution
+time 2t, the nitrogen-vacancy spin depends sensitively on the
+sample temperature (Fig. 2b). We observe a temperature sensitivity
+of g 5 (9 6 1.8) mK Hz21/2 for 2t 5 250 ms. For 30 s of integration, we
+achieve a measurement accuracy of dT 5 1.8 6 0.3 mK (Methods).
+Although the measurement sequence for a single value of 2t allows
+us to determine the temperature only up to a multiple of (2dD/dT2t)21,
+absolute temperature variations can be determined by repeating the
+measurement for 2t9 , 2t, as shown in Fig. 2b.
+We now demonstrate the high spatial resolution of nitrogen-vacancybased
+thermometry. This is achieved by using nanodiamonds. In most
+commercially available nanodiamonds, the nitrogen-vacancy coherence
+time is limited to approximately 1 ms owing to additional paramagnetic
+impurities. Although this shortened coherence time reduces
+the intrinsic temperature sensitivity for a single defect, this decrease
+can be offset by using an ensemble of nitrogen-vacancies to enhance the
+signal-to-noise ratio by a factor of pffiNffiffiffi. We note that, unlike nitrogenvacancy-based
+magnetometry, where the proximity to the source
+(often limited by the nanodiamond size) is critical to the maximum
+sensitivity, nitrogen-vacancy thermometry is not subject to such a
+constraint; in fact, the excellent thermal conductivity of diamond
+ensures that all nitrogen-vacancy centres within a nanocrystal are in
+thermal equilibrium with the local heat environment. To maximize the
+number of nitrogen-vacancy centres and to minimize the lattice strain,
+our measurements are performed on single-crystalline nanodiamonds
+containing approximately 500 nitrogen-vacancy centres (Adamas
+Nanotechnologies). The zero-field splitting, D, of the nitrogen-vacancy
+ensemble, and, thus, the temperature, is determined by recording a
+continuous-wave electron spin resonance (ESR) spectrum. Specifically,
+we measure changes to the zero-field splitting by recording the fluorescence
+at four different frequencies centred around D 5 2p 3 2.87 GHz
+(Fig. 3a). This procedure eliminates unwanted effects from fluctuations
+in the total fluorescence rate, ESR contrast, Rabi frequency and magnetic
+field, yielding a robust thermometer (Methods).
+Combining our nanodiamond thermometer with the laser heating
+of a gold nanoparticle allows us to both monitor and control temperature
+at nanometre length scales (Fig. 3). Both nanodiamonds and gold
+nanoparticles (nominal diameter, 100 nm) are initially spin-coated on a
+microscope coverslip. Using a confocal microscope with two independent
+scanning beams, we co-localize gold nanoparticles and nanodiamonds
+a
+1.1
+e
+cn1.05
+e
+sec 1
+r
+lfuo0.95
+d
+lize 0.9
+a
+rm0.85
+o
+N 0.8
+0.75
+τ
+τ
+π/2
+2π
+π/2
+1
+0.5
+P
+o
+p
+u
+l
+a
+t
+i
+o
+n
+b
+n 1
+o
+i
+t
+lau0.5
+p
+oP 0
+1
+n
+o
+i
+t
+lau0.5
+p
+o
+P 0
+24.2
+24.3
+24.4
+24.5
+24.6
+2τ′ = 50 μs
+2τ = 250 μs
+0
+100
+200 300
+2τ (μs)
+400
+0
+500
+Figure 2 | Sensitivity of single nitrogen-vacancy thermometer. a, Measured
+fluorescence as a function of echo evolution time, 2t (red points); the black solid
+line indicates a fit corresponding to a damped cosine function with two distinct
+frequencies. The characteristic beating can be explained by fluctuating
+proximal charge traps separated from the nitrogen-vacancy centre by a
+distance of about 50 nm. Inset, the microwave 2p echo pulse sequence used to
+cancel unwanted external magnetic field fluctuations23. b, Measured
+fluorescence (red points) as a function of temperature for echo times of
+24.2 24.22 24.24 24.26 24.28
+T (ºC)
+2t 5 250 ms (bottom) and 2t9 5 50 ms (top). Black lines, best fits; errors, 1s. The
+fixed evolution times of 2t and 2t9 are indicated in a by red arrows. The
+temperature is controlled by a Peltier element at the sample mount, and the
+(local) x-axis temperature is determined using a thermistor located
+immediately next to the sample. The fluorescence is converted to population by
+normalizing to two reference measurements where the spin is prepared with
+ms 5 0 and, respectively, ms 5 21.</zone>
+  <zone label="MET_BIB_INFO">©2013 Macmillan Publishers Limited. All rights reserved</zone>
+  <zone label="BODY_CONTENT">1 A U G U S T 2 0 1 3 | V O L 5 0 0 | N A T U R E | 5 5</zone>
+  <zone label="MET_BIB_INFO">RESEARCH LETTER</zone>
+  <zone label="BODY_CONTENT">a
+1
+e 0.98
+c
+n
+sce 0.96
+e
+r
+lfuo 0.94
+d
+e
+liza 0.92
+m
+r
+oN 0.9
+c
+)
+K
+(
+T
+Δ
+15
+10
+5
+0
+0.88 2.84
+2.86
+ω (GHz)
+2.88
+2.9
+1 ΔT (K)
+T (ºC)
+23 24 25 26
+0
+−1
+0
+0.5 1
+Laser power (mW)
+1.5
+b 40
+45
+)
+(mμ 50
+y
+55
+60
+50
+d 15
+)
+K
+(
+T
+Δ
+10
+5
+0
+0
+A
+55
+B
+C
+2
+(×106 c.p.s.)
+6
+4
+2
+0
+D
+B A
+60
+x (μm)
+C
+Heat
+E
+F
+65
+70
+D
+4
+6
+Distance (μm)
+E
+F
+8
+Figure 3 | Submicrometre thermometry using
+nanodiamonds. a, Frequency scan of a single
+nanodiamond containing approximately 500
+nitrogen-vacancy centres. The four red points
+indicate the measurement frequencies used to
+extract the temperature as detailed in Methods.
+b, Two-dimensional confocal scan of
+nanodiamonds (circles) and a gold nanoparticle
+(cross) spin-coated onto a glass coverslip. The
+colour bar represents fluorescence, expressed in
+counts per second (c.p.s.). c, Temperature of a
+single nanodiamond as a function of laser power
+for two different laser focus locations. The red data
+points depict the pronounced heating of a
+nanodiamond as a result of laser illumination of a
+nearby gold nanoparticle. The blue data points
+depict the same measurement with the laser focus
+displaced by 0.8 mm from the nanoparticle location;
+this results in negligible heating of the
+nanodiamond as a function of laser power. Inset,
+the measured temperature change of a
+nanodiamond, when the surrounding temperature
+is controlled by a Peltier element. d, Temperature
+changes measured (red points) at the six
+nanodiamond locations in b as a function of
+distance from the illuminated gold nanoparticle
+(cross). The blue curve is the theoretical
+temperature profile based on a steady-state
+solution of the heat equation. All data in this figure
+were obtained on a glass coverslip, and all error
+bars correspond to 1s.
+with a resolution of ,100 nm (Supplementary Information). While locally
+heating the gold nanoparticles by continuous illumination with a
+variable-power green laser (focused to a diffraction-limited spot), we
+simultaneously measure the temperature at the nanodiamond location
+using ESR spectroscopy.
+The ability to measure temperature with nanodiamonds is verified
+by heating the substrate temperature over a range of 2.5 K and simultaneously
+monitoring the zero-field splitting (Fig. 3c, inset). To demonstrate
+nanoscale temperature control, in Fig. 3c (red points) we show the
+temperature change recorded by the nanodiamond as a function of
+the green-laser power applied to the gold nanoparticle at a distance of
+0.8 6 0.1 mm. To verify further that the temperature change results
+from local heating, we repeat the measurement with the excitation
+laser displaced from the nanodiamond by 0.8 mm in the opposite direction.
+In this case, the temperature measured by the nanodiamond
+remained constant as a function of laser power (Fig. 3c, blue points),
+thereby confirming the locality of the heat source. From a linear fit to
+the data, we estimate the accuracy of our nitrogen-vacancy sensor to be
+dT 5 44 6 10 mK. The measured temperature change agrees with the
+theoretically expected temperature profile based on a steady-state solution
+of the heat equation, DT(r)~Q_ =4pkr, where Q_ is the heat dissipation,
+k is the thermal conductivity of glass and r is the distance
+between the nanodiamond and the gold nanoparticle. As shown in
+Fig. 3b, by recording the temperature of six nanodiamonds at different
+distances from the laser-heated gold nanoparticle we find that the
+measured temperature profile (Fig. 3d, points) is in excellent agreement
+with the theoretical steady-state prediction (solid line). This allows us
+directly to estimate the temperature change at the location of the gold
+nanoparticle to be 72 6 6 K.
+To demonstrate that nanodiamond thermometry is compatible with
+living cells, we introduce nanodiamonds and gold nanoparticles into
+human embryonic fibroblast WS1 cells using nanowire-assisted delivery15.
+Just as in the control experiments described above, we probe the temperature
+at two different nitrogen-vacancy locations (NV1 and NV2)
+within a single cell while locally heating an individual gold nanoparticle
+(Fig. 4a). As shown in Fig. 4b, NV1, which is significantly closer to the
+heat source, has a stronger temperature dependence as a function of
+laser power than does NV2. Varying the incident power allows us to
+generate controlled temperature differences of up to 5 K over distances
+of approximately 7 mm. To ensure that this temperature gradient is
+created by the controlled illumination of the nanoparticle and does
+not result from heating of the cellular cytoplasm, we displace the laser
+spot from the gold nanoparticle. This results in a negligible temperature
+change at the location of NV1 with DT 5 220 6 50 mK (Fig. 4b,
+green square). The increased measurement uncertainty for larger laser
+powers is the result of heating fluctuations from drift of the gold
+nanoparticle.
+The experiments shown in Fig. 4b demonstrate the submicrometre
+measurement of an intracellular heat gradient. However, the substantial
+heating induced by constant illumination for an extended period of
+time ultimately leads to the death of the cell, which is confirmed using a
+standard live/dead assay (calcein AM/ethidium homodimer-1). To
+demonstrate that our technique can be used within living cells, we
+increase the concentration of gold nanoparticles to allow for heat
+generation at different locations simply by moving the laser focus.
+Then we measure the temperature variation at a single nanodiamond
+(Fig. 4c, bar graph) while slightly heating the gold nanoparticles in two
+different locations (crosses). After our measurement, the viability of
+the cell is confirmed (Fig. 4c).
+Finally, we demonstrate that our method can be used to control cell
+viability. To start, we heat the cell with 12 mW of laser power and measure
+a temperature change of 0.5 6 0.2 K at the nanodiamond location;
+this corresponds to a change of approximately 10 K at the position of
+the gold nanoparticle. At this point, the cell is still alive, as confirmed by
+the absence of ethidium homodimer-1 fluorescence inside the membrane
+(Fig. 4d). By increasing the laser power to 120 mW, we induce a
+temperature change of 3.9 6 0.1 K at the nanodiamond location
+(approximately 80 K at the location of the laser focus); in this case,
+the cell is flooded with fluorescence from the ethidium homodimer,
+signalling cell death. This proof-of-principle experiment indicates that
+5 6 | N A T U R E | V O L 5 0 0 | 1 A U G U S T 2 0 1 3
+©2013 Macmillan Publishers Limited. All rights reserved</zone>
+  <zone label="MET_BIB_INFO">LETTER RESEARCH</zone>
+  <zone label="BODY_CONTENT">a
+-10
+-5
+)m 0
+μ
+(
+y 5
+10
+15
+c
+10
+)
+(mμ 0
+y
+-10
+(×104 c.p.s.)
+25
+20
+15
+10
+50
+d 30
+)m40
+μ
+(
+y
+b
+5
+4
+) 3
+K
+(
+T
+Δ 2
+1
+0
+0
+Heat
+NV1
+NV2
+-5
+0
+5
+x (μm)
+10 15
+NV
+-10
+Heat 1
+Heat 2
+0
+x (μm)
+2.5
+2.0
+)1.5
+K
+T(1.0
+0.5
+0.0
+10
+1 2
+Position
+T = 0.5 ± 0.2 K
+NV
+Heat
+50
+55 60 65 70 75
+x (μm)
+20 40 60 80
+Gold fluorescence ( ×103 c.p.s.)
+NV1
+40
+)
+m
+(μ50
+y
+60 T = 3.9 ± 0.1 K
+60
+x (μm)
+80
+NV2
+(×106 c.p.s.)
+100
+3
+2
+1
+Figure 4 | Nanoscale thermometry in cells. a, Confocal scan of a single cell
+under laser excitation at a wavelength of 532 nm, with collection at wavelengths
+greater than 638 nm. The cross marks the position of the gold nanoparticle used
+for heating, and circles represent the location of the nanodiamonds (NV1 and
+NV2) used for thermometry. The dotted line provides a guide to the eye and
+outlines the cell membrane. Colour bars indicate the fluorescence in counts per
+seconds. b, Measured change in temperature at the positions of NV1 and NV2
+relative to the incident laser power applied to the gold nanoparticle. Dashed
+lines are linear fits to the data. Each point consists of an average of five
+measurements, with each individual measurement taking 4 s. The error bars
+nanodiamond thermometry may enable the optimization of nanoparticle-based
+photothermal therapies8.
+Our experiments demonstrate that nitrogen-vacancy centres in diamond
+can be used as robust temperature sensors that combine the
+virtues of submicrometre spatial resolution, subdegree thermal sensitivity
+and biocompatibility. The sensitivity of our current measurement
+can be enhanced by increasing the relevant coherence time or the number
+of nitrogen-vacancy centres within the nanocrystal, or both. Optimizing
+these factors should allow us to reach sensitivities of 80 mK Hz21/2
+(Methods), yielding the ability to sense subkelvin temperature variations
+with millisecond time resolution. In solution, the ultimate accuracy
+of our method will probably be limited by residual heating during the
+measurement process. As discussed in the Methods, this limit is in the
+range of 0.05-5 mK, depending on experimental conditions. Although
+the present work focuses on monitoring temperature variations, the
+use of diamond samples with low strain, or, alternatively, ensembles of
+nanodiamonds, should allow for the realization of an absolute thermometer
+(Methods). The spatial resolution of our method can be further
+improved by using far-field subdiffraction techniques26.
+The present observations raise a number of intriguing possibilities.
+For instance, the simultaneous measurement and control of a subcellular
+thermal gradient could enable the accurate control of gene expression27.
+Further improvements in sensitivity may allow for real-time observations
+of non-equilibrium subcellular processes in biological and medical
+applications11. The large dynamic range of our quantum thermometer
+and its intrinsic robustness may also allow for the direct microscopic
+monitoring and control of chemical reactions20. Moreover, combining
+our technique with two-photon microscopy28,29 may enable in vivo
+identification of local tumour activity by mapping atypical thermogenesis
+at the single-cell level30. Finally the combination of thermoablative
+therapy with our temperature sensor could be a potent tool for
+the selective identification and killing of malignant cells without damaging
+surrounding tissue7,8.
+(1s) are set by fluctuations in the laser heating of the gold nanoparticle.
+c, Fluorescence scan of stained cells (live/dead assay) with excitation at 494 or
+528 nm and emission at 515 nm (green; live cells) and 617 nm (red; dead cells).
+The bar graph shows the temperature of a single nanodiamond (circle) with
+local heat applied at two different locations (crosses). d, Confocal fluorescence
+scans of an individual cell under varying illumination power. Excitation occurs
+at 532 nm and collection is above 630 nm. Cell death is indicated by the
+penetration of ethidium homodimer-1 through the cell membrane, staining the
+nucleus. At low laser powers, the cell remains alive; cell death occurs as laserinduced
+heating is increased.
+METHODS SUMMARY
+Nanodiamond measurement pulse sequence. As indicated in Fig. 3a, we record
+the fluorescence at four different frequencies centred on D 5 2p 3 2.87 GHz:
+f 1&lt;f (v{)z
+f 2&lt;f (v{)z
+f 3&lt;f (vz)z
+f 4&lt;f (vz)z
+Lf
+Lf
+Lf
+Lf
+Lv v{
+Lv v{
+Lv vz
+Lv vz
+{dvzdbzdT
+dvzdbzdT
+{dv{dbzdT
+dv{dbzdT
+dD
+dT
+dD
+dT
+dD
+dT
+dD
+dT
+dT~
+dv ðf 1zf 2Þ{ðf 3zf 4Þ
+dD=dT ðf 1{f 2Þzðf 3{f 4Þ
+This allows us to determine the change in temperature:
+ð1Þ
+Here v++dv are the four microwave carrier frequencies and dB is an unknown
+static magnetic field. By using the fluorescence at these four frequencies as shown
+in equation (1), we are able to remove errors associated with changes in total
+fluorescence rate, ESR contrast, Rabi frequency and magnetic field.
+Full Methods and any associated references are available in the online version of
+the paper.
+Received 19 March; accepted 10 June 2013.</zone>
+  <zone label="GEN_REFERENCES">1. Yue, Y. &amp; Wang, X. Nanoscale thermal probing. Nano Rev. http://dx.doi.org/
+10.3402/nano.v3i0.11586 (2012).
+2. Lucchetta, E., Lee, J., Fu, L., Patel, N. &amp; Ismagilov, R. Dynamics of Drosophila
+embryonic patterning network perturbed in space and time using microfluidics.
+Nature 434, 1134-1138 (2005).
+3. Kumar, S. V. &amp; Wigge, P. A. H2A.Z-containing nucleosomes mediate the
+thermosensory response in Arabidopsis. Cell 140, 136-147 (2010).
+4. Lauschke, V. M., Tsiairis, C. D., François, P. &amp; Aulehla, A. Scaling of
+embryonic patterning based on phase-gradient encoding. Nature 493, 101-105
+(2012).</zone>
+  <zone label="BODY_CONTENT">1 A U G U S T 2 0 1 3 | V O L 5 0 0 | N A T U R E | 5 7</zone>
+  <zone label="MET_BIB_INFO">©2013 Macmillan Publishers Limited. All rights reserved</zone>
+  <zone label="MET_TYPE">RESEARCH LETTER</zone>
+  <zone label="GEN_REFERENCES">5. Kamei, Y. et al. Infrared laser-mediated gene induction in targeted single cells in
+vivo. Nature Methods 6, 79-81 (2009).
+6. Vreugdenburg, T., Willis, C., Mundy, L. &amp; Hiller, J. A systematic review of
+elastography, electrical impedance scanning, and digital infrared thermography
+for breast cancer screening and diagnosis. Breast Cancer Res. Treat. 137, 665-676
+(2013).
+7. Schroeder, A. et al. Treating metastatic cancer with nanotechnology. Nature Rev.
+Cancer 12, 39-50 (2011).
+8. O'Neal, D. P., Hirsch, L. R., Halas, N. J., Payne, J. D. &amp; West, J. L. Photo-thermal tumor
+ablation in mice using near infrared-absorbing nanoparticles. Cancer Lett. 209,
+171-176 (2004).
+9. Majumdar, A. Scanning thermal microscopy. Annu. Rev. Mater. Sci. 29, 505-585
+(1999).
+10. Kim, S. H. et al. Micro-Raman thermometry for measuring the temperature
+distribution inside the microchannel of a polymerase chain reaction chip. J.
+Micromech. Microeng. 16, 526 (2006).
+11. Yang, J., Yang, H. &amp; Lin, L. Quantum dot nano thermometers reveal heterogeneous
+local thermogenesis in living cells. ACS Nano 5, 5067-5071 (2011).
+12. Vetrone, F. et al. Temperature sensing using fluorescent nanothermometers. ACS
+Nano 4, 3254-3258 (2010).
+13. Okabe, K. et al. Intracellular temperature mapping with a fluorescent polymeric
+thermometer and fluorescence lifetime imaging microscopy. Nature Commun. 3,
+705 (2012).
+14. Donner, J., Thompson, S., Kreuzer, M., Baffou, G. &amp; Quidant, R. Mapping
+intracellular temperature using green fluorescent protein. Nano Lett. 12,
+2107-2111 (2012).
+15. Shalek, A. K. et al. Vertical silicon nanowires as a universal platform for delivering
+biomolecules into living cells. Proc. Natl Acad. Sci. USA 107, 1870-1875 (2010).
+16. Acosta, V. et al. Temperature dependence of the nitrogen-vacancy magnetic
+resonance in diamond. Phys. Rev. Lett. 104, 070801 (2010).
+17. Toyli, D. et al. Measurement and control of single nitrogen-vacancy center spins
+above 600 K. Phys. Rev. X 2, 031001 (2012).
+18. Chen, X.-D. et al. Temperature dependent energy level shifts of nitrogen-vacancy
+centers in diamond. Appl. Phys. Lett. 99, 161903-161903 (2011).
+19. Taylor, J. et al. High-sensitivity diamond magnetometer with nanoscale resolution.
+Nature Phys. 4, 810-816 (2008).
+20. Jin, C., Li, Z., Williams, R., Lee, K. &amp; Park, I. Localized temperature and chemical reaction
+control in nanoscale space by nanowire array. Nano Lett. 11, 4818-4825 (2011).
+21. Maze, J. et al. Nanoscale magnetic sensing with an individual electronic spin in
+diamond. Nature 455, 644-647 (2008).
+22. Balasubramanian, G. et al. Nanoscale imaging magnetometry with diamond spins
+under ambient conditions. Nature 455, 648-651 (2008).
+23. Hodges, J. et al. Time keeping with electron spin states in diamond. Phys. Rev. A
+87, 032118 (2013).
+24. Balasubramanian, G. et al. Ultralong spin coherence time in isotopically
+engineered diamond. Nature Mater. 8, 383-387 (2009).
+25. Dolde, F. et al. Electric-field sensing using single diamond spins. Nature Phys. 7,
+459-463 (2011).
+26. Maurer, P. et al. Far-field optical imaging and manipulation of individual spins with
+nanoscale resolution. Nature Phys. 6, 912-918 (2010).
+27. Xu, G. et al. Identification of proteins sensitive to thermal stress in human
+neuroblastoma and glioma cell lines. PLoS ONE 7, e49021 (2012).
+28. Helmchen, F. &amp; Denk, W. Deep tissue two-photon microscopy. Nature Methods 2,
+932-940 (2005).
+29. Wee, T.-L. et al. Two-photon excited fluorescence of nitrogen-vacancy centers in
+proton-irradiated type Ib diamond. J. Phys. Chem. A 111, 9379-9386 (2007).
+30. Tsoli, M. et al. Activation of thermogenesis in brown adipose tissue and
+dysregulated lipid metabolism associated with cancer cachexia in mice. Cancer
+Res. 72, 4372-4382 (2012).
+Supplementary Information is available in the online version of the paper.
+Acknowledgements We thank R. Walsworth, V. Denic, C. Latta, L. Jiang, A. Gorshkov,
+P. Cappellaro, A. Sushkov and I. Lovchinsky for discussions and help with experiments.
+This work was supported by the NSF, the Center for Ultracold Atoms, the Defense
+Advanced Research Projects Agency (QUASAR programme), the Army Research Office
+(MURI programme), the Packard Foundation, NIH Pioneer Awards
+(5DP1OD003893-03), the NHGRI (1P50HG006193-01) and the Swiss National
+Science Foundation (PBSKP2_143918) (P.C.M.).
+Author Contributions P.C.M., H.J.N., H.P. and M.D.L. developed the idea for the study.
+G.K., P.C.M. and N.Y.Y. designed and conducted the experiments and analysed the data.
+M.K., P.K.L. and H.P. prepared the biological samples. All authors participated in
+discussions and writing of the manuscript.</zone>
+  <zone label="BODY_CONTENT">Author Information Reprints and permissions information is available at
+www.nature.com/reprints. The authors declare no competing financial interests.
+Readers are welcome to comment on the online version of the paper. Correspondence
+and requests for materials should be addressed to H.P. (hongkun_park@harvard.edu)
+or M.D.L. (lukin@physics.harvard.edu).
+5 8 | N A T U R E | V O L 5 0 0 | 1 A U G U S T 2 0 1 3</zone>
+  <zone label="MET_BIB_INFO">©2013 Macmillan Publishers Limited. All rights reserved
+LETTER RESEARCH</zone>
+  <zone label="BODY_CONTENT">METHODS
+Experimental apparatus, sensitivity and accuracy. Our experimental apparatus
+consists of a confocal microscope with two independent excitation-collection paths,
+allowing measurement and heating at two independent locations simultaneously.
+The experiments use either a Nikon Plan Fluor 3100, oil immersion, NA 5 1.3
+objective (nanodiamonds) or a Nikon Plan Apo 3100, air, NA 5 0.95 objective
+(bulk sample), resulting in C &lt; 0.03, which can be further improved by employing
+a solid immersion lens or diamond nanopatterning. Microwaves are delivered
+using a lithographically defined coplanar waveguide on top of a glass coverslip.
+For experiments with nanodiamonds, we use neutral-density filters in the collection
+path to avoid saturation of the avalanche photodiode. The temperature accuracy,
+dT, for bulk diamond is estimated from the measurement shown in Fig. 2b.
+Using the standard deviation s (plotted error bars), we determine the accuracy to
+be dT~s(2tcdD=dT){1, where c is the oscillation amplitude and 2t is the free
+evolution time. We find that for integration times t , 30 s (limited by temperature
+stability) the temperature accuracy increases in proportion to pffitffi, giving a sensitivity
+of g~dTpffitffi. A linear dependence of the dissipated heat on laser power
+(Fig. 3b) is used to determine the measurement accuracy for nanodiamonds. A
+linear function, with slope m, is fitted to the data (Fig. 3c, red dashed line) and the
+measurement accuracy is given by dT~qffiPffiffiffiffiffiiN~ffiffiffiffi1ffiffiffi(ffiTffiffiffiiffi{ffiffiffiffiffimffiffiffiffiffiPffiffiffiiffi)ffiffi2ffi=ffiffiffi(ffiNffiffiffiffi{ffiffiffiffiffi1ffiffi)ffi, where Ti is
+the measured temperature and Pi is the corresponding laser power. The error bars
+are evaluated as
+sðdTÞ~dT</zone>
+  <zone label="MET_BIB_INFO">sffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffi
+1{ 2 C2ðn=2Þ
+N{1 C2ððn{1Þ=2Þ</zone>
+  <zone label="BODY_CONTENT">where C(?) is the Gamma distribution.
+Ultimate sensitivity. The ultimate sensitivity of our method is limited by the
+nitrogen-vacancy coherence time and the number of defect centres. In our current
+experiment, we have demonstrated a sensitivity of 9 mK Hz21/2 (with a free evolution
+time of 250 ms). Two natural extensions allow longer nitrogen-vacancy coherences:
+decreasing the 13C concentration to suppress the nuclear spin bath, and
+further dynamical decoupling. These methods can, in principle, allow us to extend
+the evolution time to T1/2 &lt; 3 ms. In combination with a nanocrystal that contains
+,1,000 nitrogen-vacancy centres, this could yield an ultimate sensitivity limit of
+80 mK Hz21/2. Further improvement may be possible by using spin-squeezed
+states. Finally, the determination of absolute temperature is limited by variations
+in the zero-field splitting due to spatially varying strain. For low-strain diamond
+samples, we find that the variation in the zero-field splitting is less than 60 kHz,
+allowing for subkelvin absolute-temperature determination. In addition, the use of
+an ensemble of nitrogen-vacancy centres in different nanodiamonds with uncorrelated
+strain values allows for a further increase in absolute sensitivity by a factor
+of pffinffi , where n is the number of nanodiamonds.
+Ultimate accuracy in solution. In cases where our method is used to probe a
+system that is in solution (for example cells and chemical reactions), the primary
+accuracy limit is set by heat dissipation during the measurement process. In particular,
+the microwave spectroscopy used to detect changes in the nitrogenvacancy
+zero-field splitting also induces heating of the solution. In the present
+experiment, we use a lithographically fabricated microwave loop (diameter,
+200 mm) to generate an a.c. magnetic field, B &lt; 10 mG, for spin manipulations.
+Estimating the effective dipole field created by the microwave loop shows that the
+solution (water) absorbs 1026 W of power, yielding a temperature increase of 5 mK
+in the steady state. By using a smaller microwave loop (20 mm) and reducing the
+duty cycle, it should be possible to decrease the heating of the solution to approximately
+50 mK.
+Injection of nanodiamonds into cells. Nanodiamonds and gold nanoparticles
+were introduced into human embryonic fibroblast WS1 cells by means of siliconnanowire-mediated
+delivery15. Silicon nanowires were treated with 3-aminopropyltrimethoxysilane
+to give NH2 functionality on the surface. Nanodiamonds
+and gold nanoparticles were subsequently attached by electrostatic binding.
+Afterwards, WS1 cells were plated on the silicon nanowire substrates and cultured
+overnight. The cells were removed by trypsin treatment and re-plated on a glass
+slide with lithographically defined strip lines for ESR measurements. The samples
+were stained with calcein AM and ethidium homodimer-1 for the live/dead assay.</zone>
+  <zone label="MET_BIB_INFO">©2013 Macmillan Publishers Limited. All rights reserved</zone>
+</document>
