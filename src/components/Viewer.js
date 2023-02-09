@@ -1,5 +1,5 @@
 // import myfile from './Draft_Proposal.pdf'
-import myfile from '../pdfLibrary/DOI_article_ELIS3.pdf'
+import myfile from '../pdfLibrary/Test3.pdf'
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
@@ -133,7 +133,7 @@ function summaryTokenize(summary){
     summarySentencesArray[i] = TextCleaner(summarySentencesArray[i]).condense().removeChars().trim().valueOf()+".";
     console.log(summarySentencesArray[i]);
   }
-  return summarySentencesArray.join();
+  return summarySentencesArray.join(' ');
 
 }
     
