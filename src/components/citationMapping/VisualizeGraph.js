@@ -29,8 +29,8 @@ const VisualizeGraph = () => {
   const [showModal, setShowModal] = useState(false);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [fosColours, setFosColours] = useState({});
-  const [fosToDoi, setFosToDoi] = useState({});
+  const [fosColours, setFosColours] = useState(null);
+  const [fosToDoi, setFosToDoi] = useState(null);
   
 
   //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.
@@ -40,8 +40,9 @@ const VisualizeGraph = () => {
     findCitations_withTitle(titlePlus)
     //findCitations_withDOI(doi)
     .then((res) => {
-      setCitationInfo(res.connected_references)
-      setAbstractFosInfo(res.fosAndAbstract)
+      setCitationInfo(res.connected_references);
+      setAbstractFosInfo(res.fosAndAbstract);
+      //getFosToDoi();
       //getAbstract()
     });
   }, []);
@@ -54,42 +55,61 @@ const VisualizeGraph = () => {
     }
   }, [citationInfo])
 
-  const getFOS = () => {
-/*     let newAbsFosInfo = {};
-    newAbsFosInfo[Object.keys(citationInfo)[0]] = Object.values(abstractFosInfo)[0];
-    console.log(newAbsFosInfo); */
-    /* var fosColours_setup = {
-      "Computer Science" : "ff0000",
-      "Medicine" : "edb9b9",
-      //"Chemistry" :
-      "Biology" : "8f2323",
-      // "Materials Science" :
-      // "Physics" :
-      "Geology" : "ff7f00",
-      // "Psychology" :
-      // "Art" :
-      // "History" :
-      "Geography" : "ff7f00",
-      "Sociology" : "6b238f",
-      //"Business" :
-      "Political Science" : "6aff00",
-      // "Economics" :
-      // "Philosophy" :
-      // "Mathematics" :
-      // "Engineering" :
-      "Environmental Science" : "bfff00"
-      // "Agricultural and Food Sciences" :
-      // "Education" :
-      // "Law" :
-      // "Linguistics" : 
-    }; */
+  const getFosToDoi = () => {
 
-    var fosColours_setup = {
-      ComputerScience : "ff0000",
-      Medicine : "edb9b9"
+    let fosToDoi_setup = {};
+
+    for(let i = 0; i < Object.keys(citationInfo).length; i++) {
+      if(abstractFosInfo[Object.keys(citationInfo)[i]] != null && abstractFosInfo[Object.keys(citationInfo)[i]].fos != null) {
+
+        for(let j = 0 ; j< abstractFosInfo[Object.keys(citationInfo)[i]].fos.length ; j++){
+          var currField = abstractFosInfo[Object.keys(citationInfo)[i]].fos[j]
+          if (!Object.keys(fosToDoi_setup).includes(currField)){
+            
+            fosToDoi_setup[currField] = [];
+          }
+          if (!fosToDoi_setup[currField].includes(Object.keys(citationInfo)[i])){
+          //console.log("field: ", currField, " id: ", Object.keys(citationInfo)[i]);
+            fosToDoi_setup[currField].push(Object.keys(citationInfo)[i]);
+          }
+      }
+      }
+    }
+    setFosToDoi(fosToDoi_setup);
+  }
+
+  const getFOS = () => {
+    if(citationInfo == null) {
+      return;
+    }
+    let fosColours_setup = {
+      ComputerScience : "#800000",
+      Medicine : "#9a6324",
+      Chemistry : "#808000",
+      Biology : "#469990",
+      MaterialsScience : "#000076",
+      Physics : "#e6194b",
+      Geology : "#ff7f00",
+      Psychology : "#f58231",
+      Art :"#ffe119",
+      History : "#bfef45",
+      Geography : "#3cb44b",
+      Sociology : "#6b238f",
+      Business : "#42d4f4",
+      PoliticalScience : "#6aff00",
+      Economics : "#4363d8",
+      Philosophy : "#911eb4",
+      Mathematics : "#f032e6",
+      Engineering : "#a9a9a9",
+      EnvironmentalScience : "bfff00",
+      AgriculturalandFoodSciences : "#fabed4",
+      Education : "#ffd8b1",
+      Law : "fffac8",
+      Linguistics : "#aaffc3"
     };
+
     setFosColours(fosColours_setup);
-    console.log(fosColours_setup);
+    //console.log(fosColours_setup);
   }
 
   const getNodes = () => { // creates the node in the graph
@@ -120,7 +140,7 @@ const VisualizeGraph = () => {
     
     //console.log(citationInfo["10.1002/fee.1950"]);
     //console.log(abstractFosInfo[Object.keys(citationInfo)[0]].fos[0]);
-    var fosToDoi_setup = {};
+    let fosToDoi_setup = {};
     //Note that it only compares to the FIRST fosOrig. This is assuming it only has ONE fos.
     var fosOrig = "";
     if(abstractFosInfo[defaultDoi].fos != null){
@@ -136,25 +156,28 @@ const VisualizeGraph = () => {
       else{
         // If the citation has two fos, and one of them is the fos of the original doi, then use that as the default fos instead
         // haven't checked this cuz currently no citations that satisfy this case
+        
         field = abstractFosInfo[Object.keys(citationInfo)[i]].fos[0];
         for(let j = 0 ; j< abstractFosInfo[Object.keys(citationInfo)[i]].fos.length ; j++){
+
           var currField = abstractFosInfo[Object.keys(citationInfo)[i]].fos[j]
           if (!Object.keys(fosToDoi_setup).includes(currField)){
-            console.log(currField);
+            
             fosToDoi_setup[currField] = [];
           }
           if (!fosToDoi_setup[currField].includes(Object.keys(citationInfo)[i])){
-          console.log("field: ", currField, " id: ", Object.keys(citationInfo)[i]);
-          fosToDoi_setup[currField].push(Object.keys(citationInfo)[i]);
+          //console.log("field: ", currField, " id: ", Object.keys(citationInfo)[i]);
+            fosToDoi_setup[currField].push(Object.keys(citationInfo)[i]);
           }
+          
           // will work even if fosOrig doesn't exist. but if it doesn't exist, then we're unecessarily going through these.
           if (fosOrig == abstractFosInfo[Object.keys(citationInfo)[i]].fos[j]){
             field = fosOrig;
             break;
           }
         }
-        
       }
+
 
       var defaultEdge = {
         from: defaultDoi,
@@ -195,9 +218,35 @@ const VisualizeGraph = () => {
         graphEdges.push(tmpEdge);
       }
     }
-    console.log(fosToDoi_setup);
-    setFosToDoi(fosToDoi_setup);
     
+    console.log(fosToDoi_setup.length);
+    for( let l = 0 ; l < Object.keys(fosToDoi_setup).length ; l++){
+      console.log("here")
+      var fos = Object.keys(fosToDoi_setup)[l];
+      console.log(fos);
+      for(let m = 0; m < fosToDoi_setup[fos].length -1 ; m++){
+        
+        var index0 = fosToDoi_setup[fos][m];
+        var index1 = fosToDoi_setup[fos][m+1];
+        
+        var tmpEdge0 = {};
+        tmpEdge0.from = index0;
+        tmpEdge0.to = index1;
+        tmpEdge0.label = fos;
+        //tmpEdge0.color = fosColours[fos.replace(/\s/g, '')];  
+        graphEdges.push(tmpEdge0);
+
+        var tmpEdge1 = {};
+        tmpEdge1.from = index1;
+        tmpEdge1.to = index0;
+        tmpEdge1.label = fos;
+        //tmpEdge1.color = fosColours[fos.replace(/\s/g, '')];  
+        graphEdges.push(tmpEdge1);
+
+        console.log(tmpEdge0,tmpEdge1);
+
+      }
+    }
 
     // Loop through all that have more than one fOS
     setEdges(graphEdges);
@@ -305,6 +354,7 @@ const VisualizeGraph = () => {
             .then((res) => {
               setCitationInfo(res.connected_references)
               setAbstractFosInfo(res.fosAndAbstract)
+              getFosToDoi();
               getFOS();
               getNodes();
               getEdges();
