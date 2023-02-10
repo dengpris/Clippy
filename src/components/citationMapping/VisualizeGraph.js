@@ -84,17 +84,33 @@ const VisualizeGraph = () => {
     if(citationInfo == null) {
       return;
     }
+    
     console.log(citationInfo["10.1002/fee.1950"]);
     console.log(abstractFosInfo[Object.keys(citationInfo)[0]].fos[0]);
+    
+    var fosOrig = "";
+    if(abstractFosInfo[defaultDoi].fos != null){
+      fosOrig = abstractFosInfo[defaultDoi].fos;
+    }
+
     let graphEdges = [];
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       var field="";
-      console.log(Object.keys(citationInfo)[i]);
       if(abstractFosInfo[Object.keys(citationInfo)[i]] == null || abstractFosInfo[Object.keys(citationInfo)[i]].fos == null) {
         field = "Unknown";
       }
-      else {
+      else{
+        // If the citation has two fos, and one of them is the fos of the original doi, then use that as the default fos instead
+        // haven't checked this cuz currently no citations that satisfy this case
         field = abstractFosInfo[Object.keys(citationInfo)[i]].fos[0];
+        for(let j = 0 ; j< abstractFosInfo[Object.keys(citationInfo)[i]].fos.length ; j++){
+          // will work even if fosOrig doesn't exist. but if it doesn't exist, then we're unecessarily going through these.
+          if (fosOrig == abstractFosInfo[Object.keys(citationInfo)[i]].fos[j]){
+            field = fosOrig;
+            break;
+          }
+        }
+        
       }
       
       var defaultEdge = {
@@ -102,7 +118,6 @@ const VisualizeGraph = () => {
         to: Object.keys(citationInfo)[i],
         label: field
       };
-      console.log(defaultEdge);
       graphEdges.push(defaultEdge);
     
 
