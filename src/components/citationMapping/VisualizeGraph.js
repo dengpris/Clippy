@@ -53,15 +53,10 @@ const VisualizeGraph = () => {
   }, [citationInfo])
 
   const getFOS = () => {
-    let newAbsFosInfo = {};
-/*     for( let i = 0; Object.keys(citationInfo).length; i++ ){
-      for( let j = 0; Object.keys(abstractFosInfo).length; j++)
-        if(Object.keys(citationInfo)[i] == Object.keys(abstractFosInfo)[j]){
-          newAbsFosInfo[Object.keys(citationInfo)[i]] = Object.values(abstractFosInfo)[j];
-        }
-    } */
+/*     let newAbsFosInfo = {};
     newAbsFosInfo[Object.keys(citationInfo)[0]] = Object.values(abstractFosInfo)[0];
-    console.log(newAbsFosInfo);
+    console.log(newAbsFosInfo); */
+    console.log("hi");
   }
 
   const getNodes = () => { // creates the node in the graph
@@ -112,14 +107,30 @@ const VisualizeGraph = () => {
         label: field
       };
       graphEdges.push(defaultEdge);
-      var tmpFrom = Object.keys(citationInfo)[i];
+
       // loop through each connected ref
+      var tmpFrom = Object.keys(citationInfo)[i];
       for(let j = 0; j < Object.values(citationInfo)[i].connected_refs.length; j++) {
+        field = "";  
+        for(let k = 0; k < Object.keys(abstractFosInfo).length; k++) {
+          if (Object.values(citationInfo)[i].connected_refs[j] == Object.keys(abstractFosInfo)[k]){
+            if(Object.values(abstractFosInfo)[k].fos == null) {
+              field = "Unknown";
+            }
+            else {
+              field = Object.values(abstractFosInfo)[k].fos[0];
+            }
+          }
+        }
+        if(field == "") {
+          field = "Unknown";
+        }
         var tmpEdge = {};
         tmpEdge.from = tmpFrom;
         tmpEdge.to = Object.values(citationInfo)[i].connected_refs[j];
+        tmpEdge.label = field;
         graphEdges.push(tmpEdge);
-      }      
+      }   
     }
     setEdges(graphEdges);
   }
