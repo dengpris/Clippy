@@ -74,66 +74,19 @@ const getRefDataByDOI = async(referenced_dois) => {
   return connected_refs;
 }
 
-const getAbstracts = async(ref_dois) => {
-  let abstracts = {};
-  for(let i = 0; i < ref_dois.length; i++){
-    var url_abstract_query = ss_url_query + ref_dois[i] + abstract_query;
-    let ref_info = {}
-    axios.get(
-      url_abstract_query
-    )
-    .then(res => {
-      //console.log(res.data.abstract)
-      //ref_info.doi = ref_dois[i]
-      ref_info.abstract = res.data.abstract;
-      //console.log(res.data.abstract)
-      abstracts[ref_dois[i]] = ref_info
-    })
-    .catch((err)=>console.log(err));
-  }
-  console.log(abstracts[ref_dois[0]])
-  return abstracts
-}
-
-function getSimilarWords(abstracts_list, org_doi){
-/*   console.log("LOOKING FOR SIM WRD")
-  console.log(abstracts_list)
-  console.log(org_doi)
-  console.log(typeof(abstracts_list))
-  console.log(Object.keys(abstracts_list)) */
-  const org_abstract_words = abstracts_list[org_doi].split(' ')
-  /*  */
-  //console.log(org_abstract_words)
-  /* const topWord = {}
-
-  Object.keys(abstracts_list).forEach(key => {
-    const temp = {}
-    if( typeof abstracts_list[key] !== 'string'){
-      console.log("NO ABSTRACT FOR", abstracts_list[key])
-      topWord.key = "none"
-    }
-    const abstract = abstracts_list[key].split(' ')
-    console.log(abstract)
-    abstract.forEach(word => {
-      temp[word.toLocaleLowerCase()] = temp[word.toLocaleLowerCase()] + 1 || 1
-    })
-    const max = Object.keys(temp).reduce((n, word) => {
-      
-      if (temp[word] > n.count) 
-      { 
-        topWord.key = { word, count: temp[word] } 
-      } 
-      else 
-      { 
-        topWord.key = n 
+function sortData(citationData){
+    
+  let newFosAndAbstract = {};
+  console.log(Object.keys(citationData.connected_references)[0]);
+  console.log(Object.keys(citationData.fosAndAbstract)[0]);
+  for( let i = 0; Object.keys(citationData.connected_references).length; i++ ){
+    for( let j = 0; Object.keys(citationData.fosAndAbstract).length; j++)
+      if(Object.keys(citationData.connected_references)[i] == Object.keys(citationData.fosAndAbstract)[j]){
+        console.log("here");
+        newFosAndAbstract[Object.keys(citationData.connected_references)[i]] = Object.values(citationData.fosAndAbstract)[j];
       }
-    }, { word: '', count: 0 })
-    topWord.key = max.word
-  })
-
-  return topWord */
-
-  return org_abstract_words
+  }
+  //console.log(Object.keys(newFosAndAbstract));
 }
 
 const getFieldsOfStudy = async(ref_dois) => {
@@ -164,6 +117,7 @@ const getFieldsOfStudy = async(ref_dois) => {
 export const findCitations_withTitle = async (pdfTitle) => {
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
   let citationData = {}
+  let sortedData = {}
   //const org_doi = "10.1371/journal.pclm.0000093"
   console.log("HELLO4")
   try {
@@ -174,13 +128,14 @@ export const findCitations_withTitle = async (pdfTitle) => {
     //var connected_references = await getRefDataByDOI(referenced_dois);
     citationData.connected_references = await getRefDataByDOI(referenced_dois);
 
-    var new_referenced_dois = referenced_dois
+    var new_referenced_dois = referenced_dois;
 
-    const org_doi = res.data.message.items[0].DOI
-    new_referenced_dois.push(org_doi)
+    const org_doi = res.data.message.items[0].DOI;
+    new_referenced_dois.push(org_doi);
 
-    citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois)
-    console.log(citationData)
+    citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois);
+    console.log(citationData);
+   // sortedData = sortData(citationData);
     //var abstracts_from_dois = await getAbstracts(new_referenced_dois);
     //citationData.abstracts_from_dois = await getAbstracts(new_referenced_dois);
     //console.log(citationData.abstracts_from_dois['10.1002/fee.1950'])
@@ -188,27 +143,6 @@ export const findCitations_withTitle = async (pdfTitle) => {
     //var connected_subjects = getSimilarWords(abstracts_from_dois, org_doi);
     
     return citationData;
-  } catch (err) {
-    return console.log('error calling findCitations', err);
-  }
-}
-
-export const randomfunc = async (doi) => {
-  let toreturn = 'idek i just need to return something from useEffectFunction ' + doi
-  return toreturn
-}
-
-export const findCitations_withDOI = async (PDFdoi) => {
-  let urlRequest = 'https://api.crossref.org/works/' + PDFdoi
-  try {
-    const res = await axios.get(
-      urlRequest
-    );
-    console.log(res.data.message);
-    var referenced_dois = getDOIofReferences(res.data.message);
-    console.log(referenced_dois);
-    var connected_references = await getRefDataByDOI(referenced_dois);
-    return connected_references;
   } catch (err) {
     return console.log('error calling findCitations', err);
   }

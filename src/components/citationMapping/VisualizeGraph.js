@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Graph from "react-graph-vis";
 import { findCitations_withTitle } from "../../api/find_citations";
-import { randomfunc } from "../../api/find_citations";
 import { v4 as uuidv4 } from "uuid";
 
 import Button from 'react-bootstrap/Button';
@@ -54,7 +53,15 @@ const VisualizeGraph = () => {
   }, [citationInfo])
 
   const getFOS = () => {
-    console.log(Object.values(abstractFosInfo)[0].fos[0])
+    let newAbsFosInfo = {};
+/*     for( let i = 0; Object.keys(citationInfo).length; i++ ){
+      for( let j = 0; Object.keys(abstractFosInfo).length; j++)
+        if(Object.keys(citationInfo)[i] == Object.keys(abstractFosInfo)[j]){
+          newAbsFosInfo[Object.keys(citationInfo)[i]] = Object.values(abstractFosInfo)[j];
+        }
+    } */
+    newAbsFosInfo[Object.keys(citationInfo)[0]] = Object.values(abstractFosInfo)[0];
+    console.log(newAbsFosInfo);
   }
 
   const getNodes = () => { // creates the node in the graph
@@ -85,12 +92,18 @@ const VisualizeGraph = () => {
     let graphEdges = [];
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       var field="";
-      if(Object.values(abstractFosInfo)[i].fos == null) {
-        console.log(Object.keys(abstractFosInfo)[i]);
-        field = "Unknown";
+      for(let j = 0; j < Object.keys(abstractFosInfo).length; j++) {
+        if (Object.keys(citationInfo)[i] == Object.keys(abstractFosInfo)[j]){
+          if(Object.values(abstractFosInfo)[j].fos == null) {
+            field = "Unknown";
+          }
+          else {
+            field = Object.values(abstractFosInfo)[j].fos[0];
+          }
+        }
       }
-      else {
-        field = Object.values(abstractFosInfo)[i].fos[0];
+      if(field == "") {
+        field = "Unknown";
       }
       
       var defaultEdge = {
