@@ -85,12 +85,13 @@ const VisualizeGraph = () => {
       return;
     }
     
-    console.log(citationInfo["10.1002/fee.1950"]);
-    console.log(abstractFosInfo[Object.keys(citationInfo)[0]].fos[0]);
+    //console.log(citationInfo["10.1002/fee.1950"]);
+    //console.log(abstractFosInfo[Object.keys(citationInfo)[0]].fos[0]);
     
+    //Note that it only compares to the FIRST fosOrig. This is assuming it only has ONE fos.
     var fosOrig = "";
     if(abstractFosInfo[defaultDoi].fos != null){
-      fosOrig = abstractFosInfo[defaultDoi].fos;
+      fosOrig = abstractFosInfo[defaultDoi].fos[0];
     }
 
     let graphEdges = [];
@@ -129,7 +130,20 @@ const VisualizeGraph = () => {
           field = "Unknown";
         }
         else {
+          var fosCurr = "";
+          if (abstractFosInfo[Object.keys(citationInfo)[i]].fos != null){
+            fosCurr = abstractFosInfo[Object.keys(citationInfo)[i]].fos[0];
+          }
+  
           field = abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos[0];
+          console.log(field);
+          for(let k = 0 ; k< abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos.length ; k++){
+            if (fosCurr == abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos[k]){
+              console.log(Object.values(citationInfo)[i].connected_refs[j]);
+              field = fosCurr;
+              break;
+            }
+          }
         }
         var tmpEdge = {};
         tmpEdge.from = tmpFrom;
