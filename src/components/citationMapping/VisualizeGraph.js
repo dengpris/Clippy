@@ -84,21 +84,17 @@ const VisualizeGraph = () => {
     if(citationInfo == null) {
       return;
     }
+    console.log(citationInfo["10.1002/fee.1950"]);
+    console.log(abstractFosInfo[Object.keys(citationInfo)[0]].fos[0]);
     let graphEdges = [];
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       var field="";
-      for(let j = 0; j < Object.keys(abstractFosInfo).length; j++) {
-        if (Object.keys(citationInfo)[i] == Object.keys(abstractFosInfo)[j]){
-          if(Object.values(abstractFosInfo)[j].fos == null) {
-            field = "Unknown";
-          }
-          else {
-            field = Object.values(abstractFosInfo)[j].fos[0];
-          }
-        }
-      }
-      if(field == "") {
+      console.log(Object.keys(citationInfo)[i]);
+      if(abstractFosInfo[Object.keys(citationInfo)[i]] == null || abstractFosInfo[Object.keys(citationInfo)[i]].fos == null) {
         field = "Unknown";
+      }
+      else {
+        field = abstractFosInfo[Object.keys(citationInfo)[i]].fos[0];
       }
       
       var defaultEdge = {
@@ -106,32 +102,30 @@ const VisualizeGraph = () => {
         to: Object.keys(citationInfo)[i],
         label: field
       };
+      console.log(defaultEdge);
       graphEdges.push(defaultEdge);
+    
 
       // loop through each connected ref
       var tmpFrom = Object.keys(citationInfo)[i];
       for(let j = 0; j < Object.values(citationInfo)[i].connected_refs.length; j++) {
-        field = "";  
-        for(let k = 0; k < Object.keys(abstractFosInfo).length; k++) {
-          if (Object.values(citationInfo)[i].connected_refs[j] == Object.keys(abstractFosInfo)[k]){
-            if(Object.values(abstractFosInfo)[k].fos == null) {
-              field = "Unknown";
-            }
-            else {
-              field = Object.values(abstractFosInfo)[k].fos[0];
-            }
-          }
-        }
-        if(field == "") {
+        field="";
+        if(abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]] == null || abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos == null) {
           field = "Unknown";
+        }
+        else {
+          field = abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos[0];
         }
         var tmpEdge = {};
         tmpEdge.from = tmpFrom;
         tmpEdge.to = Object.values(citationInfo)[i].connected_refs[j];
         tmpEdge.label = field;
         graphEdges.push(tmpEdge);
-      }   
+      }
     }
+    
+
+    // Loop through all that have more than one fOS
     setEdges(graphEdges);
   }
 
