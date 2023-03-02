@@ -220,6 +220,7 @@ const VisualizeGraph = () => {
     }
     
     console.log(fosToDoi_setup.length);
+    /*
     for( let l = 0 ; l < Object.keys(fosToDoi_setup).length ; l++){
       console.log("here")
       var fos = Object.keys(fosToDoi_setup)[l];
@@ -247,6 +248,7 @@ const VisualizeGraph = () => {
 
       }
     }
+    */
 
     // Loop through all that have more than one fOS
     setEdges(graphEdges);
