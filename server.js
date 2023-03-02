@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
   res.end('Hello World');
 
   const exec = require('child_process').exec;
-  const childProcess = exec('java -cp C:\\Users\\hccru\\Downloads\\CERMINE.jar pl.edu.icm.cermine.ContentExtractor -path C:\\Users\\hccru\\ClippyFinal\\Clippy\\src\\pdfLibrary\\TestPDF -outputs zones', function(err, stdout, stderr) {
+  const childProcess = exec('java -cp CERMINE.jar pl.edu.icm.cermine.ContentExtractor -path src/pdfLibrary/TestPDF -outputs zones', function(err, stdout, stderr) {
     if (err) {
         console.log(err)
     }
@@ -18,7 +18,7 @@ const server = http.createServer((req, res) => {
   })
   
   const fs = require('fs');
-  var dir_path = 'C:\\Users\\hccru\\ClippyFinal\\Clippy\\src\\pdfLibrary\\TestPDF\\'
+  var dir_path = 'src/pdfLibrary/TestPDF'
   var files = fs.readdirSync(dir_path);
   for (i in files){
     if(files[i].includes("cermzones")){
