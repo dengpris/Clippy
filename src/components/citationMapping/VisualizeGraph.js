@@ -295,10 +295,36 @@ const VisualizeGraph = () => {
   const events = {
     select: function(event) {
       var { nodes, edges } = event;
-      console.log(event);
+      console.log(nodes);
       //toggleEdgeView(event,edges);
-      
+      console.log(nodes[0]);
+      //console.log(graph.edges);
+      console.log(citationInfo[nodes[0]].author[0].given);
+      var title = citationInfo[nodes[0]].title[0];
+      var author = citationInfo[nodes[0]].author[0].given + citationInfo[nodes[0]].author[0].family ;
+      var abstract = "";
+      var fos = "";
+      if (abstractFosInfo[nodes[0]] != null){
+        if(abstractFosInfo[nodes[0]].abstract != null){
+          abstract = abstractFosInfo[nodes[0]].abstract;
+        }
+        if(abstractFosInfo[nodes[0]].fos != null){
+          fos = "FIELD OF STUDY:"
+          if (abstractFosInfo[nodes[0]].fos.length == 1){
+            fos = fos + " " + abstractFosInfo[nodes[0]].fos[0]
+          }else{
+            fos = fos + " " + abstractFosInfo[nodes[0]].fos[0];
+            for(var i=1; i< abstractFosInfo[nodes[0]].fos.length; i++){
+              fos = fos + ", " + abstractFosInfo[nodes[0]].fos[i] ;
+            }
+          }
+          
+        }
+      }
+
+      alert("TITLE: " + title + "\n\nAUTHOR: " + author +"\n\n" + fos + "\n\n" + abstract);
     }
+
   };
 
   function toggleEdgeView (event, selected_edges) {
@@ -332,12 +358,13 @@ const VisualizeGraph = () => {
     if(!loading) {
       return (
         <Graph
-          //getNetwork={network => this.setState({ network })}
+          
           key={ uuidv4() } // need to generate unique key for graph each render
           graph={graph}
           options={options}
           events={events}
-          
+          getNetwork={network => { 
+          }}
         />
       )
     } else {
