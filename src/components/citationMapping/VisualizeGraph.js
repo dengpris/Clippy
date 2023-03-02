@@ -288,7 +288,7 @@ const VisualizeGraph = () => {
       margin: 10
     },
     height: '600',
-    width: '700',
+    width: '100%',
     
   };
 
