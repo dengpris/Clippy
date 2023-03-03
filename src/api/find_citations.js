@@ -162,7 +162,6 @@ function getPaperID(pdf_data){
   var paperID = pdf_data.data[0].paperId; //check if it's the right shape EX: https://api.semanticscholar.org/graph/v1/paper/search?query=title:%20(The+Role+of+Sensation+Seeking+in+Political+Violence)
   return paperID;
 }
-
 const getAbstract = async(doi) => {
   
   var url_abstract_query = ss_url_query + doi + abstract_query;
@@ -185,8 +184,6 @@ const getAbstract = async(doi) => {
   })
   .catch((err)=>console.log(err)); 
 }
-
-
 const getSubjectsByAbstract = async(referenced_dois) => {
   let connected_refs = {};
   for(let i = 0; i < referenced_dois.length; i++) {
@@ -212,7 +209,6 @@ const getSubjectsByAbstract = async(referenced_dois) => {
   // await new Promise(r => setTimeout(r, 2000));
   return connected_refs;
 }
-
 export const findSimilarSubjects = async (pdfTitle) => {
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
   try {

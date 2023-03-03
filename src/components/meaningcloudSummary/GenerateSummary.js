@@ -11,7 +11,6 @@ export async function getPDFText(url) {
         return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
     });
     let result = (await Promise.all(pageTexts)).join('');
-
     return result;
 }
 
