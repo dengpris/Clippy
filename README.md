@@ -1,6 +1,6 @@
 ## How To Run Clippy:
 
-In the project directory, you can run:
+1. In the project directory, you can run:
 
 ### `npm run-script run`
 
@@ -9,8 +9,10 @@ Runs the app in the development mode with both the React.js frontend and Node.js
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.\
 Open [http://localhost:3001](http://localhost:3001) to launch the backend in your browser.
 
+
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
+
 
 ## Additional npm Commands:
 ### `npm test`
@@ -39,5 +41,22 @@ Instead, it will copy all the configuration files and the transitive dependencie
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
 
+
 ## pdfLibrary
 Only certain PDFs (placed in this directory) make use of Clippy's full functionality (summary, knowledge graph, cross-reference hovering).
+
+### Code Structure
+All code must go in src in order for the React app to run. For styling, minimize use of inline css styling and use the React Bootstrap for buttons.
+
+## api
+All backend api calls go here. Axios is used to call the api calls.
+
+## components
+Each feature (ie. citation map, hover, etc) and its corresponding helper files go in here.
+
+## pdfLibrary
+Sample pdf files go here
+
+## App.js
+Only add srs components here, do not overcrowd this file
+
