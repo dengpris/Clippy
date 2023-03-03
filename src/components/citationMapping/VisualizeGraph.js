@@ -5,32 +5,20 @@ import { v4 as uuidv4 } from "uuid";
 
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import './citationMappingStyle.css';
-import axios from 'axios';
+import './citationMappingStyle.css'
 
 // import "./styles.css";
 // // need to import the vis network css in order to show tooltip
 // import "./network.css";
 
 //WORKING WITH THE PDF FOR DEMO
-//const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
-//const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
-//const doi = '10.1371/journal.pclm.0000093';
+const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
+const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
+const doi = '10.1371/journal.pclm.0000093';
 
 //const title = 'Nanometre-scale thermometry in a living cell'
 //const titlePlus = 'Nanometre-scale+thermometry+in+a+living+cell'
 //const doi = '10.1038/nature12373'
-
-async function getPDFTitle() {
-  //let doc = await PDFJS.getDocument(url).promise;
-  // let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
-  //     return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
-  // });
-  // let result = (await Promise.all(pageTexts)).join('');
-  const result = (await axios.get('http://localhost:3001/')).data;
-  //setPdfTitle(result['TITLE']);
-  return result['TITLE'];
-}
 
 
 const VisualizeGraph = () => {
@@ -46,8 +34,6 @@ const VisualizeGraph = () => {
   const [abstract, setAbstract] = useState(null);
   const [title, setTitle] = useState(null);
   const [defaultDoi, setDefaultDoi] = useState(null);
-  const [pdfTitle, setPdfTitle] = useState(null);
-  const [pdfTitlePlus, setPdfTitlePlus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fosColours, setFosColours] = useState(null);
   const [fosToDoi, setFosToDoi] = useState(null);
@@ -56,10 +42,8 @@ const VisualizeGraph = () => {
   //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.
   useEffect(() => {
     console.log("use effect ran");
-    //setDefaultDoi(doi);
-    setPdfTitle(getPDFTitle())
-    setPdfTitlePlus(getTitleWithPlus())
-    findCitations_withTitle(pdfTitlePlus)
+    setDefaultDoi(doi);
+    findCitations_withTitle(titlePlus)
     //findCitations_withDOI(doi)
     .then((res) => {
       setCitationInfo(res.connected_references);
@@ -76,11 +60,6 @@ const VisualizeGraph = () => {
       setLoading(false);
     }
   }, [citationInfo])
-
-  const getTitleWithPlus = () => {
-    var titlePlus = pdfTitle.replace(/ /g, '+');
-    return titlePlus
-  }
 
   const getFosToDoi = () => {
 
@@ -147,7 +126,7 @@ const VisualizeGraph = () => {
     var defaultNode = {
       id: defaultDoi,
       title: defaultDoi,
-      label: pdfTitle
+      label: title
     };
     graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
@@ -410,7 +389,7 @@ const VisualizeGraph = () => {
       <>
         <Button 
           onClick={() => {
-            findCitations_withTitle(pdfTitlePlus)
+            findCitations_withTitle(titlePlus)
             .then((res) => {
               setCitationInfo(res.connected_references)
               setAbstractFosInfo(res.fosAndAbstract)
