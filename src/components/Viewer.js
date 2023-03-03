@@ -106,6 +106,8 @@ const Viewer = () => {
 async function onSummaryClick() {
     let text = await getPDFText(url)
     const payload = new FormData()
+    //var serverVar = require('../../server')
+    //console.log(JSON.stringify(serverVar.title_array));
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", text);
     payload.append("sentences", 3);

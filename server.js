@@ -31,7 +31,8 @@ const server = http.createServer((req, res) => {
   var file = dir_path.concat(user_file);
   console.log(file);
 
-  var text_dict = {};
+  var text_dict = [];
+  var title_array = [];
   var lastHeading = "";
 
   var r = readline.createInterface({
@@ -47,20 +48,15 @@ const server = http.createServer((req, res) => {
     input_text = test[1].match(/(.*)">(.*)/)
     console.log("Heading:", input_text[1].trim(), "Text:",input_text[2].trim());
     heading_text = input_text[1].trim();
-    if (heading_text in text_dict){
-      if(!(/\d/.test(heading_text.slice(-1)))){
-        heading_text.concat("_0")
-      }
-      else{
-        var num = heading_text.slice(-1);
-        num+=1;
-        heading_text.slice(0, -1);
-        heading_text.concat(num);
-      }
-    }
     lastHeading = heading_text;
-    text_dict[heading_text] = input_text[2].trim();
-    console.log(JSON.stringify(text_dict));
+    if(heading_text == "BODY_CONTENT"){
+      text_dict.push(input_text[2].trim());
+      console.log(JSON.stringify(text_dict));
+    }
+    if(heading_text == "MET_TITLE"){
+      title_array.push(input_text[2].trim());
+      console.log(JSON.stringify(title_array));
+    }
     //zone_array.push()
    }
    else if(text.match(/<zone label="*(.*)/)){
@@ -69,23 +65,15 @@ const server = http.createServer((req, res) => {
     input_text = test[1].match(/(.*)">(.*)/)
     console.log("Heading:", input_text[1].trim(), "Text:",input_text[2].trim());
     heading_text = input_text[1].trim();
-    if (heading_text in text_dict){
-      var last_character = heading_text.slice(-1);
-      console.log("Last Char:", last_character);
-      if(!(/\d/.test(heading_text.slice(-1)))){
-        console.log("Hello");
-        heading_text = heading_text.concat("_0")
-      }
-      else{
-        var num = heading_text.slice(-1);
-        num+=1;
-        heading_text = heading_text.slice(0, -1);
-        heading_text = heading_text.concat(num);
-      }
-    }
     lastHeading = heading_text;
-    text_dict[heading_text] = input_text[2].trim();
-    console.log(JSON.stringify(text_dict));
+    if(heading_text == "BODY_CONTENT"){
+      text_dict.push(input_text[2].trim());
+      console.log(JSON.stringify(text_dict));
+    }
+    if(heading_text == "MET_TITLE"){
+      title_array.push(input_text[2].trim());
+      console.log(JSON.stringify(title_array));
+    }
    }
    else if ((text.match(/<document>/)) || (text.match(/<\/document>/))){
     console.log("Skip!");
@@ -93,12 +81,25 @@ const server = http.createServer((req, res) => {
    else{
     console.log("Captured Line_From_Continue: ", text);
     input_text = " ".concat(text);
-    text_dict[lastHeading] = text_dict[lastHeading].concat(input_text);
-    console.log(JSON.stringify(text_dict));
+    if (input_text.match(/(.*)<\/zone>/)){
+      test = text.match(/(.*)<\/zone>/);
+      input_text = test[1].trim();
+    }
+    if(lastHeading == "BODY_CONTENT"){
+      last_body_content = text_dict[text_dict.length-1];
+      last_body_content = last_body_content.concat(" ");
+      text_dict[text_dict.length-1] = last_body_content.concat(input_text);
+      console.log(JSON.stringify(text_dict));
+    }
+    if(lastHeading == "MET_TITLE"){
+      last_title_content = title_array[title_array.length-1];
+      last_title_content = last_title_content.concat(" ");
+      title_array[title_array.length-1] = last_title_content.concat(input_text);
+      console.log(JSON.stringify(title_array));
+    }
    }
-
+   console.log(JSON.stringify(title_array));
   });
-
 
 });
 
