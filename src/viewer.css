@@ -9,8 +9,8 @@
     opacity: 0.25;
     line-height: 1;
     -webkit-text-size-adjust: none;
-       -moz-text-size-adjust: none;
-            text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    text-size-adjust: none;
     forced-color-adjust: none;
     transform-origin: 0 0;
     z-index: 2;
@@ -18,7 +18,7 @@
   
   .textLayer span,
   .textLayer br {
-    color: yellow;
+    color: darkblue;
     position: absolute;
     white-space: pre;
     cursor: text;
@@ -96,8 +96,8 @@
     z-index: -1;
     cursor: default;
     -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    -moz-user-select: none;
+    user-select: none;
   }
   
   .textLayer .endOfContent.active {

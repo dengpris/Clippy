@@ -13,7 +13,10 @@ import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import * as pdfjsLib from 'pdfjs-dist';
+
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+
 
 const Viewer = (props) => {
   const {
@@ -22,6 +25,7 @@ const Viewer = (props) => {
 
   const url = getPdf(pdfUrl);
   const canvasRef = useRef();
+  const textRef = useRef();
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,13 +51,17 @@ const Viewer = (props) => {
       renderTask.promise.then(function() {
         // Returns a promise, on resolving it will return text contents of the page
         return page.getTextContent();
-    }).then(function(textContent) {
+    })
+    .then(function(textContent) {
+
          // PDF canvas
+        // const textLayer = textRef.current;
         var textLayer = document.querySelector(".textLayer");
         textLayer.style.left = canvas.offsetLeft + 'px';
         textLayer.style.top = canvas.offsetTop + 'px';
         textLayer.style.height = canvas.offsetHeight + 'px';
         textLayer.style.width = canvas.offsetWidth + 'px';
+        console.log('henlo these are the sizes ', textLayer.style.left,textLayer.style.top, textLayer.style.height, textLayer.style.top);
         // Pass the data to the method for rendering of text over the pdf canvas.
         PDFJS.renderTextLayer({
             textContent: textContent,
@@ -61,10 +69,13 @@ const Viewer = (props) => {
             viewport: viewport,
             textDivs: []
         });
+        textLayer.setTextContent(textContent);
+
       });
 
     });   
   }, [pdfRef, zoomScale]);
+
     
   useEffect(() => {
     renderPage(currentPage, pdfRef);
@@ -105,14 +116,6 @@ const Viewer = (props) => {
     return result;
 }
 
-// ONSUMMARYCLICK SHOULD ONLY CALL GETSUMMARY FROM GENERATESUMMARY.JS, THEN SETSUMMARY STATE TO THE RESULT
-// HOWEVER THAT CALLING GETSUMMARY RETURNS UNDEFINED INSTEAD OF THE SUMMARY
-// CURRENTLY SOLUTION IS TO INCLUDE THE GETSUMMARY FUNCTION CALL IN VIEWER.JS, BUT I DONT LIKE THIS WORKFLOW
-// const onSummaryClick = async() => {
-//   getSummary(url).then(response => setSummary(response))
-//   toggleSidebar();
-// } NOT WORKING
-
 async function onSummaryClick() {
     let text = await getPDFText(url)
     const payload = new FormData()
@@ -122,7 +125,6 @@ async function onSummaryClick() {
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        //console.log(response.data.summary);
         setSummary(summaryTokenize(response.data.summary));
         toggleSidebar();
     })
@@ -130,6 +132,7 @@ async function onSummaryClick() {
         console.log('error', error);
     })
 }
+
 
 function summaryTokenize(summary){
   var Tokenizer = require('sentence-tokenizer');
@@ -144,7 +147,6 @@ function summaryTokenize(summary){
     console.log(summarySentencesArray[i]);
   }
   return summarySentencesArray.join(' ');
-
 }
     
   return (
@@ -173,7 +175,7 @@ function summaryTokenize(summary){
         : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
-      <div className="textLayer"></div>
+      {/* <div className="textLayer"></div> */}
     </>
     
   );
