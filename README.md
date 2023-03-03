@@ -4,6 +4,9 @@ By: Priscilla Deng, Marie Joy Cuevas, Hannah Ruiz, and Bethany Chu
 
 Submission for [ICSE 2023 SCORE contest](https://conf.researchr.org/track/icse-2023/icse-2023-score-2023).
 
+### Demo
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/TIY1SV1n3Zc/0.jpg)](http://www.youtube.com/watch?v=TIY1SV1n3Zc "Clippy Demo")
+
 ## How To Run Clippy:
 
 In the project directory, run the following command:
