@@ -8,7 +8,6 @@ import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import * as pdfjsLib from 'pdfjs-dist';
-// import { getSummary } from './meaningcloudSummary/GenerateSummary';
 import axios from 'axios';
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -21,6 +20,7 @@ const Viewer = () => {
   const [zoomScale, setZoomScale] = useState(1.3);
   const [showSidebar, setShowSidebar] = useState(false);
   const [summary, setSummary] = useState("");
+  const [title, setTitle] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // NOT MY CODE
@@ -84,27 +84,19 @@ const Viewer = () => {
   const hideSidebar = () => setShowSidebar(false);
 
 
-  // I DONT WANT THIS FUNCTION HERE
-  async function getPDFText(url) {
-    let doc = await PDFJS.getDocument(url).promise;
-    let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
-        return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
-    });
-    let result = (await Promise.all(pageTexts)).join('');
-
-    return result;
+  async function getPDFText() {
+    //let doc = await PDFJS.getDocument(url).promise;
+    // let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+    //     return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+    // });
+    // let result = (await Promise.all(pageTexts)).join('');
+    const result = (await axios.get('http://localhost:3001/')).data;
+    setTitle(result['TITLE']);
+    return result['BODY_CONTENT'];
 }
 
-// ONSUMMARYCLICK SHOULD ONLY CALL GETSUMMARY FROM GENERATESUMMARY.JS, THEN SETSUMMARY STATE TO THE RESULT
-// HOWEVER THAT CALLING GETSUMMARY RETURNS UNDEFINED INSTEAD OF THE SUMMARY
-// CURRENTLY SOLUTION IS TO INCLUDE THE GETSUMMARY FUNCTION CALL IN VIEWER.JS, BUT I DONT LIKE THIS WORKFLOW
-// const onSummaryClick = async() => {
-//   getSummary(url).then(response => setSummary(response))
-//   toggleSidebar();
-// } NOT WORKING
-
 async function onSummaryClick() {
-    let text = await getPDFText(url)
+    let text = await getPDFText()
     const payload = new FormData()
     //var serverVar = require('../../server')
     //console.log(JSON.stringify(serverVar.title_array));

@@ -7,6 +7,7 @@ const port = 3001;
 const server = http.createServer((req, res) => {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
   const exec = require('child_process').exec;
   const childProcess = exec('java -cp CERMINE.jar pl.edu.icm.cermine.ContentExtractor -path src/pdfLibrary/TestPDF/ -outputs zones', function(err, stdout, stderr) {
