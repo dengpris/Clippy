@@ -1,0 +1,190 @@
+<document>
+  <zone label="MET_TITLE">ECE410
+Linearization of Nonlinear Systems</zone>
+  <zone label="MET_AUTHOR">Objective</zone>
+  <zone label="MET_ABSTRACT">This handout explains the procedure to linearize a nonlinear system around an equilibrium point.
+An example illustrates the technique.</zone>
+  <zone label="GEN_OTHER">1</zone>
+  <zone label="MET_CATEGORY">State-Variable Form and Equilibrium Points</zone>
+  <zone label="MET_ABSTRACT">A system is said to be in state-variable form if its mathematical model is described by a system of
+n first-order differential equations and an algebraic output equation:
+where x = [x1 · · · xn]⊤, u = [u1 · · · um]⊤, and y = [y1 · · · yp]⊤. When f and h are nonlinear
+functions of x and u, then we say that the system is nonlinear. In this course we will work
+exclusively with linear systems, i.e., systems for which (1) becomes
+where A is an n × n real matrix, B is n × m, C is p × n, and D is p × m. Sometimes, physical
+systems are described by nonlinear models such as (1), and the tools we will learn in this course
+can not be employed to design controllers. However, if a nonlinear system operates around an
+equilibrium point, i.e., around a configuration where the system is at rest, then it is possible to
+study the behavior of the system in a neighborhood of such point.
+Example 1 (A simple pendulum). Consider the dynamics of the pendulum depicted below,</zone>
+  <zone label="MET_CORRESPONDENCE">x˙ = f (x, u)</zone>
+  <zone label="MET_KEYWORDS">y = h(x, u),</zone>
+  <zone label="MET_CORRESPONDENCE">x˙ = Ax + Bu
+y = Cx + Du,</zone>
+  <zone label="GEN_OTHER">1
+(1)
+(2)</zone>
+  <zone label="MET_BIB_INFO">1 State-Variable Form and Equilibrium Points</zone>
+  <zone label="BODY_CONTENT">where u denotes an input torque provided by a DC motor.
+u
+θ
+Mg
+l
+The equation of motion for this system is
+d2θ
+I dt2 + M gl sin θ = u
+y = θ,
+where I is the moment of inertia of the pendulum around the pivot point, and y is the output
+of the system, i.e., the variable one wants to control. Consider now the equivalent state-variable
+representation of (3), obtained by choosing x1 = θ and x2 = θ˙,
+x˙ 1 = x2
+x˙ 2 = − MIgl sin x1 + uI
+y = x1
+The model (4) has precisely the form (1), where in this case x = [x1, x2]⊤ and
+f (x, u) =
+"
+x2 #
+− MIgl sin x1 + uI ,
+h(x, u) = x1.
+Since f contains the term sin x1, the system (4) is nonlinear. Observe that when (x, u) = (0, 0),
+x˙ = f (x, u) = 0 which implies that x(t) = [x1(t) x2(t)]⊤ is constant for all t. In other words, if the
+pendulum is in the vertical downward position with no angular velocity (i.e., x1 = x2 = 0), and
+with no input torque (i.e., u = 0), then the pendulum stays in the vertical downward position for
+all time (i.e., x(t) is constant for all t). For this reason, the configuration x = [0 0]⊤ is referred to
+as an equilibrium point.
+We now generalize the intuition developed in the previous example by defining the notion of an
+equilibrium point.
+Definition 1 (Equilibrium Point) Consider a system in state-variable form (1). Suppose that u is
+set to be a constant value u¯. Then, x¯ is said to be an equilibrium point of (1) with u = u¯ if
+f (x¯, u¯) = [0 0 . . . 0]⊤.</zone>
+  <zone label="GEN_OTHER">2</zone>
+  <zone label="BODY_CONTENT">(3)
+(4)
+△</zone>
+  <zone label="MET_BIB_INFO">2 Linearization</zone>
+  <zone label="GEN_OTHER">u=u¯=0</zone>
+  <zone label="BODY_CONTENT">Example 2 (Pendulum - continued) Back to the pendulum example, suppose we turn off the
+DC motor, that is, we set u = u¯ = 0. Let's use the definition above to find all corresponding
+equilibria. We set f (x, u) = [0 0]⊤, in other words,
+x2 = 0
+− MIgl sin x1 = 0
+The solutions are
+"kπ#
+x¯ = , k integer.
+0
+Physically, this means that the pendulum is at equilibrium whenever the angle θ is either 0 (pendulum
+pointing downward) or π (pendulum pointing upward), and the angular velocity θ˙ is zero.
+Qualitatively, the equilibrium x¯ = [0 0]⊤ is stable, while the equilibrium x¯ = [π 0]⊤ is unstable.
+Now suppose we turn on the DC motor in such a way that it produces a desired constant torque
+u = u¯ 6= 0. The corresponding equilibria must satisfy the equation f (x, u¯) = [0 0]⊤, i.e.,
+x2 = 0
+− MIgl sin x1 + uI¯ = 0.
+Note that, setting u = u¯ = M gl sin x¯1, the state
+x¯ =
+"x¯1#
+0</zone>
+  <zone label="GEN_OTHER">3</zone>
+  <zone label="BODY_CONTENT">is an equilibrium point of the pendulum. Physically, that means that by imparting a suitable
+constant torque to the pendulum one can make the pendulum be at rest at any desired angle x¯1.
+For instance, by imparting a torque u = u¯ = M gl, the configuration x1 = π/2, x2 = 0 is an
+equilibrium of the pendulum. Is such configuration stable or unstable? We will see the answer to
+this question later on in the course.
+2
+Linearization
+Although almost every physical system contains nonlinearities, oftentimes its behavior within a
+certain operating range of an equilibrium point can be reasonably approximated by that of a linear
+model. One reason for approximating the nonlinear system (1) by a linear model of the form (2) is
+that, by so doing, one can apply the systematic linear control design techniques introduced in this
+△
+The new coordinates x˜, u˜, and y˜ represent the variations of x, u, and y from their equilibrium
+values. You have to think of these as a new state, new control input, and new output respectively.
+The linearization of (1) at x¯ is given by
+where
+(5)
+A =
+B =
+C =
+D =
+∂f
+∂x (x¯,u¯)
+∂f
+∂u (x¯,u¯)
+∂h
+∂x (x¯,u¯)
+∂h
+∂u (x¯,u¯)
+x˜ := x − x¯,
+u˜ := u − u¯,
+y˜ := y − h(x¯, u¯).
+x˜˙ = Ax˜ + Bu˜
+y˜ = Cx˜ + Du˜,
+ ∂∂xf11 (x¯, u¯) · · ·
+=  · · · · · ·
+ ∂∂fxn1 (x¯, u¯) · · ·
+ ∂∂uf11 (x¯, u¯) · · ·
+=  ...
+ ∂∂fun1 (x¯, u¯) · · ·
+ ∂h1 (x¯, u¯) · · ·
+=  ∂x1 ...
+ ∂∂hx1p (x¯, u¯) · · ·
+ ∂h1 (x¯, u¯) · · ·
+=  ∂u1 ...
+ ∂∂hu1p (x¯, u¯) · · ·
+∂f1 (x¯, u¯)
+∂xn· · ·  ,
+∂fn (x¯, u¯)
+∂xn
+∂f1 (x¯, u¯)
+∂um 
+ ,
+
+∂fn (x¯, u¯)
+∂um
+∂h1 (x¯, u¯)
+∂xn ...  ,
+∂∂xhnp (x¯, u¯)
+∂h1 (x¯, u¯)
+∂um ...  .
+∂hp (x¯, u¯)
+∂um</zone>
+  <zone label="MET_BIB_INFO">2 Linearization</zone>
+  <zone label="BODY_CONTENT">course. Keep in mind, however, that a linearized model is valid only when the system operates in
+a sufficiently small range around an equilibrium point.
+Given the nonlinear system (1) and an equilibrium point x¯ = [x¯1 · · · x¯n]⊤ obtained when u = u¯,
+we define a coordinate transformation as follows. Denote
+Remark 1: The linearization (5), also referred to as a small-signal model, is valid only in a
+sufficiently small neighborhood of the equilibrium point x¯. Notice that, as expected, (5) has the
+linear structure (2).
+Remark 2: Note that the matrices A, B, C, D have constant coefficients in that all partial
+derivatives are evaluated at the numerical values (x¯, u¯).</zone>
+  <zone label="GEN_OTHER">4</zone>
+  <zone label="MET_BIB_INFO">2 Linearization</zone>
+  <zone label="BODY_CONTENT">Example 3 (Linearization of the pendulum system). We return to the pendulum example.
+Recall that the state-variable model is given by
+x˙ 1 = x2
+x˙ 2 = − MIgl sin x1 + uI</zone>
+  <zone label="MET_BIB_INFO">y = x1</zone>
+  <zone label="BODY_CONTENT">Consider the equilibrium point, obtained by setting u = u¯ = 0, corresponding to the vertical upward
+position and no control input, i.e., x¯ = [π 0]⊤. Following the procedure outlined above, we define
+x˜ = x − x¯ =
+"x1 − π# ,
+x2
+u˜ = u − 0 = u,
+y˜ = y − π,
+and we form the matrices containing partial derivatives
+∂∂fx =
+"
+− MIg0lcos x1 10# , ∂∂fu = " 0I1 # , ∂∂hx = [1, 0], ∂∂hu = 0.
+Next, we evaluate the matrices above at (x¯1, x¯2, u¯) = (π, 0, 0) and we write the linearized model
+"xx˜˜˙˙12# = " M0Igl 10# "xx˜˜12# + " 0I1 # u˜
+y˜ = [1 0] "x˜1# .
+x˜2
+Notice how the linearized model is expressed in terms of a new state x˜, new control input u˜, and new
+output y˜. These represent variations of x, u, and y from their equilibrium values. The linearized
+model above is only valid in a small neighborhood of the equilibrium x¯ = [π 0]⊤, that is, it is only
+valid when the components x˜1 and x˜2 of the vector x˜, are small. Physically this can be rephrased
+as follows: the linearized model of the pendulum at the vertical upward position is only valid when
+the angle θ is in a small neighborhood of π and the angular speed θ˙ is small.</zone>
+  <zone label="GEN_OTHER">△
+5</zone>
+</document>

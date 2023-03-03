@@ -1,18 +1,18 @@
 
+import myfile from '../pdfLibrary/Test3.pdf'
+import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
+
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
 import Sidebar from './viewerComponents/Sidebar';
-import myfile from '../pdfLibrary/nature12373.pdf'
-import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import { getPdf } from '../pdfLibrary/getPdf';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
-import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
-import * as pdfjsLib from 'pdfjs-dist';
+
 
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -32,6 +32,7 @@ const Viewer = (props) => {
   const [zoomScale, setZoomScale] = useState(1.3);
   const [showSidebar, setShowSidebar] = useState(false);
   const [summary, setSummary] = useState("");
+  const [title, setTitle] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // NOT MY CODE
@@ -45,7 +46,6 @@ const Viewer = (props) => {
         canvasContext: canvas.getContext('2d'),
         viewport: viewport
       };
-      // setTimeout(page.render(renderContext), 1000);
       var renderTask = page.render(renderContext);
 
       renderTask.promise.then(function() {
@@ -105,20 +105,22 @@ const Viewer = (props) => {
   const hideSidebar = () => setShowSidebar(false);
 
 
-  // I DONT WANT THIS FUNCTION HERE
-  async function getPDFText(url) {
-    let doc = await PDFJS.getDocument(url).promise;
-    let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
-        return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
-    });
-    let result = (await Promise.all(pageTexts)).join('');
-
-    return result;
+  async function getPDFText() {
+    //let doc = await PDFJS.getDocument(url).promise;
+    // let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+    //     return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+    // });
+    // let result = (await Promise.all(pageTexts)).join('');
+    const result = (await axios.get('http://localhost:3001/')).data;
+    setTitle(result['TITLE']);
+    return result['BODY_CONTENT'];
 }
 
 async function onSummaryClick() {
-    let text = await getPDFText(url)
+    let text = await getPDFText()
     const payload = new FormData()
+    //var serverVar = require('../../server')
+    //console.log(JSON.stringify(serverVar.title_array));
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", text);
     payload.append("sentences", 5);
