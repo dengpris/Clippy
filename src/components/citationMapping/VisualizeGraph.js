@@ -17,6 +17,7 @@ const title = 'The value of standing forests for birds and people in a biodivers
 const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
 const doi = '10.1371/journal.pclm.0000093';
 
+
 const VisualizeGraph = () => {
 
   const [citationInfo, setCitationInfo] = useState(null);
@@ -24,6 +25,11 @@ const VisualizeGraph = () => {
   const [nodes, setNodes] = useState({});
   const [edges, setEdges] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [showNodeModal, setShowNodeModal] = useState(false);
+  const [author, setAuthor] = useState(null);
+  const [fos, setFos] = useState(null);
+  const [abstract, setAbstract] = useState(null);
+  const [title, setTitle] = useState(null);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fosColours, setFosColours] = useState(null);
@@ -291,10 +297,40 @@ const VisualizeGraph = () => {
   const events = {
     select: function(event) {
       var { nodes, edges } = event;
-      console.log(event);
+      console.log(nodes);
       //toggleEdgeView(event,edges);
-      
+      console.log(nodes[0]);
+      //console.log(graph.edges);
+      console.log(citationInfo[nodes[0]].author[0].given);
+      var title = citationInfo[nodes[0]].title[0];
+      var author = citationInfo[nodes[0]].author[0].given + citationInfo[nodes[0]].author[0].family ;
+      var abstract = "";
+      var fos = "";
+      if (abstractFosInfo[nodes[0]] != null){
+        if(abstractFosInfo[nodes[0]].abstract != null){
+          abstract = abstractFosInfo[nodes[0]].abstract;
+        }
+        if(abstractFosInfo[nodes[0]].fos != null){
+          fos = "FIELD OF STUDY:"
+          if (abstractFosInfo[nodes[0]].fos.length == 1){
+            fos = fos + " " + abstractFosInfo[nodes[0]].fos[0]
+          }else{
+            fos = fos + " " + abstractFosInfo[nodes[0]].fos[0];
+            for(var i=1; i< abstractFosInfo[nodes[0]].fos.length; i++){
+              fos = fos + ", " + abstractFosInfo[nodes[0]].fos[i] ;
+            }
+          }
+          
+        }
+      }
+      setShowNodeModal(true);
+      setTitle(title);
+      setAuthor(author);
+      setFos(fos);
+      setAbstract(abstract);
+      // alert("TITLE: " + title + "\n\nAUTHOR: " + author +"\n\n" + fos + "\n\n" + abstract);
     }
+
   };
 
   function toggleEdgeView (event, selected_edges) {
@@ -328,12 +364,13 @@ const VisualizeGraph = () => {
     if(!loading) {
       return (
         <Graph
-          //getNetwork={network => this.setState({ network })}
+          
           key={ uuidv4() } // need to generate unique key for graph each render
           graph={graph}
           options={options}
           events={events}
-          
+          getNetwork={network => { 
+          }}
         />
       )
     } else {
@@ -384,6 +421,26 @@ const VisualizeGraph = () => {
             </div>
           </Modal.Body>
         </Modal>
+        <Modal 
+          show={ showNodeModal }
+          onHide={ () => setShowNodeModal(false) }
+          scrollable={true}
+          style={{ maxHeight: "90vh" }}
+          size='m'
+          centered>
+        <Modal.Header closeButton>
+            <Modal.Title>
+              Citation Info
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body
+         >
+            <p><b>{title}</b></p>
+            <p>{author}</p>
+            <p>{fos}</p>
+            <p>{abstract}</p>
+          </Modal.Body>
+      </Modal>
       </>
     )
   }
