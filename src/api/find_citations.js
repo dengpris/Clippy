@@ -7,23 +7,22 @@ const abstract_query = "?fields=abstract"
 function compareTwoListsOfDOIReferences(origList, tempList){
   var similar_dois = [];
   let k = 0;
-  if(origList.length === undefined || tempList.length === undefined) {
-    return;
-  }
   for(let i = 0 ; i< origList.length ; i++){
-    for(let j = 0; j<tempList.length; j++){
-      if(origList[i] === tempList[j]){
-        similar_dois[k] = tempList[j];
-        k++;
+      for(let j = 0; j<tempList.length; j++){
+          if(origList[i] === tempList[j]){
+              similar_dois[k] = tempList[j];
+              k++
+          }
       }
-    }
   }
   return similar_dois;
 }
 
 function getListOfConnectedRefs(pdf_refs, temp_refs,index){
+  // const currRefDOI = pdf_refs[index];
   var connected_refs = [];
   //Make sure that DOI from origList used to make tempList is listed as a similar ref
+  // temp_refs[temp_refs.length] = currRefDOI;
   //Compare the two lists of refs
   connected_refs = compareTwoListsOfDOIReferences(pdf_refs, temp_refs);
   return connected_refs;
@@ -31,9 +30,6 @@ function getListOfConnectedRefs(pdf_refs, temp_refs,index){
 
 function getDOIofReferences(pdf_data){
   var list_of_references = pdf_data.reference;
-  if(list_of_references === undefined) {
-    return;
-  }
   let list_of_doi_refs = [];
   for(let i = 0; i < list_of_references.length; i++){
     if(list_of_references[i].DOI !== undefined){
@@ -166,7 +162,6 @@ function getPaperID(pdf_data){
   var paperID = pdf_data.data[0].paperId; //check if it's the right shape EX: https://api.semanticscholar.org/graph/v1/paper/search?query=title:%20(The+Role+of+Sensation+Seeking+in+Political+Violence)
   return paperID;
 }
-
 const getAbstract = async(doi) => {
   
   var url_abstract_query = ss_url_query + doi + abstract_query;
@@ -189,8 +184,6 @@ const getAbstract = async(doi) => {
   })
   .catch((err)=>console.log(err)); 
 }
-
-
 const getSubjectsByAbstract = async(referenced_dois) => {
   let connected_refs = {};
   for(let i = 0; i < referenced_dois.length; i++) {
@@ -216,7 +209,6 @@ const getSubjectsByAbstract = async(referenced_dois) => {
   // await new Promise(r => setTimeout(r, 2000));
   return connected_refs;
 }
-
 export const findSimilarSubjects = async (pdfTitle) => {
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
   try {
