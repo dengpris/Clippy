@@ -1,5 +1,4 @@
 
-// import myfile from './Draft_Proposal.pdf'
 import myfile from '../pdfLibrary/Test3.pdf'
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 
@@ -9,16 +8,11 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 
 import Sidebar from './viewerComponents/Sidebar';
-import myfile from '../pdfLibrary/nature12373.pdf'
-import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 import { getPdf } from '../pdfLibrary/getPdf';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
-import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
-import * as pdfjsLib from 'pdfjs-dist';
 
-import axios from 'axios';
 
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -52,7 +46,6 @@ const Viewer = (props) => {
         canvasContext: canvas.getContext('2d'),
         viewport: viewport
       };
-      // setTimeout(page.render(renderContext), 1000);
       var renderTask = page.render(renderContext);
 
       renderTask.promise.then(function() {
