@@ -1,62 +1,33 @@
 ## How To Run Clippy:
 
-1. In the project directory, you can run:
+In the project directory, run the following command:
 
 ### `npm run-script run`
 
-Runs the app in the development mode with both the React.js frontend and Node.js backend.\
+This starts the app in the development mode with both the React.js frontend and Node.js backend.
 
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.\
-Open [http://localhost:3001](http://localhost:3001) to launch the backend in your browser.
+The frontend runs on [http://localhost:3000](http://localhost:3000) and the backend runs on [http://localhost:3001](http://localhost:3001).
 
+------
+![image](https://user-images.githubusercontent.com/61913136/222653449-83195a1f-0bbf-493a-881b-4c00bba146b5.png#center)
+*<p align="center" class="italic">Fig 1. Preview of Clippy and the generated summary</p>*
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-
-## Additional npm Commands:
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-
-
-## pdfLibrary
-Only certain PDFs (placed in this directory) make use of Clippy's full functionality (summary, knowledge graph, cross-reference hovering).
-
-### Code Structure
+## Code Structure
 All code must go in src in order for the React app to run. For styling, minimize use of inline css styling and use the React Bootstrap for buttons.
 
-## api
+### pdfLibrary
+```
+Please note the PDFs placed in this directory make use of Clippy's full functionality 
+(summary, knowledge graph, cross-reference hovering).
+```
+Other PDFs can be loaded and viewed but not all features will be supported.
+
+### api
 All backend api calls go here. Axios is used to call the api calls.
 
-## components
+### components
 Each feature (ie. citation map, hover, etc) and its corresponding helper files go in here.
 
-## pdfLibrary
-Sample pdf files go here
-
-## App.js
+### App.js
 Only add srs components here, do not overcrowd this file
 
