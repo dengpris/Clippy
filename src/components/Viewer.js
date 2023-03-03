@@ -35,7 +35,7 @@ const Viewer = (props) => {
   const [title, setTitle] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
-  // NOT MY CODE
+  // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
     pdf && pdf.getPage(pageNum).then(function(page) {
       const viewport = page.getViewport({ scale: zoomScale });
@@ -80,7 +80,7 @@ const Viewer = (props) => {
   useEffect(() => {
     renderPage(currentPage, pdfRef);
   },[pdfRef, currentPage, renderPage]);
-  // END NOT MY CODE
+  // End code
     
   useEffect(() => { 
     const loadingTask = PDFJS.getDocument(url);
@@ -158,6 +158,7 @@ function summaryTokenize(summary){
   return finalSummaryArray.join(' ');
 }
 
+// Code from: https://www.geeksforgeeks.org/check-given-sentence-given-set-simple-grammer-rules/
 function checkValidSentence(str){
   var len = str.length;
 
@@ -203,7 +204,8 @@ function checkValidSentence(str){
   }
   return false;
 }
-    
+// end code
+
   return (
     <>
       <ViewerNavbar 
