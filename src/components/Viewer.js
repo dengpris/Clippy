@@ -1,26 +1,38 @@
-// import myfile from './Draft_Proposal.pdf'
+
 import myfile from '../pdfLibrary/Test3.pdf'
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
+
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import axios from 'axios';
+
 import Sidebar from './viewerComponents/Sidebar';
+import { getPdf } from '../pdfLibrary/getPdf';
+
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
-import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
-import * as pdfjsLib from 'pdfjs-dist';
-// import { getSummary } from './meaningcloudSummary/GenerateSummary';
-import axios from 'axios';
+
+
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-const Viewer = () => {
-  const url = myfile
+
+
+const Viewer = (props) => {
+  const {
+    pdfUrl
+  } = props;
+
+  const url = getPdf(pdfUrl);
   const canvasRef = useRef();
+  const textRef = useRef();
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomScale, setZoomScale] = useState(1.3);
   const [showSidebar, setShowSidebar] = useState(false);
   const [summary, setSummary] = useState("");
+  const [title, setTitle] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // NOT MY CODE
@@ -34,27 +46,36 @@ const Viewer = () => {
         canvasContext: canvas.getContext('2d'),
         viewport: viewport
       };
-      // setTimeout(page.render(renderContext), 1000);
       var renderTask = page.render(renderContext);
 
       renderTask.promise.then(function() {
         // Returns a promise, on resolving it will return text contents of the page
         return page.getTextContent();
-    }).then(function(textContent) {
+    })
+    .then(function(textContent) {
+
          // PDF canvas
-        var pdf_canvas = document.getElementById("viewer-canvas"); 
-        // Canvas offset
+        // const textLayer = textRef.current;
+        var textLayer = document.querySelector(".textLayer");
+        textLayer.style.left = canvas.offsetLeft + 'px';
+        textLayer.style.top = canvas.offsetTop + 'px';
+        textLayer.style.height = canvas.offsetHeight + 'px';
+        textLayer.style.width = canvas.offsetWidth + 'px';
+        console.log('henlo these are the sizes ', textLayer.style.left,textLayer.style.top, textLayer.style.height, textLayer.style.top);
         // Pass the data to the method for rendering of text over the pdf canvas.
         PDFJS.renderTextLayer({
             textContent: textContent,
-            container: document.getElementById("textLayer"),
+            container: textLayer,
             viewport: viewport,
             textDivs: []
         });
+        textLayer.setTextContent(textContent);
+
       });
 
     });   
   }, [pdfRef, zoomScale]);
+
     
   useEffect(() => {
     renderPage(currentPage, pdfRef);
@@ -84,35 +105,28 @@ const Viewer = () => {
   const hideSidebar = () => setShowSidebar(false);
 
 
-  // I DONT WANT THIS FUNCTION HERE
-  async function getPDFText(url) {
-    let doc = await PDFJS.getDocument(url).promise;
-    let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
-        return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
-    });
-    let result = (await Promise.all(pageTexts)).join('');
-
-    return result;
+  async function getPDFText() {
+    //let doc = await PDFJS.getDocument(url).promise;
+    // let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
+    //     return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
+    // });
+    // let result = (await Promise.all(pageTexts)).join('');
+    const result = (await axios.get('http://localhost:3001/')).data;
+    setTitle(result['TITLE']);
+    return result['BODY_CONTENT'];
 }
 
-// ONSUMMARYCLICK SHOULD ONLY CALL GETSUMMARY FROM GENERATESUMMARY.JS, THEN SETSUMMARY STATE TO THE RESULT
-// HOWEVER THAT CALLING GETSUMMARY RETURNS UNDEFINED INSTEAD OF THE SUMMARY
-// CURRENTLY SOLUTION IS TO INCLUDE THE GETSUMMARY FUNCTION CALL IN VIEWER.JS, BUT I DONT LIKE THIS WORKFLOW
-// const onSummaryClick = async() => {
-//   getSummary(url).then(response => setSummary(response))
-//   toggleSidebar();
-// } NOT WORKING
-
 async function onSummaryClick() {
-    let text = await getPDFText(url)
+    let text = await getPDFText()
     const payload = new FormData()
+    //var serverVar = require('../../server')
+    //console.log(JSON.stringify(serverVar.title_array));
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", text);
     payload.append("sentences", 5);
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        //console.log(response.data.summary);
         setSummary(summaryTokenize(response.data.summary));
         toggleSidebar();
     })
@@ -120,6 +134,7 @@ async function onSummaryClick() {
         console.log('error', error);
     })
 }
+
 
 function summaryTokenize(summary){
   var Tokenizer = require('sentence-tokenizer');
@@ -134,7 +149,6 @@ function summaryTokenize(summary){
     console.log(summarySentencesArray[i]);
   }
   return summarySentencesArray.join(' ');
-
 }
     
   return (
@@ -163,9 +177,14 @@ function summaryTokenize(summary){
         : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
+      {/* <div className="textLayer"></div> */}
     </>
     
   );
+};
+
+Viewer.propTypes = {
+  pdfUrl: PropTypes.string
 };
 
 export default Viewer;
