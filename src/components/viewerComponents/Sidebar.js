@@ -9,11 +9,11 @@ const Sidebar = (props) => {
         hideSidebar
     } = props;
     return(
-        <div className="sidebar">
+        <div className="sidebar p-4">
             <p>{ summary }</p>
             <Button 
-              id="close"
-              onClick={() => { hideSidebar() }}
+                id="close"
+                onClick={() => { hideSidebar() }}
             >Close
             </Button>
         </div>

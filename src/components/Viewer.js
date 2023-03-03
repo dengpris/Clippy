@@ -1,19 +1,37 @@
+
 // import myfile from './Draft_Proposal.pdf'
 import myfile from '../pdfLibrary/Test3.pdf'
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
+
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import axios from 'axios';
+
 import Sidebar from './viewerComponents/Sidebar';
+import myfile from '../pdfLibrary/nature12373.pdf'
+import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
+import { getPdf } from '../pdfLibrary/getPdf';
+
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import * as pdfjsLib from 'pdfjs-dist';
+
 import axios from 'axios';
+
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-const Viewer = () => {
-  const url = myfile
+
+
+const Viewer = (props) => {
+  const {
+    pdfUrl
+  } = props;
+
+  const url = getPdf(pdfUrl);
   const canvasRef = useRef();
+  const textRef = useRef();
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,21 +58,31 @@ const Viewer = () => {
       renderTask.promise.then(function() {
         // Returns a promise, on resolving it will return text contents of the page
         return page.getTextContent();
-    }).then(function(textContent) {
+    })
+    .then(function(textContent) {
+
          // PDF canvas
-        var pdf_canvas = document.getElementById("viewer-canvas"); 
-        // Canvas offset
+        // const textLayer = textRef.current;
+        var textLayer = document.querySelector(".textLayer");
+        textLayer.style.left = canvas.offsetLeft + 'px';
+        textLayer.style.top = canvas.offsetTop + 'px';
+        textLayer.style.height = canvas.offsetHeight + 'px';
+        textLayer.style.width = canvas.offsetWidth + 'px';
+        console.log('henlo these are the sizes ', textLayer.style.left,textLayer.style.top, textLayer.style.height, textLayer.style.top);
         // Pass the data to the method for rendering of text over the pdf canvas.
         PDFJS.renderTextLayer({
             textContent: textContent,
-            container: document.getElementById("textLayer"),
+            container: textLayer,
             viewport: viewport,
             textDivs: []
         });
+        textLayer.setTextContent(textContent);
+
       });
 
     });   
   }, [pdfRef, zoomScale]);
+
     
   useEffect(() => {
     renderPage(currentPage, pdfRef);
@@ -102,11 +130,10 @@ async function onSummaryClick() {
     //console.log(JSON.stringify(serverVar.title_array));
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", text);
-    payload.append("sentences", 3);
+    payload.append("sentences", 5);
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        //console.log(response.data.summary);
         setSummary(summaryTokenize(response.data.summary));
         toggleSidebar();
     })
@@ -114,6 +141,7 @@ async function onSummaryClick() {
         console.log('error', error);
     })
 }
+
 
 function summaryTokenize(summary){
   var Tokenizer = require('sentence-tokenizer');
@@ -124,11 +152,10 @@ function summaryTokenize(summary){
 
   const TextCleaner = require('text-cleaner');
   for(let i = 0; i < summarySentencesArray.length; i++){
-    summarySentencesArray[i] = TextCleaner(summarySentencesArray[i]).condense().removeChars().trim().valueOf()+".";
+    summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
     console.log(summarySentencesArray[i]);
   }
   return summarySentencesArray.join(' ');
-
 }
     
   return (
@@ -157,9 +184,14 @@ function summaryTokenize(summary){
         : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
+      {/* <div className="textLayer"></div> */}
     </>
     
   );
+};
+
+Viewer.propTypes = {
+  pdfUrl: PropTypes.string
 };
 
 export default Viewer;

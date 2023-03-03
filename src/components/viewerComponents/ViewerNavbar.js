@@ -1,21 +1,15 @@
 
 import './viewerComponents.css';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import { BsArrowRight, BsArrowLeft, BsArrowBarRight, BsArrowBarLeft } from 'react-icons/bs';
 import { AiOutlineZoomIn, AiOutlineZoomOut } from 'react-icons/ai';
 import { Button, Nav, Navbar } from 'react-bootstrap';
-import { getPDFText, getSummary } from '../meaningcloudSummary/GenerateSummary';
-import Sidebar from './Sidebar';
-
 
 const ViewerNavbar = (props) => {
   const {
-    url,
-    showSidebar,
-    toggleSidebar,
     onSummaryClick,
     currentPage,
     totalPageCount,
@@ -111,11 +105,9 @@ const ViewerNavbar = (props) => {
     </div>
   )
 
- 
-
   return (
     <>
-      <Navbar bg='light' variant='light' className="justify-content-center">
+      <Navbar bg='dark' variant='dark' className="justify-content-center mb-3">
         <Nav>
           { renderPageCounts() }
           { renderSummaryButton() }
