@@ -6,8 +6,7 @@ const port = 3001;
 
 const server = http.createServer((req, res) => {
   res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World');
+  res.setHeader('Content-Type', 'application/json');
 
   const exec = require('child_process').exec;
   const childProcess = exec('java -cp CERMINE.jar pl.edu.icm.cermine.ContentExtractor -path src/pdfLibrary/TestPDF/ -outputs zones', function(err, stdout, stderr) {
@@ -98,15 +97,19 @@ const server = http.createServer((req, res) => {
       //console.log(JSON.stringify(title_array));
     }
    }
-   console.log(JSON.stringify(text_dict));
-   console.log(JSON.stringify(title_array));
-
-   pdf_info = {};
-   pdf_info["TITLE"] = title_array[0];
-   pdf_info["BODY_CONTENT"] = text_dict.join("");
-   console.log(JSON.stringify(pdf_info));
-
+   // console.log(JSON.stringify(text_dict));
+   // console.log(JSON.stringify(title_array));
   });
+
+  r.on('close', () => {
+    pdf_info = {};
+    pdf_info["TITLE"] = title_array[0];
+    pdf_info["BODY_CONTENT"] = text_dict.join("");
+    res.write(JSON.stringify(pdf_info), () => {
+     res.end();
+    });
+  });
+
   return [title_array, text_dict];
 
 });
