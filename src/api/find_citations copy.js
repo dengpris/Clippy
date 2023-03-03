@@ -1,29 +1,26 @@
 import axios from 'axios';
 
 const url_query = "https://api.crossref.org/works";
-const ss_url_query = "https://api.semanticscholar.org/graph/v1/paper/" 
-const abstract_query = "?fields=abstract"
 
 function compareTwoListsOfDOIReferences(origList, tempList){
   var similar_dois = [];
   let k = 0;
-  if(origList.length === undefined || tempList.length === undefined) {
-    return;
-  }
   for(let i = 0 ; i< origList.length ; i++){
-    for(let j = 0; j<tempList.length; j++){
-      if(origList[i] === tempList[j]){
-        similar_dois[k] = tempList[j];
-        k++;
+      for(let j = 0; j<tempList.length; j++){
+          if(origList[i] === tempList[j]){
+              similar_dois[k] = tempList[j];
+              k++
+          }
       }
-    }
   }
   return similar_dois;
 }
 
 function getListOfConnectedRefs(pdf_refs, temp_refs,index){
+  // const currRefDOI = pdf_refs[index];
   var connected_refs = [];
   //Make sure that DOI from origList used to make tempList is listed as a similar ref
+  // temp_refs[temp_refs.length] = currRefDOI;
   //Compare the two lists of refs
   connected_refs = compareTwoListsOfDOIReferences(pdf_refs, temp_refs);
   return connected_refs;
@@ -31,9 +28,6 @@ function getListOfConnectedRefs(pdf_refs, temp_refs,index){
 
 function getDOIofReferences(pdf_data){
   var list_of_references = pdf_data.reference;
-  if(list_of_references === undefined) {
-    return;
-  }
   let list_of_doi_refs = [];
   for(let i = 0; i < list_of_references.length; i++){
     if(list_of_references[i].DOI !== undefined){
@@ -45,10 +39,9 @@ function getDOIofReferences(pdf_data){
 
 const getRefDataByDOI = async(referenced_dois) => {
   let connected_refs = {};
-  var keys = {}
   for(let i = 0; i < referenced_dois.length; i++) {
     const url_doi_query = url_query + "/" + referenced_dois[i];
-    let ref_info = [];
+    let ref_info = {};
     axios.get(
       url_doi_query
     )
@@ -65,53 +58,11 @@ const getRefDataByDOI = async(referenced_dois) => {
       ref_info.connected_refs = connected_refs_for_i;
       //Add this doi's info on the connected_refs list
       connected_refs[referenced_dois[i]] = ref_info;  
-      //console.log(i)
-      //console.log(Object.values(connected_refs))
-      keys = Object.keys(connected_refs)
     })
     .catch((err)=>console.log(err)); 
   }
-  //console.log(connected_refs)
-  //console.log("Here")
-  //console.log(Object.values(connected_refs)[0])
-  //console.log(Object.getOwnPropertyNames(connected_refs))
+  // await new Promise(r => setTimeout(r, 2000));
   return connected_refs;
-}
-
-function sortData(citationData){
-    
-  let newFosAndAbstract = {};
-  console.log(Object.keys(citationData.connected_references)[0]);
-  console.log(Object.keys(citationData.fosAndAbstract)[0]);
-  for( let i = 0; Object.keys(citationData.connected_references).length; i++ ){
-    for( let j = 0; Object.keys(citationData.fosAndAbstract).length; j++)
-      if(Object.keys(citationData.connected_references)[i] == Object.keys(citationData.fosAndAbstract)[j]){
-        console.log("here");
-        newFosAndAbstract[Object.keys(citationData.connected_references)[i]] = Object.values(citationData.fosAndAbstract)[j];
-      }
-  }
-  //console.log(Object.keys(newFosAndAbstract));
-}
-
-const getFieldsOfStudy = async(ref_dois) => {
-  //console.log(Object.keys(connected_refs))
-  let fosAndAbstract = {};
-  for(let i = 0; i < ref_dois.length; i++){
-    var url_abstract_query = ss_url_query + ref_dois[i] + "?fields=fieldsOfStudy,abstract";
-    let ref_info = {}
-    axios.get(
-      url_abstract_query
-    )
-    .then(res => {
-      ref_info.fos = res.data.fieldsOfStudy;
-      ref_info.abstract = res.data.abstract;
-      //ref_info.title = res.data.title;
-      fosAndAbstract[ref_dois[i]] = ref_info
-    })
-    .catch((err)=>console.log(err));
-  }
-  //console.log(fosAndAbstract[ref_dois[0]])
-  return fosAndAbstract
 }
 
 // const pdf_title = "Nanometre-scale+thermometry+in+a+living+cell";
@@ -120,33 +71,31 @@ const getFieldsOfStudy = async(ref_dois) => {
 
 export const findCitations_withTitle = async (pdfTitle) => {
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
-  let citationData = {}
-  let sortedData = {}
-  //const org_doi = "10.1371/journal.pclm.0000093"
-  console.log("HELLO4")
   try {
     const res = await axios.get(
       urlRequest
     );
+    //console.log(res.data.message);
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
-    //var connected_references = await getRefDataByDOI(referenced_dois);
-    citationData.connected_references = await getRefDataByDOI(referenced_dois);
+    //console.log(referenced_dois);
+    var connected_references = await getRefDataByDOI(referenced_dois);
+    return connected_references;
+  } catch (err) {
+    return console.log('error calling findCitations', err);
+  }
+}
 
-    var new_referenced_dois = referenced_dois;
-
-    const org_doi = res.data.message.items[0].DOI;
-    new_referenced_dois.push(org_doi);
-
-    citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois);
-    console.log(citationData);
-   // sortedData = sortData(citationData);
-    //var abstracts_from_dois = await getAbstracts(new_referenced_dois);
-    //citationData.abstracts_from_dois = await getAbstracts(new_referenced_dois);
-    //console.log(citationData.abstracts_from_dois['10.1002/fee.1950'])
-    //console.log(Object.values(citationData.abstracts_from_dois[0]).abstract)
-    //var connected_subjects = getSimilarWords(abstracts_from_dois, org_doi);
-    
-    return citationData;
+export const findCitations_withDOI = async (PDFdoi) => {
+  let urlRequest = 'https://api.crossref.org/works/' + PDFdoi
+  try {
+    const res = await axios.get(
+      urlRequest
+    );
+    console.log(res.data.message);
+    var referenced_dois = getDOIofReferences(res.data.message);
+    console.log(referenced_dois);
+    var connected_references = await getRefDataByDOI(referenced_dois);
+    return connected_references;
   } catch (err) {
     return console.log('error calling findCitations', err);
   }
@@ -161,7 +110,9 @@ export const findCitations_withTitle = async (pdfTitle) => {
 //   .catch((err) => console.log(err))
 // }
 
- /*
+/* const ss_url_query = "https://api.semanticscholar.org/graph/v1/paper/" 
+const abstract_query = "?fields=abstract"
+
 function getPaperID(pdf_data){
   var paperID = pdf_data.data[0].paperId; //check if it's the right shape EX: https://api.semanticscholar.org/graph/v1/paper/search?query=title:%20(The+Role+of+Sensation+Seeking+in+Political+Violence)
   return paperID;
@@ -232,10 +183,10 @@ export const findSimilarSubjects = async (pdfTitle) => {
   } catch (err) {
     return console.log('error calling findCitations', err);
   }
-} */
+}
 
 //Search by DOI/paperID:
 // https://api.semanticscholar.org/graph/v1/paper/<DOI/PaperID>?fields=abstract
 //Search by Title:
 // https://api.semanticscholar.org/graph/v1/paper/search?query=title:%20(The+Role+of+Sensation+Seeking+in+Political+Violence)&limit=1
-//
+// */
