@@ -35,7 +35,7 @@ const VisualizeGraph = () => {
   const [fosColours, setFosColours] = useState(null);
   const [fosToDoi, setFosToDoi] = useState(null);
   
-
+  //testing
   //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.
   useEffect(() => {
     console.log("use effect ran");
