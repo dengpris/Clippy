@@ -27,6 +27,11 @@ const VisualizeGraph = () => {
   const [nodes, setNodes] = useState({});
   const [edges, setEdges] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [showNodeModal, setShowNodeModal] = useState(false);
+  const [author, setAuthor] = useState(null);
+  const [fos, setFos] = useState(null);
+  const [abstract, setAbstract] = useState(null);
+  const [title, setTitle] = useState(null);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fosColours, setFosColours] = useState(null);
@@ -321,8 +326,12 @@ const VisualizeGraph = () => {
           
         }
       }
-
-      alert("TITLE: " + title + "\n\nAUTHOR: " + author +"\n\n" + fos + "\n\n" + abstract);
+      setShowNodeModal(true);
+      setTitle(title);
+      setAuthor(author);
+      setFos(fos);
+      setAbstract(abstract);
+      // alert("TITLE: " + title + "\n\nAUTHOR: " + author +"\n\n" + fos + "\n\n" + abstract);
     }
 
   };
@@ -417,6 +426,26 @@ const VisualizeGraph = () => {
 
           </Modal.Body>
         </Modal>
+        <Modal 
+          show={ showNodeModal }
+          onHide={ () => setShowNodeModal(false) }
+          scrollable={true}
+          style={{ maxHeight: "90vh" }}
+          size='m'
+          centered>
+        <Modal.Header closeButton>
+            <Modal.Title>
+              Citation Info
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body
+         >
+            <p><b>{title}</b></p>
+            <p>{author}</p>
+            <p>{fos}</p>
+            <p>{abstract}</p>
+          </Modal.Body>
+      </Modal>
       </>
     )
   }
