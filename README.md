@@ -1,3 +1,9 @@
+# Clippy
+The Smart PDF Reader for Better Paper Reading Experience and Knowledge Mining
+By: Priscilla Deng, Marie Joy Cuevas, Hannah Ruiz, and Bethany Chu
+
+Submission for [ICSE 2023 SCORE contest](https://conf.researchr.org/track/icse-2023/icse-2023-score-2023).
+
 ## How To Run Clippy:
 
 In the project directory, run the following command:
@@ -31,3 +37,22 @@ Each feature (ie. citation map, hover, etc) and its corresponding helper files g
 ### App.js
 Only add srs components here, do not overcrowd this file
 
+------
+
+### References
+This repository uses the work from the following sources.
+
+#### Cermine
+Dominika Tkaczyk, Pawel Szostek, Mateusz Fedoryszak, Piotr Jan Dendek and Lukasz Bolikowski. 
+CERMINE: automatic extraction of structured metadata from scientific literature. 
+In International Journal on Document Analysis and Recognition (IJDAR), 2015, 
+vol. 18, no. 4, pp. 317-335, doi: 10.1007/s10032-015-0249-8.
+
+#### MeaningCloud Summary API
+[MeaningCloud™](http://www.meaningcloud.com/) has been used for Text Analytics purposes in the development/testing/validation of this research/prototype/software.
+
+#### SemanticScholar
+[Semantic Scholar](https://www.semanticscholar.org/product/api) provides free, AI-driven search and discovery tools, and open resources for the global research community. 
+
+#### CrossReference API
+[CrossRef REST API](https://api.crossref.org/swagger-ui/index.html) has been used for research paper meta data collection.
