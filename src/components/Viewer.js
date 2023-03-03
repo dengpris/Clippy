@@ -142,13 +142,66 @@ function summaryTokenize(summary){
   tokenizer.setEntry(summary);
   console.log(tokenizer.getSentences());
   var summarySentencesArray = tokenizer.getSentences();
+  var finalSummaryArray = [];
 
   const TextCleaner = require('text-cleaner');
   for(let i = 0; i < summarySentencesArray.length; i++){
-    summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
-    console.log(summarySentencesArray[i]);
+     summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
+     console.log(summarySentencesArray[i]);
+   }
+  
+  for(let i = 0; i<summarySentencesArray.length;i++){
+    if (checkValidSentence(summarySentencesArray[i])){
+      finalSummaryArray.push(summarySentencesArray[i]);
+    };
   }
-  return summarySentencesArray.join(' ');
+  return finalSummaryArray.join(' ');
+}
+
+function checkValidSentence(str){
+  var len = str.length;
+
+  if(str[0].charCodeAt(0) < "A".charCodeAt(0) ||
+     str[0].charCodeAt(0) > "Z".charCodeAt(0)
+    ){
+      return false;
+    }
+
+  if (str[len - 1] !== "."){
+    return false;
+  }
+
+  var prev_state = 0;
+  var curr_state = 0;
+  var index = 1;
+
+  while (index <= str.length) {
+    if (
+      str[index].charCodeAt(0) >= "A".charCodeAt(0) &&
+      str[index].charCodeAt(0) <= "Z".charCodeAt(0)
+    )
+    curr_state = 0;
+
+    else if (str[index] === " ") curr_state = 1;
+
+    else if (
+      str[index].charCodeAt(0) >= "a".charCodeAt(0) &&
+      str[index].charCodeAt(0) <= "z".charCodeAt(0)
+    )
+      curr_state = 2;
+
+    else if (str[index] === ".") curr_state = 3;
+
+    if (prev_state === curr_state && curr_state !== 2) return false;
+    if (prev_state === 2 && curr_state === 0) return false;
+
+    if (curr_state === 3 && prev_state !== 1)
+            return index + 1 == str.length;
+
+    index++;
+    prev_state = curr_state;
+  }
+  return false;
 }
     
   return (
