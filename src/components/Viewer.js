@@ -3,7 +3,7 @@ import myfile from '../pdfLibrary/Test3.pdf'
 import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
 
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
@@ -20,10 +20,13 @@ PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const Viewer = (props) => {
   const {
-    pdfUrl
+    pdfData
   } = props;
 
-  const url = getPdf(pdfUrl);
+  const url = useMemo(() => {
+    return URL.createObjectURL(pdfData);
+  }, [pdfData])
+
   const canvasRef = useRef();
   const textRef = useRef();
   const [pdfRef, setPdfRef] = useState();
@@ -82,7 +85,9 @@ const Viewer = (props) => {
   },[pdfRef, currentPage, renderPage]);
   // End code
     
-  useEffect(() => { 
+  useEffect(() => {
+    if (!url) return;
+
     const loadingTask = PDFJS.getDocument(url);
     loadingTask.promise.then(loadedPdf => {
       setPdfRef(loadedPdf);
@@ -239,7 +244,7 @@ function checkValidSentence(str){
 };
 
 Viewer.propTypes = {
-  pdfUrl: PropTypes.string
+  pdfData: PropTypes.instanceOf(File)
 };
 
 export default Viewer;

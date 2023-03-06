@@ -6,16 +6,16 @@ import VisualizeGraph from './components/citationMapping/VisualizeGraph';
 import ChooseFile from './components/viewerComponents/ChooseFile';
 
 function App() {
-  const [pdfUrl, setPdfUrl] = useState();
+  const [pdfData, setPdfData] = useState();
   const [pdfTitle, setPdfTitle] = useState();
 
   return (
     <div className="App">
       <header className="App-header">
-        { pdfUrl ?  
+        { pdfData ?
           <>
             <Viewer
-              pdfUrl={ pdfUrl }
+              pdfData={ pdfData }
             />
             <VisualizeGraph
               pdfTitle={ pdfTitle }
@@ -23,7 +23,7 @@ function App() {
           </>
         : 
           <ChooseFile
-            setPdfUrl={ setPdfUrl }
+            setPdfData={ setPdfData }
             setPdfTitle={ setPdfTitle }
           />
         }
