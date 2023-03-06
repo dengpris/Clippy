@@ -16,15 +16,19 @@ function App() {
           <>
             <Viewer
               pdfData={ pdfData }
+              setPdfTitle={setPdfTitle}
             />
-            <VisualizeGraph
-              pdfTitle={ pdfTitle }
-            />
+            {
+              pdfTitle &&
+              <VisualizeGraph
+                pdfTitle={ pdfTitle }
+              />
+            }
+
           </>
         : 
           <ChooseFile
             setPdfData={ setPdfData }
-            setPdfTitle={ setPdfTitle }
           />
         }
       </header>

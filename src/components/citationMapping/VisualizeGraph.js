@@ -8,9 +8,6 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import './citationMappingStyle.css'
 
-// import "./styles.css";
-// // need to import the vis network css in order to show tooltip
-// import "./network.css";
 
 //WORKING WITH THE PDF FOR DEMO
 const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
@@ -18,7 +15,7 @@ const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodi
 const doi = '10.1371/journal.pclm.0000093';
 
 
-const VisualizeGraph = () => {
+const VisualizeGraph = ({pdfTitle}) => {
 
   const [citationInfo, setCitationInfo] = useState(null);
   const [abstractFosInfo, setAbstractFosInfo] = useState(null);
@@ -34,6 +31,10 @@ const VisualizeGraph = () => {
   const [loading, setLoading] = useState(true);
   const [fosColours, setFosColours] = useState(null);
   const [fosToDoi, setFosToDoi] = useState(null);
+
+  const titlePlus = () => {
+    return pdfTitle.replace(/ /g,"+");
+  }
   
 
   //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.

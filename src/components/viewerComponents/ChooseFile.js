@@ -6,7 +6,6 @@ import { getTitle } from '../hovering/GetDocInfo';
 const ChooseFile = (props) => {
   const {
     setPdfData,
-    setPdfTitle
   } = props;
 
   const inputFile = useRef(null);
@@ -43,7 +42,6 @@ const ChooseFile = (props) => {
 
 ChooseFile.propTypes = {
   setPdfData: PropTypes.func.isRequired,
-  setPdfTitle: PropTypes.func.isRequired
 };
 
 export default ChooseFile;

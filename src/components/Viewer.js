@@ -18,12 +18,9 @@ PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 
 
-const Viewer = (props) => {
-  const {
-    pdfData
-  } = props;
-
+const Viewer = ({pdfData, setPdfTitle}) => {
   const url = useMemo(() => {
+    getPDFText();
     return URL.createObjectURL(pdfData);
   }, [pdfData])
 
@@ -35,7 +32,7 @@ const Viewer = (props) => {
   const [zoomScale, setZoomScale] = useState(1.3);
   const [showSidebar, setShowSidebar] = useState(false);
   const [summary, setSummary] = useState("");
-  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
@@ -111,23 +108,16 @@ const Viewer = (props) => {
 
 
   async function getPDFText() {
-    //let doc = await PDFJS.getDocument(url).promise;
-    // let pageTexts = Array.from({length: doc.numPages}, async (v,i) => {
-    //     return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
-    // });
-    // let result = (await Promise.all(pageTexts)).join('');
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
-    setTitle(result['TITLE']);
-    return result['BODY_CONTENT'];
+    setPdfTitle(result['TITLE']);
+    setBody(result['BODY_CONTENT']);
 }
 
 async function onSummaryClick() {
-    let text = await getPDFText()
     const payload = new FormData()
-    //var serverVar = require('../../server')
-    //console.log(JSON.stringify(serverVar.title_array));
+
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
-    payload.append("txt", text);
+    payload.append("txt", body);
     payload.append("sentences", 5);
 
     axios.post(summaryURL, payload)
@@ -244,7 +234,8 @@ function checkValidSentence(str){
 };
 
 Viewer.propTypes = {
-  pdfData: PropTypes.instanceOf(File)
+  pdfData: PropTypes.instanceOf(File),
+  setPdfTitle: PropTypes.func.isRequired,
 };
 
 export default Viewer;
