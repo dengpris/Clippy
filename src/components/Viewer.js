@@ -116,7 +116,7 @@ const Viewer = (props) => {
     //     return (await (await doc.getPage(i+1)).getTextContent()).items.map(token => token.str).join(' ');
     // });
     // let result = (await Promise.all(pageTexts)).join('');
-    const result = (await axios.get('http://localhost:3001/')).data;
+    const result = (await axios.post('http://localhost:3001/', pdfData)).data;
     setTitle(result['TITLE']);
     return result['BODY_CONTENT'];
 }
