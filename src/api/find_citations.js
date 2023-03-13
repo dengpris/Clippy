@@ -115,6 +115,7 @@ const getFieldsOfStudy = async(ref_dois) => {
 // const url_title_query = url_query + "?query.title=" + pdf_title;
 
 export const findCitations_withTitle = async (pdfTitle) => {
+  console.log(pdfTitle)
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
   let citationData = {}
   let sortedData = {}
