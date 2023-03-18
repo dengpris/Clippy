@@ -5,18 +5,16 @@ import { getTitle } from '../hovering/GetDocInfo';
 
 const ChooseFile = (props) => {
   const {
-    setPdfUrl,
-    setPdfTitle
+    setPdfData,
   } = props;
 
   const inputFile = useRef(null);
 
   const handleClick = () => {
     inputFile.current.click();
-    if(inputFile.current.value) {
-      const url = inputFile.current.value;
-      const indexStart = url.search('path') + 5;
-      setPdfUrl(url.substring(indexStart));
+    const file = inputFile.current.files[0];
+    if(file) {
+      setPdfData(file);
     }
   }
 
@@ -27,6 +25,7 @@ const ChooseFile = (props) => {
         type='file' 
         id='file' 
         ref={ inputFile } 
+        accept=".pdf"
         style={{ display: 'none' }}
         onChange={ handleClick }
       />
@@ -42,8 +41,7 @@ const ChooseFile = (props) => {
 };
 
 ChooseFile.propTypes = {
-  setPdfUrl: PropTypes.func.isRequired,
-  setPdfTitle: PropTypes.func.isRequired
+  setPdfData: PropTypes.func.isRequired,
 };
 
 export default ChooseFile;

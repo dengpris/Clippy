@@ -8,17 +8,14 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import './citationMappingStyle.css'
 
-// import "./styles.css";
-// // need to import the vis network css in order to show tooltip
-// import "./network.css";
 
 //WORKING WITH THE PDF FOR DEMO
-const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
-const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
+//const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
+//const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
 const doi = '10.1371/journal.pclm.0000093';
 
 
-const VisualizeGraph = () => {
+const VisualizeGraph = ({pdfTitle}) => {
 
   const [citationInfo, setCitationInfo] = useState(null);
   const [abstractFosInfo, setAbstractFosInfo] = useState(null);
@@ -30,23 +27,39 @@ const VisualizeGraph = () => {
   const [fos, setFos] = useState(null);
   const [abstract, setAbstract] = useState(null);
   const [title, setTitle] = useState(null);
+  const [pdfTitlePlus, setTitlePlus] = useState(null);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fosColours, setFosColours] = useState(null);
   const [fosToDoi, setFosToDoi] = useState(null);
+
+  const makeTitlePlus = () => {
+    var title_with_pulses = pdfTitle.split(' ').join('+');
+    console.log(title_with_pulses)
+    return title_with_pulses;
+  }
   
 
   //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.
   useEffect(() => {
-    console.log("use effect ran");
-    setDefaultDoi(doi);
-    findCitations_withTitle(titlePlus)
+    
+    //setDefaultDoi(doi);
+    const title_with_pulses = makeTitlePlus();
+    
+    //setTitlePlus(title_with_pulses)
+    console.log(title_with_pulses);
+    findCitations_withTitle(title_with_pulses)
     .then((res) => {
+      setDefaultDoi(doi);
       setCitationInfo(res.connected_references);
       setAbstractFosInfo(res.fosAndAbstract);
+      console.log('here');
+      console.log(citationInfo);
+      console.log(defaultDoi);
       //getFosToDoi();
       //getAbstract()
     });
+    console.log("use effect ran");
   }, []);
 
   useEffect(() => {
@@ -122,7 +135,7 @@ const VisualizeGraph = () => {
     var defaultNode = {
       id: defaultDoi,
       title: defaultDoi,
-      label: title
+      label: pdfTitle
     };
     graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
@@ -385,12 +398,13 @@ const VisualizeGraph = () => {
       <>
         <Button 
           onClick={() => {
-            findCitations_withTitle(titlePlus)
+            const title_with_pulses = makeTitlePlus();
+            findCitations_withTitle(title_with_pulses)
             .then((res) => {
               setCitationInfo(res.connected_references)
               setAbstractFosInfo(res.fosAndAbstract)
-              getFosToDoi();
-              getFOS();
+              //getFosToDoi();
+              //getFOS();
               getNodes();
               getEdges();
             });
