@@ -32,7 +32,7 @@ const VisualizeGraph = ({pdfTitle}) => {
 
   const makeTitlePlus = () => {
     var title_with_pulses = pdfTitle.split(' ').join('+');
-    console.log(title_with_pulses)
+    //console.log(title_with_pulses)
     return title_with_pulses;
   }
   
@@ -78,7 +78,6 @@ const VisualizeGraph = ({pdfTitle}) => {
       title: defaultDoi,
       label: pdfTitle
     };
-    console.log("defaultNode: ", defaultNode);
     graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       var tmpNode = {};
@@ -101,12 +100,10 @@ const VisualizeGraph = ({pdfTitle}) => {
     let fosToDoi_setup = {};
     //Note that it only compares to the FIRST fosOrig. This is assuming it only has ONE fos.
     var fosOrig = "";
-    console.log("DefaultDOI:", defaultDoi );
     if(abstractFosInfo[defaultDoi] == null){
       console.log("No abstract info for defaultDOI");
       return;
     }
-    console.log(abstractFosInfo[defaultDoi]);
 
     if(abstractFosInfo[defaultDoi].fos != null){
       fosOrig = abstractFosInfo[defaultDoi].fos[0];
@@ -184,7 +181,7 @@ const VisualizeGraph = ({pdfTitle}) => {
       }
     }
     
-    console.log(fosToDoi_setup.length);
+    //console.log(fosToDoi_setup.length);
     setEdges(graphEdges);
   }
 
@@ -229,11 +226,11 @@ const VisualizeGraph = ({pdfTitle}) => {
   const events = {
     select: function(event) {
       var { nodes, edges } = event;
-      console.log(nodes);
+      //console.log(nodes);
       //toggleEdgeView(event,edges);
-      console.log(nodes[0]);
+      //console.log(nodes[0]);
       //console.log(graph.edges);
-      console.log(citationInfo[nodes[0]].author[0].given);
+      //console.log(citationInfo[nodes[0]].author[0].given);
       var title = citationInfo[nodes[0]].title[0];
       var author = citationInfo[nodes[0]].author[0].given + citationInfo[nodes[0]].author[0].family ;
       var abstract = "";
@@ -322,14 +319,14 @@ const VisualizeGraph = ({pdfTitle}) => {
             findCitations_withTitle(title_with_pulses)
             .then((res) => {
               setCitationInfo(res.connected_references)
-              console.log(citationInfo);
+              //console.log(citationInfo);
               setAbstractFosInfo(res.fosAndAbstract)
               //getFosToDoi();
               //getFOS();
               getNodes();
-              console.log(nodes);
+              //console.log(nodes);
               getEdges();
-              console.log(edges);
+              //console.log(edges);
             });
             setShowModal(true);
           }}

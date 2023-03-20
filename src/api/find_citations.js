@@ -133,12 +133,12 @@ export const findCitations_withTitle = async (pdfTitle) => {
 
     const org_doi = res.data.message.items[0].DOI;
     citationData.origDOI = org_doi;
-    console.log("Originial DOI: ",org_doi);
+    //console.log("Originial DOI: ",org_doi);
     new_referenced_dois.push(org_doi);
 
 
     citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois);
-    console.log("fosAndAbstract: ", citationData.fosAndAbstract);
+    //console.log("fosAndAbstract: ", citationData.fosAndAbstract);
 
     console.log(citationData);
    // sortedData = sortData(citationData);
