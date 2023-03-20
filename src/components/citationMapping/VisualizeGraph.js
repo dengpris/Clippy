@@ -12,7 +12,7 @@ import './citationMappingStyle.css'
 //WORKING WITH THE PDF FOR DEMO
 //const title = 'The value of standing forests for birds and people in a biodiversity hotspot'
 //const titlePlus = 'The+value+of+standing+forests+for+birds+and+people+in+a+biodiversity+hotspot';
-const doi = '10.1371/journal.pclm.0000093';
+//const doi = '10.1371/journal.pclm.0000093';
 
 
 const VisualizeGraph = ({pdfTitle}) => {
@@ -27,11 +27,8 @@ const VisualizeGraph = ({pdfTitle}) => {
   const [fos, setFos] = useState(null);
   const [abstract, setAbstract] = useState(null);
   const [title, setTitle] = useState(null);
-  const [pdfTitlePlus, setTitlePlus] = useState(null);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [fosColours, setFosColours] = useState(null);
-  const [fosToDoi, setFosToDoi] = useState(null);
 
   const makeTitlePlus = () => {
     var title_with_pulses = pdfTitle.split(' ').join('+');
@@ -47,15 +44,15 @@ const VisualizeGraph = ({pdfTitle}) => {
     const title_with_pulses = makeTitlePlus();
     
     //setTitlePlus(title_with_pulses)
-    console.log(title_with_pulses);
+    //console.log(title_with_pulses);
     findCitations_withTitle(title_with_pulses)
     .then((res) => {
-      setDefaultDoi(doi);
+      setDefaultDoi(res.origDOI);
       setCitationInfo(res.connected_references);
       setAbstractFosInfo(res.fosAndAbstract);
-      console.log('here');
-      console.log(citationInfo);
-      console.log(defaultDoi);
+      console.log('finished usedeffect findCitations');
+      //console.log(citationInfo);
+      //console.log(defaultDoi);
       //getFosToDoi();
       //getAbstract()
     });
@@ -70,65 +67,9 @@ const VisualizeGraph = ({pdfTitle}) => {
     }
   }, [citationInfo])
 
-  const getFosToDoi = () => {
-
-    let fosToDoi_setup = {};
-
-    for(let i = 0; i < Object.keys(citationInfo).length; i++) {
-      if(abstractFosInfo[Object.keys(citationInfo)[i]] != null && abstractFosInfo[Object.keys(citationInfo)[i]].fos != null) {
-
-        for(let j = 0 ; j< abstractFosInfo[Object.keys(citationInfo)[i]].fos.length ; j++){
-          var currField = abstractFosInfo[Object.keys(citationInfo)[i]].fos[j]
-          if (!Object.keys(fosToDoi_setup).includes(currField)){
-            
-            fosToDoi_setup[currField] = [];
-          }
-          if (!fosToDoi_setup[currField].includes(Object.keys(citationInfo)[i])){
-          //console.log("field: ", currField, " id: ", Object.keys(citationInfo)[i]);
-            fosToDoi_setup[currField].push(Object.keys(citationInfo)[i]);
-          }
-      }
-      }
-    }
-    setFosToDoi(fosToDoi_setup);
-  }
-
-  const getFOS = () => {
-    if(citationInfo == null) {
-      return;
-    }
-    let fosColours_setup = {
-      ComputerScience : "#800000",
-      Medicine : "#9a6324",
-      Chemistry : "#808000",
-      Biology : "#469990",
-      MaterialsScience : "#000076",
-      Physics : "#e6194b",
-      Geology : "#ff7f00",
-      Psychology : "#f58231",
-      Art :"#ffe119",
-      History : "#bfef45",
-      Geography : "#3cb44b",
-      Sociology : "#6b238f",
-      Business : "#42d4f4",
-      PoliticalScience : "#6aff00",
-      Economics : "#4363d8",
-      Philosophy : "#911eb4",
-      Mathematics : "#f032e6",
-      Engineering : "#a9a9a9",
-      EnvironmentalScience : "bfff00",
-      AgriculturalandFoodSciences : "#fabed4",
-      Education : "#ffd8b1",
-      Law : "fffac8",
-      Linguistics : "#aaffc3"
-    };
-
-    setFosColours(fosColours_setup);
-    //console.log(fosColours_setup);
-  }
-
   const getNodes = () => { // creates the node in the graph
     if(citationInfo == null) {
+      console.log("citation info is null so nodes is null");
       return;
     }
     let graphNodes = [];
@@ -137,6 +78,7 @@ const VisualizeGraph = ({pdfTitle}) => {
       title: defaultDoi,
       label: pdfTitle
     };
+    console.log("defaultNode: ", defaultNode);
     graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       var tmpNode = {};
@@ -150,6 +92,7 @@ const VisualizeGraph = ({pdfTitle}) => {
 
   const getEdges = () => {
     if(citationInfo == null) {
+      console.log("citation info is null so edges is null");
       return;
     }
     
@@ -158,6 +101,13 @@ const VisualizeGraph = ({pdfTitle}) => {
     let fosToDoi_setup = {};
     //Note that it only compares to the FIRST fosOrig. This is assuming it only has ONE fos.
     var fosOrig = "";
+    console.log("DefaultDOI:", defaultDoi );
+    if(abstractFosInfo[defaultDoi] == null){
+      console.log("No abstract info for defaultDOI");
+      return;
+    }
+    console.log(abstractFosInfo[defaultDoi]);
+
     if(abstractFosInfo[defaultDoi].fos != null){
       fosOrig = abstractFosInfo[defaultDoi].fos[0];
     }
@@ -235,37 +185,6 @@ const VisualizeGraph = ({pdfTitle}) => {
     }
     
     console.log(fosToDoi_setup.length);
-    /*
-    for( let l = 0 ; l < Object.keys(fosToDoi_setup).length ; l++){
-      console.log("here")
-      var fos = Object.keys(fosToDoi_setup)[l];
-      console.log(fos);
-      for(let m = 0; m < fosToDoi_setup[fos].length -1 ; m++){
-        
-        var index0 = fosToDoi_setup[fos][m];
-        var index1 = fosToDoi_setup[fos][m+1];
-        
-        var tmpEdge0 = {};
-        tmpEdge0.from = index0;
-        tmpEdge0.to = index1;
-        tmpEdge0.label = fos;
-        //tmpEdge0.color = fosColours[fos.replace(/\s/g, '')];  
-        graphEdges.push(tmpEdge0);
-
-        var tmpEdge1 = {};
-        tmpEdge1.from = index1;
-        tmpEdge1.to = index0;
-        tmpEdge1.label = fos;
-        //tmpEdge1.color = fosColours[fos.replace(/\s/g, '')];  
-        graphEdges.push(tmpEdge1);
-
-        console.log(tmpEdge0,tmpEdge1);
-
-      }
-    }
-    */
-
-    // Loop through all that have more than one fOS
     setEdges(graphEdges);
   }
 
@@ -399,14 +318,18 @@ const VisualizeGraph = ({pdfTitle}) => {
         <Button 
           onClick={() => {
             const title_with_pulses = makeTitlePlus();
+            console.log(title_with_pulses);
             findCitations_withTitle(title_with_pulses)
             .then((res) => {
               setCitationInfo(res.connected_references)
+              console.log(citationInfo);
               setAbstractFosInfo(res.fosAndAbstract)
               //getFosToDoi();
               //getFOS();
               getNodes();
+              console.log(nodes);
               getEdges();
+              console.log(edges);
             });
             setShowModal(true);
           }}

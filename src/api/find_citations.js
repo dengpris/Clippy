@@ -115,12 +115,12 @@ const getFieldsOfStudy = async(ref_dois) => {
 // const url_title_query = url_query + "?query.title=" + pdf_title;
 
 export const findCitations_withTitle = async (pdfTitle) => {
-  console.log(pdfTitle)
+  //console.log(pdfTitle)
   let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
   let citationData = {}
   let sortedData = {}
   //const org_doi = "10.1371/journal.pclm.0000093"
-  console.log("HELLO4")
+  console.log("In findCitations")
   try {
     const res = await axios.get(
       urlRequest
@@ -132,9 +132,14 @@ export const findCitations_withTitle = async (pdfTitle) => {
     var new_referenced_dois = referenced_dois;
 
     const org_doi = res.data.message.items[0].DOI;
+    citationData.origDOI = org_doi;
+    console.log("Originial DOI: ",org_doi);
     new_referenced_dois.push(org_doi);
 
+
     citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois);
+    console.log("fosAndAbstract: ", citationData.fosAndAbstract);
+
     console.log(citationData);
    // sortedData = sortData(citationData);
     //var abstracts_from_dois = await getAbstracts(new_referenced_dois);
