@@ -37,35 +37,13 @@ const VisualizeGraph = ({pdfTitle}) => {
   }
   
 
-  //MJ Idek what useEffect does but it looks like we need the find_citations in useEffect. Idek why it's getting called 3 other times tho.
   useEffect(() => {
-    
-    //setDefaultDoi(doi);
-    const title_with_pulses = makeTitlePlus();
-    
-    //setTitlePlus(title_with_pulses)
-    //console.log(title_with_pulses);
-    findCitations_withTitle(title_with_pulses)
-    .then((res) => {
-      setDefaultDoi(res.origDOI);
-      setCitationInfo(res.connected_references);
-      setAbstractFosInfo(res.fosAndAbstract);
-      console.log('finished usedeffect findCitations');
-      //console.log(citationInfo);
-      //console.log(defaultDoi);
-      //getFosToDoi();
-      //getAbstract()
-    });
-    console.log("use effect ran");
-  }, []);
-
-  useEffect(() => {
-    if(citationInfo === null) {
+    if(Object.keys(nodes).length == 0) {
       setLoading(true);
     } else {
       setLoading(false);
     }
-  }, [citationInfo])
+  }, [nodes])
 
   const getNodes = () => { // creates the node in the graph
     if(citationInfo == null) {
@@ -226,11 +204,6 @@ const VisualizeGraph = ({pdfTitle}) => {
   const events = {
     select: function(event) {
       var { nodes, edges } = event;
-      //console.log(nodes);
-      //toggleEdgeView(event,edges);
-      //console.log(nodes[0]);
-      //console.log(graph.edges);
-      //console.log(citationInfo[nodes[0]].author[0].given);
       var title = citationInfo[nodes[0]].title[0];
       var author = citationInfo[nodes[0]].author[0].given + citationInfo[nodes[0]].author[0].family ;
       var abstract = "";
@@ -257,7 +230,6 @@ const VisualizeGraph = ({pdfTitle}) => {
       setAuthor(author);
       setFos(fos);
       setAbstract(abstract);
-      // alert("TITLE: " + title + "\n\nAUTHOR: " + author +"\n\n" + fos + "\n\n" + abstract);
     }
 
   };
@@ -318,6 +290,7 @@ const VisualizeGraph = ({pdfTitle}) => {
             console.log(title_with_pulses);
             findCitations_withTitle(title_with_pulses)
             .then((res) => {
+              setDefaultDoi(res.origDOI);
               setCitationInfo(res.connected_references)
               //console.log(citationInfo);
               setAbstractFosInfo(res.fosAndAbstract)
