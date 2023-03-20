@@ -42,31 +42,35 @@ function getDOIofReferences(pdf_data){
 const getRefDataByDOI = async(referenced_dois) => {
   let connected_refs = {};
   var keys = {}
+  const queries = [];
   for(let i = 0; i < referenced_dois.length; i++) {
     const url_doi_query = url_query + "/" + referenced_dois[i];
     let ref_info = [];
-    axios.get(
-      url_doi_query
-    )
-    .then(res => {
-      //gets referenced dois of this specific doi
-      var temp_referenced_dois = getDOIofReferences(res.data.message);
-      //storing specific doi info
-      ref_info.author = res.data.message.author;
-      ref_info.title = res.data.message.title;
-      ref_info.doi = res.data.message.DOI;
-      ref_info.references = temp_referenced_dois;
-      // Takes the references of current doi and compares it with the references on the pdf
-      var connected_refs_for_i = getListOfConnectedRefs(referenced_dois, temp_referenced_dois,i);
-      ref_info.connected_refs = connected_refs_for_i;
-      //Add this doi's info on the connected_refs list
-      connected_refs[referenced_dois[i]] = ref_info;  
-      //console.log(i)
-      //console.log(Object.values(connected_refs))
-      keys = Object.keys(connected_refs)
-    })
-    .catch((err)=>console.log(err)); 
+    queries.push(
+      axios.get(
+        url_doi_query
+      )
+      .then(res => {
+        //gets referenced dois of this specific doi
+        var temp_referenced_dois = getDOIofReferences(res.data.message);
+        //storing specific doi info
+        ref_info.author = res.data.message.author;
+        ref_info.title = res.data.message.title;
+        ref_info.doi = res.data.message.DOI;
+        ref_info.references = temp_referenced_dois;
+        // Takes the references of current doi and compares it with the references on the pdf
+        var connected_refs_for_i = getListOfConnectedRefs(referenced_dois, temp_referenced_dois,i);
+        ref_info.connected_refs = connected_refs_for_i;
+        //Add this doi's info on the connected_refs list
+        connected_refs[referenced_dois[i]] = ref_info;  
+        //console.log(i)
+        //console.log(Object.values(connected_refs))
+        keys = Object.keys(connected_refs)
+      })
+      .catch((err)=>console.log(err))
+    );
   }
+  await Promise.all(queries);
   //console.log(connected_refs)
   //console.log("Here")
   //console.log(Object.values(connected_refs)[0])
@@ -92,22 +96,26 @@ function sortData(citationData){
 const getFieldsOfStudy = async(ref_dois) => {
   //console.log(Object.keys(connected_refs))
   let fosAndAbstract = {};
+  const queries = [];
   for(let i = 0; i < ref_dois.length; i++){
     var url_abstract_query = ss_url_query + ref_dois[i] + "?fields=fieldsOfStudy,abstract";
     let ref_info = {}
-    axios.get(
-      url_abstract_query
-    )
-    .then(res => {
-      ref_info.fos = res.data.fieldsOfStudy;
-      ref_info.abstract = res.data.abstract;
-      //ref_info.title = res.data.title;
-      fosAndAbstract[ref_dois[i]] = ref_info
-    })
-    .catch((err)=>console.log(err));
+    queries.push(
+      axios.get(
+        url_abstract_query
+      )
+      .then(res => {
+        ref_info.fos = res.data.fieldsOfStudy;
+        ref_info.abstract = res.data.abstract;
+        //ref_info.title = res.data.title;
+        fosAndAbstract[ref_dois[i]] = ref_info
+      })
+      .catch((err)=>console.log(err))
+    );
   }
+  await Promise.all(queries);
   //console.log(fosAndAbstract[ref_dois[0]])
-  return fosAndAbstract
+  return fosAndAbstract;
 }
 
 // const pdf_title = "Nanometre-scale+thermometry+in+a+living+cell";

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Graph from "react-graph-vis";
 import { v4 as uuidv4 } from "uuid";
 import PropTypes from 'prop-types';
@@ -19,8 +19,6 @@ const VisualizeGraph = ({pdfTitle}) => {
 
   const [citationInfo, setCitationInfo] = useState(null);
   const [abstractFosInfo, setAbstractFosInfo] = useState(null);
-  const [nodes, setNodes] = useState({});
-  const [edges, setEdges] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showNodeModal, setShowNodeModal] = useState(false);
   const [author, setAuthor] = useState(null);
@@ -36,19 +34,10 @@ const VisualizeGraph = ({pdfTitle}) => {
     return title_with_pulses;
   }
   
-
-  useEffect(() => {
-    if(Object.keys(nodes).length == 0) {
-      setLoading(true);
-    } else {
-      setLoading(false);
-    }
-  }, [nodes])
-
-  const getNodes = () => { // creates the node in the graph
+  const nodes = useMemo(() => { // creates the node in the graph
     if(citationInfo == null) {
       console.log("citation info is null so nodes is null");
-      return;
+      return [];
     }
     let graphNodes = [];
     var defaultNode = {
@@ -64,13 +53,22 @@ const VisualizeGraph = ({pdfTitle}) => {
       tmpNode.label = Object.values(citationInfo)[i].title[0];
       graphNodes.push(tmpNode);
     }
-    setNodes(graphNodes);
-  }
+    console.log("graphNodes", graphNodes);
+    return graphNodes;
+  }, [citationInfo]);
 
-  const getEdges = () => {
-    if(citationInfo == null) {
+  useEffect(() => {
+    if(!nodes || Object.keys(nodes).length == 0) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  }, [nodes]);
+
+  const edges = useMemo(() => {
+    if(citationInfo == null || abstractFosInfo == null) {
       console.log("citation info is null so edges is null");
-      return;
+      return [];
     }
     
     //console.log(citationInfo["10.1002/fee.1950"]);
@@ -80,7 +78,7 @@ const VisualizeGraph = ({pdfTitle}) => {
     var fosOrig = "";
     if(abstractFosInfo[defaultDoi] == null){
       console.log("No abstract info for defaultDOI");
-      return;
+      return [];
     }
 
     if(abstractFosInfo[defaultDoi].fos != null){
@@ -160,13 +158,15 @@ const VisualizeGraph = ({pdfTitle}) => {
     }
     
     //console.log(fosToDoi_setup.length);
-    setEdges(graphEdges);
-  }
+    console.log("graphEdges", graphEdges);
+    return graphEdges;
+  }, [citationInfo, abstractFosInfo]);
 
   const graph = {
     nodes: nodes,
     edges: edges
   };
+  console.log(graph);
 
   const options = {
     interaction: {
@@ -234,6 +234,7 @@ const VisualizeGraph = ({pdfTitle}) => {
 
   };
 
+  /*
   function toggleEdgeView (event, selected_edges) {
     console.log("nodes updating");
     var currEdges = graph.edges;
@@ -260,6 +261,7 @@ const VisualizeGraph = ({pdfTitle}) => {
     console.log(graph.edges);
     console.log("nodes updates");
   }
+  */
 
   const renderConditionalGraph = () => {
     if(!loading) {
@@ -291,15 +293,10 @@ const VisualizeGraph = ({pdfTitle}) => {
             findCitations_withTitle(title_with_pulses)
             .then((res) => {
               setDefaultDoi(res.origDOI);
-              setCitationInfo(res.connected_references)
-              //console.log(citationInfo);
-              setAbstractFosInfo(res.fosAndAbstract)
+              setCitationInfo(res.connected_references);
+              setAbstractFosInfo(res.fosAndAbstract);
               //getFosToDoi();
               //getFOS();
-              getNodes();
-              //console.log(nodes);
-              getEdges();
-              //console.log(edges);
             });
             setShowModal(true);
           }}
