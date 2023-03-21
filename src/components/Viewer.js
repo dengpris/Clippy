@@ -110,6 +110,10 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 }
 
 async function onSummaryClick() {
+    if (summary != "") { 
+      toggleSidebar();
+      return; 
+    }
     const payload = new FormData()
 
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
