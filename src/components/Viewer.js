@@ -37,6 +37,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
+    var textLayer = document.querySelector(".textLayer");
     pdf && pdf.getPage(pageNum).then(function(page) {
       const viewport = page.getViewport({ scale: zoomScale });
       const canvas = canvasRef.current;
@@ -46,17 +47,15 @@ const Viewer = ({pdfData, setPdfTitle}) => {
         canvasContext: canvas.getContext('2d'),
         viewport: viewport
       };
+      // Clear previous textlayer on page or zoom change
+      textLayer.innerHTML = "";
+      
       var renderTask = page.render(renderContext);
-
       renderTask.promise.then(function() {
         // Returns a promise, on resolving it will return text contents of the page
         return page.getTextContent();
     })
     .then(function(textContent) {
-
-         // PDF canvas
-        // const textLayer = textRef.current;
-        var textLayer = document.querySelector(".textLayer");
         textLayer.style.left = canvas.offsetLeft + 'px';
         textLayer.style.top = canvas.offsetTop + 'px';
         textLayer.style.height = canvas.offsetHeight + 'px';
@@ -69,8 +68,6 @@ const Viewer = ({pdfData, setPdfTitle}) => {
             viewport: viewport,
             textDivs: []
         });
-        textLayer.setTextContent(textContent);
-
       });
 
     });   
@@ -227,7 +224,7 @@ function checkValidSentence(str){
         : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
-      {/* <div className="textLayer"></div> */}
+      <div className="textLayer"></div>
     </>
     
   );
