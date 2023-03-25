@@ -1,14 +1,10 @@
 
-import myfile from '../pdfLibrary/Test3.pdf'
-import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
-
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
 import Sidebar from './viewerComponents/Sidebar';
-import { getPdf } from '../pdfLibrary/getPdf';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
@@ -114,6 +110,10 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 }
 
 async function onSummaryClick() {
+    if (summary != "") { 
+      toggleSidebar();
+      return; 
+    }
     const payload = new FormData()
 
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
