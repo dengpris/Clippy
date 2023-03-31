@@ -29,7 +29,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [summary, setSummary] = useState("");
   const [body, setBody] = useState(null);
-  const [abstract, setAbstract] = useState("");
+  const [abstract, setAbstract] = useState("not ready");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
@@ -103,7 +103,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const toggleSidebar = () => setShowSidebar(true);
   const hideSidebar = () => setShowSidebar(false);
 
-  const getAbstract = async (pdfTitle) => {
+  async function getAbstract(pdfTitle){
     let doiRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle;
     const doi = (await axios.get(doiRequest)).data.message.items[0].DOI;
     let abstractRequest = 'https://api.semanticscholar.org/graph/v1/paper/' + doi + '?fields=abstract';
@@ -112,7 +112,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
       abstract_temp = "";
     }
     setAbstract(abstract_temp);
-    //console.log(abstract_temp);
+    console.log("done getting abstract");
     //return abstract_temp;
   }
 
@@ -120,7 +120,8 @@ const Viewer = ({pdfData, setPdfTitle}) => {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
     setPdfTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
-    await getAbstract(result['TITLE']);
+    getAbstract(result['TITLE']);
+    //setAbstract(abstract_temp1);
 }
 
 async function onSummaryClick() {
@@ -128,6 +129,7 @@ async function onSummaryClick() {
       toggleSidebar();
       return; 
     }
+    console.log(abstract);
     const payload = new FormData()
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", body);
