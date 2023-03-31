@@ -122,14 +122,37 @@ async function onSummaryClick() {
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        setSummary(summaryTokenize(response.data.summary));
+
+        var reference_summary = "Colombia is recognised for its overall high biodiversity and being number one for bird richness globally. Colombia's rich biodiversity and the multiple values associated with it are threatened by multiple drivers of change including deforestation and climate change. In this opinion\
+        piece, we argue that to succeed in protecting forests and associated biodiversity in Colombia,\
+        conservation actions need to consider local communities and focus on win-win situations for\
+        biodiversity and people. We highlight the example of birdwatching tourism as a nature-based\
+        solution that can help halt deforestation and contribute to climate change adaptation."
+        var rouge = require('rouge');
+        var generated_summary = summaryTokenize(response.data.summary);
+
+        setSummary(generated_summary);
         toggleSidebar();
+        let rouge_scores = getRougeScore(reference_summary, generated_summary);
+        console.log("Rouge Score - Unigram: ", rouge_scores[0]);
+        console.log("Rouge Score - Bigram: ", rouge_scores[1]);
+        console.log("Rouge Score - Trigram: ", rouge_scores[2]);
     })
     .catch((error) => {
         console.log('error', error);
     })
 }
 
+//Calculates the ROUGE score for the given summary
+function getRougeScore(reference_summary, generated_summary){
+  var rouge = require('rouge');
+  var rouge_score_unigram = rouge.n(generated_summary,reference_summary,1);
+  var rouge_score_bigram = rouge.n(generated_summary,reference_summary,2);
+  var rouge_score_trigram = rouge.n(generated_summary,reference_summary,3);
+  //return [rouge_score_unigram, rouge_score_bigram];
+  return [rouge_score_unigram, rouge_score_bigram, rouge_score_trigram];
+  //return rouge_score_unigram;
+}
 
 function summaryTokenize(summary){
   var Tokenizer = require('sentence-tokenizer');
