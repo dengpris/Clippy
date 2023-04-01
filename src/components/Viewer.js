@@ -86,7 +86,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
         viewport: viewport,
         textDivs: []
     }).promise.then(() => {
-      highlightSummary(textLayer);
+      if (showSidebar) { highlightSummary(textLayer); }
     });
   }, [textContent, viewport, summaryArray]);
     
@@ -117,7 +117,11 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
   
   const toggleSidebar = () => setShowSidebar(true);
-  const hideSidebar = () => setShowSidebar(false);
+  const hideSidebar = () => {
+    setShowSidebar(false);
+    const textLayer = document.querySelector(".textLayer")
+    removeHighlight(textLayer);
+  }
 
 
 async function getPDFText() {
@@ -185,6 +189,7 @@ function highlightSummary(textLayer) {
           }
           const highlightNode = document.createElement("mark");
           highlightNode.style.backgroundColor = 'yellow';
+          highlightNode.style.color ='transparent';
           highlightNode.textContent = wordsInLine[wordIdx];
           textLine.append(highlightNode);
           currentWord++;
@@ -208,6 +213,12 @@ function highlightSummary(textLayer) {
   }
 }
 
+function removeHighlight(textLayer) {
+  const highlightedWords = textLayer.getElementsByTagName('mark');
+  for (let words of highlightedWords) {
+    words.style.backgroundColor = 'transparent';
+  }
+}
 
 function summaryTokenize(summary){
   var Tokenizer = require('sentence-tokenizer');
