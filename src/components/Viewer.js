@@ -1,14 +1,10 @@
 
-import myfile from '../pdfLibrary/Test3.pdf'
-import extractText from '../pdfLibrary/PDF_Test_TLDR.cermzones'
-
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
 import Sidebar from './viewerComponents/Sidebar';
-import { getPdf } from '../pdfLibrary/getPdf';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
@@ -33,6 +29,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [summaryArray, setSummaryArray] = useState([]);
   const [body, setBody] = useState("");
+  const [abstract, setAbstract] = useState("not ready");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
   const [textContent, setTextContent] = useState();
   const [viewport, setViewport] = useState();
@@ -123,16 +120,34 @@ const Viewer = ({pdfData, setPdfTitle}) => {
     removeHighlight(textLayer);
   }
 
+  async function getAbstract(pdfTitle){
+    let doiRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle;
+    const doi = (await axios.get(doiRequest)).data.message.items[0].DOI;
+    let abstractRequest = 'https://api.semanticscholar.org/graph/v1/paper/' + doi + '?fields=abstract';
+    let abstract_temp = (await axios.get(abstractRequest)).data.abstract;
+    if(abstract_temp == null){
+      abstract_temp = "";
+    }
+    setAbstract(abstract_temp);
+    console.log("done getting abstract");
+    //return abstract_temp;
+  }
 
 async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
     setPdfTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
+    getAbstract(result['TITLE']);
+    //setAbstract(abstract_temp1);
 }
 
 async function onSummaryClick() {
+    if (summary != "") { 
+      toggleSidebar();
+      return; 
+    }
+    console.log(abstract);
     const payload = new FormData()
-
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", body);
     payload.append("sentences", 5);
