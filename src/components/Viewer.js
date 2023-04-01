@@ -27,15 +27,22 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomScale, setZoomScale] = useState(1.3);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [summary, setSummary] = useState("");
-  const [body, setBody] = useState(null);
+  const [summaryArray, setSummaryArray] = useState([]);
+  const [body, setBody] = useState("");
   const [abstract, setAbstract] = useState("not ready");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
+  const [textContent, setTextContent] = useState();
+  const [viewport, setViewport] = useState();
+  
+  const summary = useMemo(() => {
+    return summaryArray.join(' ');
+  }, [summaryArray]);
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
     pdf && pdf.getPage(pageNum).then(function(page) {
       const viewport = page.getViewport({ scale: zoomScale });
+      setViewport(viewport);
       const canvas = canvasRef.current;
       canvas.height = viewport.height;
       canvas.width = viewport.width;
@@ -43,36 +50,42 @@ const Viewer = ({pdfData, setPdfTitle}) => {
         canvasContext: canvas.getContext('2d'),
         viewport: viewport
       };
-      var renderTask = page.render(renderContext);
 
+      
+      var renderTask = page.render(renderContext);
       renderTask.promise.then(function() {
         // Returns a promise, on resolving it will return text contents of the page
         return page.getTextContent();
     })
     .then(function(textContent) {
-
-         // PDF canvas
-        // const textLayer = textRef.current;
-        var textLayer = document.querySelector(".textLayer");
-        textLayer.style.left = canvas.offsetLeft + 'px';
-        textLayer.style.top = canvas.offsetTop + 'px';
-        textLayer.style.height = canvas.offsetHeight + 'px';
-        textLayer.style.width = canvas.offsetWidth + 'px';
-        console.log('henlo these are the sizes ', textLayer.style.left,textLayer.style.top, textLayer.style.height, textLayer.style.top);
-        // Pass the data to the method for rendering of text over the pdf canvas.
-        PDFJS.renderTextLayer({
-            textContent: textContent,
-            container: textLayer,
-            viewport: viewport,
-            textDivs: []
-        });
-        textLayer.setTextContent(textContent);
-
+      setTextContent(textContent);
       });
-
     });   
   }, [pdfRef, zoomScale]);
 
+  useEffect(() => {
+    if (!textContent || !viewport) {
+      return;
+    }
+    const textLayer = document.querySelector(".textLayer");
+    // Clear previous textlayer on page or zoom change
+    textLayer.innerHTML = "";
+    const canvas = canvasRef.current;
+
+    textLayer.style.left = canvas.offsetLeft + 'px';
+    textLayer.style.top = canvas.offsetTop + 'px';
+    textLayer.style.height = canvas.offsetHeight + 'px';
+    textLayer.style.width = canvas.offsetWidth + 'px';
+    // Pass the data to the method for rendering of text over the pdf canvas.
+    PDFJS.renderTextLayer({
+        textContent: textContent,
+        container: textLayer,
+        viewport: viewport,
+        textDivs: []
+    }).promise.then(() => {
+      if (showSidebar) { highlightSummary(textLayer); }
+    });
+  }, [textContent, viewport, summaryArray]);
     
   useEffect(() => {
     renderPage(currentPage, pdfRef);
@@ -101,7 +114,11 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
   
   const toggleSidebar = () => setShowSidebar(true);
-  const hideSidebar = () => setShowSidebar(false);
+  const hideSidebar = () => {
+    setShowSidebar(false);
+    const textLayer = document.querySelector(".textLayer")
+    removeHighlight(textLayer);
+  }
 
   async function getAbstract(pdfTitle){
     let doiRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle;
@@ -116,7 +133,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
     //return abstract_temp;
   }
 
-  async function getPDFText() {
+async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
     setPdfTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
@@ -137,7 +154,7 @@ async function onSummaryClick() {
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        setSummary(summaryTokenize(response.data.summary));
+        setSummaryArray(summaryTokenize(response.data.summary));
         toggleSidebar();
     })
     .catch((error) => {
@@ -145,27 +162,98 @@ async function onSummaryClick() {
     })
 }
 
+function highlightSummary(textLayer) {
+  const textLines = textLayer.getElementsByTagName("span");
+
+  for (let sentenceIdx = 0; sentenceIdx < summaryArray.length; sentenceIdx++) {
+    let currentLine = 0;
+    const sentence = summaryArray[sentenceIdx];
+    console.log('searching for ' + sentence);
+    const words = sentence.split(' ');
+    let currentWord = 0;
+
+    const highlightLines = [];
+    while (currentWord < words.length && currentLine < textLines.length) {
+      const wordsInLine = textLines[currentLine].textContent.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').split(' ');
+      const textLine = textLines[currentLine].cloneNode();
+
+      let matched = false;
+      for (let wordIdx = 0; wordIdx < wordsInLine.length; wordIdx++) {
+        const word = wordsInLine[wordIdx];
+        if (currentWord === words.length) {
+          matched = true;
+          // need to add unhighlighted words following this wordw
+          textLine.innerHTML += wordsInLine.slice(wordIdx).join(" ");
+          highlightLines.push(textLine);
+          break;
+        }
+
+        matched = word === words[currentWord];
+        if (!matched && wordIdx == wordsInLine.length - 1) { // last word on a line may contain a hyphen
+          if (word[word.length - 1] === '-' && word.slice(0, word.length - 1) === words[currentWord].slice(0, word.length - 1)) {
+            matched = true;
+            words[currentWord] = words[currentWord].slice(word.length - 1); 
+            currentWord--;
+          }
+        }
+
+        if (matched) {
+          if (currentWord == 0) {
+            // first word found, need to add unhighlighted words in this line
+            textLine.textContent = wordsInLine.slice(0, wordIdx).join(" ");
+          }
+          const highlightNode = document.createElement("mark");
+          highlightNode.style.backgroundColor = 'yellow';
+          highlightNode.style.color ='transparent';
+          highlightNode.textContent = wordsInLine[wordIdx];
+          textLine.append(highlightNode);
+          currentWord++;
+        } else if (currentWord !== 0) {
+          console.log('terminated');
+          currentWord = 0;
+          matched = false;
+          highlightLines.length = 0;
+        }
+      }
+      if (!matched) {
+        textLine.remove();
+      } else {
+        highlightLines.push(textLine);
+      }
+      currentLine++;
+    }
+    for (const line of highlightLines) {
+      textLayer.append(line);
+    }
+  }
+}
+
+function removeHighlight(textLayer) {
+  const highlightedWords = textLayer.getElementsByTagName('mark');
+  for (let words of highlightedWords) {
+    words.style.backgroundColor = 'transparent';
+  }
+}
 
 function summaryTokenize(summary){
   var Tokenizer = require('sentence-tokenizer');
   var tokenizer = new Tokenizer();
   tokenizer.setEntry(summary);
-  console.log(tokenizer.getSentences());
   var summarySentencesArray = tokenizer.getSentences();
-  var finalSummaryArray = [];
+  const summaryArray = [];
 
   const TextCleaner = require('text-cleaner');
   for(let i = 0; i < summarySentencesArray.length; i++){
      summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
-     console.log(summarySentencesArray[i]);
    }
   
   for(let i = 0; i<summarySentencesArray.length;i++){
     if (checkValidSentence(summarySentencesArray[i])){
-      finalSummaryArray.push(summarySentencesArray[i]);
+      summaryArray.push(summarySentencesArray[i]);
     };
   }
-  return finalSummaryArray.join(' ');
+
+  return summaryArray;
 }
 
 // Code from: https://www.geeksforgeeks.org/check-given-sentence-given-set-simple-grammer-rules/
@@ -242,7 +330,7 @@ function checkValidSentence(str){
         : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
-      {/* <div className="textLayer"></div> */}
+      <div className="textLayer"></div>
     </>
     
   );
