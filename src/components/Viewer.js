@@ -113,7 +113,11 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const firstPage = () => currentPage !== 1 && setCurrentPage(1);
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
   
-  const toggleSidebar = () => setShowSidebar(true);
+  const toggleSidebar = () => {
+    setShowSidebar(true);
+    const textLayer = document.querySelector(".textLayer");
+    highlightSummary(textLayer);
+  }
   const hideSidebar = () => {
     setShowSidebar(false);
     const textLayer = document.querySelector(".textLayer")
@@ -174,21 +178,30 @@ function highlightSummary(textLayer) {
 
     const highlightLines = [];
     while (currentWord < words.length && currentLine < textLines.length) {
+      // If span only has numbers, brackets, or [.,-], assume it is a super/subscript and skip it
+      if (textLines[currentLine].textContent.match(/^[\d\.\,\-\–\[\]\(\)\{\}]+$/)) { 
+        currentLine++;
+        continue;
+      }
       const wordsInLine = textLines[currentLine].textContent.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').split(' ');
       const textLine = textLines[currentLine].cloneNode();
 
       let matched = false;
       for (let wordIdx = 0; wordIdx < wordsInLine.length; wordIdx++) {
         const word = wordsInLine[wordIdx];
+        if (!word) { continue; }
         if (currentWord === words.length) {
           matched = true;
-          // need to add unhighlighted words following this wordw
+          // need to add unhighlighted words following this word
           textLine.innerHTML += wordsInLine.slice(wordIdx).join(" ");
           highlightLines.push(textLine);
           break;
         }
-
+        
         matched = word === words[currentWord];
+        // Sometimes textContent will lack a period
+        if (words[currentWord].replace(word, '').match(/^[\.\?\!]*$/)) { matched = true; }
+
         if (!matched && wordIdx == wordsInLine.length - 1) { // last word on a line may contain a hyphen
           if (word[word.length - 1] === '-' && word.slice(0, word.length - 1) === words[currentWord].slice(0, word.length - 1)) {
             matched = true;
