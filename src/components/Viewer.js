@@ -34,11 +34,12 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const [summaryArray, setSummaryArray] = useState([]);
   const [body, setBody] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
+  const [textContent, setTextContent] = useState();
+  const [viewport, setViewport] = useState();
+  
   const summary = useMemo(() => {
     return summaryArray.join(' ');
   }, [summaryArray]);
-  const [textContent, setTextContent] = useState();
-  const [viewport, setViewport] = useState();
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -119,7 +120,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const hideSidebar = () => setShowSidebar(false);
 
 
-  async function getPDFText() {
+async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
     setPdfTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
@@ -143,8 +144,6 @@ async function onSummaryClick() {
 }
 
 function highlightSummary(textLayer) {
-  //var l = 0;
-
   const textLines = textLayer.getElementsByTagName("span");
 
   for (let sentenceIdx = 0; sentenceIdx < summaryArray.length; sentenceIdx++) {
@@ -214,9 +213,7 @@ function summaryTokenize(summary){
   var Tokenizer = require('sentence-tokenizer');
   var tokenizer = new Tokenizer();
   tokenizer.setEntry(summary);
-  console.log(tokenizer.getSentences());
   var summarySentencesArray = tokenizer.getSentences();
-  //var finalSummaryArray = [];
   const summaryArray = [];
 
   const TextCleaner = require('text-cleaner');
