@@ -129,26 +129,22 @@ async function onSummaryClick() {
       toggleSidebar();
       return; 
     }
-    console.log(abstract);
     const payload = new FormData()
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", body);
+    //When testing summary, use number of sentences equal to abstract.
     payload.append("sentences", 5);
 
     axios.post(summaryURL, payload)
     .then((response) => {
-
-        var reference_summary = "Colombia is recognised for its overall high biodiversity and being number one for bird richness globally. Colombia's rich biodiversity and the multiple values associated with it are threatened by multiple drivers of change including deforestation and climate change. In this opinion\
-        piece, we argue that to succeed in protecting forests and associated biodiversity in Colombia,\
-        conservation actions need to consider local communities and focus on win-win situations for\
-        biodiversity and people. We highlight the example of birdwatching tourism as a nature-based\
-        solution that can help halt deforestation and contribute to climate change adaptation."
-        var rouge = require('rouge');
+        console.log(abstract);
+        var reference_summary = abstract;
         var generated_summary = summaryTokenize(response.data.summary);
 
         setSummary(generated_summary);
         toggleSidebar();
         let rouge_scores = getRougeScore(reference_summary, generated_summary);
+        //ROUGE Scores output to console
         console.log("Rouge Score - Unigram: ", rouge_scores[0]);
         console.log("Rouge Score - Bigram: ", rouge_scores[1]);
         console.log("Rouge Score - Trigram: ", rouge_scores[2]);
@@ -164,30 +160,29 @@ function getRougeScore(reference_summary, generated_summary){
   var rouge_score_unigram = rouge.n(generated_summary,reference_summary,1);
   var rouge_score_bigram = rouge.n(generated_summary,reference_summary,2);
   var rouge_score_trigram = rouge.n(generated_summary,reference_summary,3);
-  //return [rouge_score_unigram, rouge_score_bigram];
   return [rouge_score_unigram, rouge_score_bigram, rouge_score_trigram];
-  //return rouge_score_unigram;
 }
 
+//Tokenizes summary into sentences with proper formatting.
 function summaryTokenize(summary){
-  var Tokenizer = require('sentence-tokenizer');
-  var tokenizer = new Tokenizer();
-  tokenizer.setEntry(summary);
-  console.log(tokenizer.getSentences());
-  var summarySentencesArray = tokenizer.getSentences();
+  //Using new tokenizer for cleaner sentence parsing
+  var tokenizer = require('sbd');
+  console.log(tokenizer.sentences(summary));
+  var summarySentencesArray = tokenizer.sentences(summary);
   var finalSummaryArray = [];
 
   const TextCleaner = require('text-cleaner');
   for(let i = 0; i < summarySentencesArray.length; i++){
      summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
-     console.log(summarySentencesArray[i]);
    }
   
+  //Checking for valid sentences and removes sentences that are not valid sentences.
   for(let i = 0; i<summarySentencesArray.length;i++){
     if (checkValidSentence(summarySentencesArray[i])){
       finalSummaryArray.push(summarySentencesArray[i]);
-    };
+    }
   }
+  console.log(finalSummaryArray);
   return finalSummaryArray.join(' ');
 }
 

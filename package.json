@@ -29,6 +29,7 @@
     "rouge": "^1.0.3",
     "sbd": "^1.0.19",
     "sentence-tokenizer": "^1.0.1",
+    "spellchecker": "^3.7.1",
     "stream-browserify": "^3.0.0",
     "text-cleaner": "^1.2.1",
     "url": "^0.11.0",
