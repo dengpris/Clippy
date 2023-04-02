@@ -29,6 +29,7 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
   const [title, setTitle] = useState(null);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [madeGraph, setMadeGraph] = useState(null);
 
   const makeTitlePlus = () => {
     var title_with_pulses = pdfTitle.split(' ').join('+');
@@ -238,7 +239,7 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
 
   const renderConditionalGraph = () => {
     if(!loading) {
-      return (
+      setMadeGraph(
         <>
           <p>
             Click on the nodes to see more information!
@@ -254,8 +255,9 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
           />
         </>
       )
+      console.log("done making the graph");
     } else {
-      return (
+      setMadeGraph(
         //<p>Loading...</p>
         //<Spinner animation="border" variant="primary"/>
         <>
@@ -275,11 +277,18 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
       setDefaultDoi(res.origDOI);
       setCitationInfo(res.connected_references);
       setAbstractFosInfo(res.fosAndAbstract);
-      //getFosToDoi();
-      //getFOS();
     });
+    renderConditionalGraph();
+  }, [pdfTitle])
+
+  useEffect( () => {  
+    console.log(graphClicked);
     setShowModal(true);
   }, [graphClicked])
+
+  const renderGraph = ()=>{
+    return madeGraph;
+  }
 
   const renderModal = () => {
     return (
@@ -290,6 +299,7 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
           onHide={ () => {
             setShowModal(false); 
             graphClicked = false;
+            console.log(graphClicked);
           }}
           size='xl'
         >
@@ -300,7 +310,7 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
           </Modal.Header>
           <Modal.Body>
             <div className='vis-graph'>
-              { renderConditionalGraph() }
+              { renderGraph() }
             </div>
           </Modal.Body>
         </Modal>
