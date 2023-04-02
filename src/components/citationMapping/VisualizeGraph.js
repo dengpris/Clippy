@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { findCitations_withTitle } from "../../api/find_citations";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Spinner from 'react-bootstrap/Spinner';
 import './citationMappingStyle.css'
 
 
@@ -234,35 +235,6 @@ const VisualizeGraph = ({pdfTitle}) => {
 
   };
 
-  /*
-  function toggleEdgeView (event, selected_edges) {
-    console.log("nodes updating");
-    var currEdges = graph.edges;
-    var newEdges = selected_edges;
-    console.log(currEdges);
-
-    for (var i = 0; i < currEdges.length; i++) {
-      for (var j = 0; j < newEdges.length; j++) {
-        if (currEdges[i].id == newEdges[j]) {
-          console.log(currEdges[i].hidden);
-          console.log(currEdges[i].id);
-          if (currEdges[i].hidden == true){
-            currEdges[i].hidden = false;
-          }else{
-            currEdges[i].hidden = true;
-          }
-          currEdges[i].color = "#5151fc";
-          //delete currEdges[i];
-          
-        }
-      }
-    }
-    setEdges(currEdges);
-    console.log(graph.edges);
-    console.log("nodes updates");
-  }
-  */
-
   const renderConditionalGraph = () => {
     if(!loading) {
       return (
@@ -278,7 +250,10 @@ const VisualizeGraph = ({pdfTitle}) => {
       )
     } else {
       return (
-        <p>Loading...</p>
+        //<p>Loading...</p>
+        <>
+          <Spinner animation="border" variant="primary"/>
+        </>
       )
     }
   }
@@ -303,7 +278,7 @@ const VisualizeGraph = ({pdfTitle}) => {
           variant='secondary'
           className="m-5"
           >
-          Generate Citation Graph
+          Generate Knowledge Map
         </Button>
         
         <Modal
@@ -313,12 +288,12 @@ const VisualizeGraph = ({pdfTitle}) => {
         >
           <Modal.Header closeButton>
             <Modal.Title>
-              Citation Map
+              Knowledge Map
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <p>
-              Hover over nodes to see DOI!
+              Click nodes to see more information
             </p>
             <div className='vis-graph'>
               { renderConditionalGraph() }
