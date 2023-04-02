@@ -266,22 +266,20 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
     }
   }
 
-  async function onGraphClick() {
-    if(graphClicked){
-      console.log("we made it here");
-      const title_with_pulses = makeTitlePlus();
-      console.log(title_with_pulses);
-      findCitations_withTitle(title_with_pulses)
-      .then((res) => {
-        setDefaultDoi(res.origDOI);
-        setCitationInfo(res.connected_references);
-        setAbstractFosInfo(res.fosAndAbstract);
-        //getFosToDoi();
-        //getFOS();
-      });
-      setShowModal(true);
-    }
-  }
+  useEffect( () => {
+    console.log("we made it here");
+    const title_with_pulses = makeTitlePlus();
+    console.log(title_with_pulses);
+    findCitations_withTitle(title_with_pulses)
+    .then((res) => {
+      setDefaultDoi(res.origDOI);
+      setCitationInfo(res.connected_references);
+      setAbstractFosInfo(res.fosAndAbstract);
+      //getFosToDoi();
+      //getFOS();
+    });
+    setShowModal(true);
+  }, [graphClicked])
 
   const renderModal = () => {
     return (
@@ -289,7 +287,10 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
         <Modal
           className="my-modal"
           show={ showModal }
-          onHide={ () => setShowModal(false)}
+          onHide={ () => {
+            setShowModal(false); 
+            graphClicked = false;
+          }}
           size='xl'
         >
           <Modal.Header closeButton>
@@ -329,7 +330,6 @@ const VisualizeGraph = ({pdfTitle, graphClicked}) => {
 
   return (
     <>
-      {onGraphClick()}
       {renderModal() }      
     </>
     
