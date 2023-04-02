@@ -147,20 +147,42 @@ async function onSummaryClick() {
       return; 
     }
     const payload = new FormData()
+    var numSentences = 5;
+    //Tokenizes body into sentence array.
+    var formattedBodyArray = summaryTokenize(body);
+    //Removes invalid sentences from body text to be put in summarizer.
+    var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
+    //console.log(formatted_body);
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
-    payload.append("txt", body);
+    payload.append("txt", formatted_body);
     //When testing summary, use number of sentences equal to abstract.
-    payload.append("sentences", 5);
+    payload.append("sentences", numSentences);
 
     axios.post(summaryURL, payload)
     .then((response) => {
         console.log(abstract);
-        var reference_summary = abstract;
+        var reference_summary;
+        //No abstract available
+        if(abstract == ""){
+          var abstractBodyArray = summaryTokenize(body);
+          var newAbstractArray = [];
+          for(let i = 0; i < numSentences; i++){
+            newAbstractArray.push(abstractBodyArray[i]);
+          }
+          //console.log(newAbstractArray);
+          reference_summary = newAbstractArray.join(' ');
+        }
+        //Abstract available
+        else{
+          reference_summary = abstract;
+        }
+        //console.log(response.data.summary)
+        //Tokenizes summary but does not remove improper sentences.
         var generated_summary = summaryTokenize(response.data.summary);
         setSummaryArray(generated_summary);
-        console.log(summaryArray);
+        //console.log(generated_summary);
         toggleSidebar();
-        let rouge_scores = getRougeScore(reference_summary, generated_summary);
+        let rouge_scores = getRougeScore(reference_summary, generated_summary.join(' '));
         //ROUGE Scores output to console
         console.log("Rouge Score - Unigram: ", rouge_scores[0]);
         console.log("Rouge Score - Bigram: ", rouge_scores[1]);
@@ -266,14 +288,19 @@ function summaryTokenize(summary){
      summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
    }
   
-  //Checking for valid sentences and removes sentences that are not valid sentences.
-  for(let i = 0; i<summarySentencesArray.length;i++){
-    if (checkValidSentence(summarySentencesArray[i])){
-      finalSummaryArray.push(summarySentencesArray[i]);
+  //console.log(summarySentencesArray);
+  return summarySentencesArray;
+}
+
+function removeInvalidSentence(summarySentencesArray){
+    var tempSentenceArray = [];
+    //Checking for valid sentences and removes sentences that are not valid sentences.
+    for(let i = 0; i<summarySentencesArray.length;i++){
+      if (checkValidSentence(summarySentencesArray[i])){
+        tempSentenceArray.push(summarySentencesArray[i]);
+      }
     }
-  }
-  //console.log(finalSummaryArray);
-  return finalSummaryArray;
+    return tempSentenceArray;
 }
 
 // Code from: https://www.geeksforgeeks.org/check-given-sentence-given-set-simple-grammer-rules/
