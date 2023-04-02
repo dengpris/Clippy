@@ -7,6 +7,7 @@ import { findCitations_withTitle } from "../../api/find_citations";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Spinner from 'react-bootstrap/Spinner';
+import loading_logo from '../citationMapping/book_loading.gif';
 import './citationMappingStyle.css'
 
 
@@ -238,21 +239,28 @@ const VisualizeGraph = ({pdfTitle}) => {
   const renderConditionalGraph = () => {
     if(!loading) {
       return (
-        <Graph
-          
-          key={ uuidv4() } // need to generate unique key for graph each render
-          graph={graph}
-          options={options}
-          events={events}
-          getNetwork={network => { 
-          }}
-        />
+        <>
+          <p>
+            Click on the nodes to see more information!
+          </p>
+          <Graph
+            
+            key={ uuidv4() } // need to generate unique key for graph each render
+            graph={graph}
+            options={options}
+            events={events}
+            getNetwork={network => { 
+            }}
+          />
+        </>
       )
     } else {
       return (
         //<p>Loading...</p>
+        //<Spinner animation="border" variant="primary"/>
         <>
-          <Spinner animation="border" variant="primary"/>
+          <span className="loading-caption">We're still generating the map...Please come back later!</span>
+          <img src={loading_logo} alt="Generating map..." className="loading-img"/>
         </>
       )
     }
@@ -282,6 +290,7 @@ const VisualizeGraph = ({pdfTitle}) => {
         </Button>
         
         <Modal
+          className="my-modal"
           show={ showModal }
           onHide={ () => setShowModal(false) }
           size='xl'
@@ -292,9 +301,6 @@ const VisualizeGraph = ({pdfTitle}) => {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p>
-              Click nodes to see more information
-            </p>
             <div className='vis-graph'>
               { renderConditionalGraph() }
             </div>
