@@ -1,5 +1,6 @@
 
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
+import VisualizeGraph from './citationMapping/VisualizeGraph';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
@@ -14,7 +15,7 @@ PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 
 
-const Viewer = ({pdfData, setPdfTitle}) => {
+const Viewer = ({pdfData, setPdfTitle, setGraphClicked}) => {
   const url = useMemo(() => {
     getPDFText();
     return URL.createObjectURL(pdfData);
@@ -30,6 +31,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const [summary, setSummary] = useState("");
   const [body, setBody] = useState(null);
   const [abstract, setAbstract] = useState("not ready");
+  const [title, setTitle] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
@@ -118,7 +120,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 
   async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
-    setPdfTitle(result['TITLE']);
+    setTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
     getAbstract(result['TITLE']);
     //setAbstract(abstract_temp1);
@@ -143,6 +145,13 @@ async function onSummaryClick() {
     .catch((error) => {
         console.log('error', error);
     })
+}
+
+async function onGraphClick1(){
+  console.log("graph button was clicked");
+  console.log(title);
+  setGraphClicked(true);
+  setPdfTitle(title);
 }
 
 
@@ -224,6 +233,7 @@ function checkValidSentence(str){
         summary = { summary }
         toggleSidebar={ toggleSidebar }
         onSummaryClick={ onSummaryClick }
+        onGraphClick1 = {onGraphClick1}
         currentPage={ currentPage }
         totalPageCount={ totalPages }
         nextPage={ nextPage }
@@ -251,6 +261,7 @@ function checkValidSentence(str){
 Viewer.propTypes = {
   pdfData: PropTypes.instanceOf(File),
   setPdfTitle: PropTypes.func.isRequired,
+  setGraphClicked: PropTypes.func.isRequired,
 };
 
 export default Viewer;

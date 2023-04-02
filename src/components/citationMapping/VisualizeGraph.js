@@ -17,7 +17,7 @@ import './citationMappingStyle.css'
 //const doi = '10.1371/journal.pclm.0000093';
 
 
-const VisualizeGraph = ({pdfTitle}) => {
+const VisualizeGraph = ({pdfTitle, graphClicked}) => {
 
   const [citationInfo, setCitationInfo] = useState(null);
   const [abstractFosInfo, setAbstractFosInfo] = useState(null);
@@ -266,33 +266,30 @@ const VisualizeGraph = ({pdfTitle}) => {
     }
   }
 
+  async function onGraphClick() {
+    if(graphClicked){
+      console.log("we made it here");
+      const title_with_pulses = makeTitlePlus();
+      console.log(title_with_pulses);
+      findCitations_withTitle(title_with_pulses)
+      .then((res) => {
+        setDefaultDoi(res.origDOI);
+        setCitationInfo(res.connected_references);
+        setAbstractFosInfo(res.fosAndAbstract);
+        //getFosToDoi();
+        //getFOS();
+      });
+      setShowModal(true);
+    }
+  }
+
   const renderModal = () => {
     return (
       <>
-        <Button 
-          onClick={() => {
-            const title_with_pulses = makeTitlePlus();
-            console.log(title_with_pulses);
-            findCitations_withTitle(title_with_pulses)
-            .then((res) => {
-              setDefaultDoi(res.origDOI);
-              setCitationInfo(res.connected_references);
-              setAbstractFosInfo(res.fosAndAbstract);
-              //getFosToDoi();
-              //getFOS();
-            });
-            setShowModal(true);
-          }}
-          variant='secondary'
-          className="m-5"
-          >
-          Generate Knowledge Map
-        </Button>
-        
         <Modal
           className="my-modal"
           show={ showModal }
-          onHide={ () => setShowModal(false) }
+          onHide={ () => setShowModal(false)}
           size='xl'
         >
           <Modal.Header closeButton>
@@ -332,7 +329,8 @@ const VisualizeGraph = ({pdfTitle}) => {
 
   return (
     <>
-      { renderModal() }      
+      {onGraphClick()}
+      {renderModal() }      
     </>
     
   );

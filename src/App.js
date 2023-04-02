@@ -8,6 +8,7 @@ import ChooseFile from './components/viewerComponents/ChooseFile';
 function App() {
   const [pdfData, setPdfData] = useState();
   const [pdfTitle, setPdfTitle] = useState();
+  const [graphClicked, setGraphClicked] = useState(false);
 
   return (
     <div className="App">
@@ -17,11 +18,13 @@ function App() {
             <Viewer
               pdfData={ pdfData }
               setPdfTitle={setPdfTitle}
+              setGraphClicked={setGraphClicked}
             />
             {
               pdfTitle &&
               <VisualizeGraph
                 pdfTitle={ pdfTitle }
+                graphClicked = {graphClicked}
               />
             }
 

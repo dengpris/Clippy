@@ -11,11 +11,12 @@ import { Button, Nav, Navbar } from 'react-bootstrap';
 const ViewerNavbar = (props) => {
   const {
     onSummaryClick,
+    onGraphClick1,
     currentPage,
     totalPageCount,
     nextPage,
     previousPage,
-    firstPage,
+    firstPage, 
     lastPage,
     onZoomIn,
     onZoomOut,
@@ -104,6 +105,19 @@ const ViewerNavbar = (props) => {
       </Button>
     </div>
   )
+  
+  const renderGraphButton = () => (
+    <div>
+      <Button
+        className='mx-4'
+        variant='outline-secondary'
+        size='sm'   
+        onClick={ () => onGraphClick1() }
+      >
+      Generate Knowledge Graph
+      </Button>
+    </div>
+  )
 
   return (
     <>
@@ -111,6 +125,7 @@ const ViewerNavbar = (props) => {
         <Nav>
           { renderPageCounts() }
           { renderSummaryButton() }
+          { renderGraphButton() }
           { renderZoomButtons() }
         </Nav>
       </Navbar>
