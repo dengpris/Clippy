@@ -157,7 +157,6 @@ async function onSummaryClick() {
         console.log(abstract);
         var reference_summary = abstract;
         var generated_summary = summaryTokenize(response.data.summary);
-
         setSummaryArray(generated_summary);
         console.log(summaryArray);
         toggleSidebar();
@@ -273,8 +272,8 @@ function summaryTokenize(summary){
       finalSummaryArray.push(summarySentencesArray[i]);
     }
   }
-  console.log(finalSummaryArray);
-  return finalSummaryArray.join(' ');
+  //console.log(finalSummaryArray);
+  return finalSummaryArray;
 }
 
 // Code from: https://www.geeksforgeeks.org/check-given-sentence-given-set-simple-grammer-rules/
