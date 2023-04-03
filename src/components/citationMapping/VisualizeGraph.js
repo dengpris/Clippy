@@ -29,6 +29,8 @@ const VisualizeGraph = ({pdfTitle}) => {
   const [title, setTitle] = useState(null);
   const [defaultDoi, setDefaultDoi] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [startTime, setStartTime] = useState(true);
+  const [endTime, setEndTime] = useState(true);
 
   const makeTitlePlus = () => {
     var title_with_pulses = pdfTitle.split(' ').join('+');
@@ -42,18 +44,20 @@ const VisualizeGraph = ({pdfTitle}) => {
       return [];
     }
     let graphNodes = [];
-    var defaultNode = {
-      id: defaultDoi,
-      title: defaultDoi,
-      label: pdfTitle
-    };
-    graphNodes.push(defaultNode);
+    // var defaultNode = {
+    //   id: defaultDoi,
+    //   title: defaultDoi,
+    //   label: pdfTitle
+    // };
+    // graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
+      //if(Object.keys(citationInfo)[i].doi != defaultDoi){
       var tmpNode = {};
       tmpNode.id = Object.keys(citationInfo)[i];
       tmpNode.title = Object.values(citationInfo)[i].doi;
       tmpNode.label = Object.values(citationInfo)[i].title[0];
       graphNodes.push(tmpNode);
+      //}
     }
     console.log("graphNodes", graphNodes);
     return graphNodes;
@@ -62,6 +66,8 @@ const VisualizeGraph = ({pdfTitle}) => {
   useEffect(() => {
     if(!nodes || Object.keys(nodes).length == 0) {
       setLoading(true);
+      //setEndTime(Date.now())
+      //console.log(endTime-startTime);
     } else {
       setLoading(false);
     }
@@ -118,15 +124,15 @@ const VisualizeGraph = ({pdfTitle}) => {
         }
       }
 
-
-      var defaultEdge = {
-        from: defaultDoi,
-        to: Object.keys(citationInfo)[i],
-        label: field,
-        hidden: false
-      };
-      graphEdges.push(defaultEdge);
-    
+      if(defaultDoi != Object.keys(citationInfo)[i]){
+        var defaultEdge = {
+          from: defaultDoi,
+          to: Object.keys(citationInfo)[i],
+          label: field,
+          hidden: false
+        };
+        graphEdges.push(defaultEdge);
+      }
 
       // loop through each connected ref
       var tmpFrom = Object.keys(citationInfo)[i];
@@ -238,6 +244,10 @@ const VisualizeGraph = ({pdfTitle}) => {
 
   const renderConditionalGraph = () => {
     if(!loading) {
+      //console.timeEnd("timer");
+      //setEndTime(performance.now())
+      const timerCount = endTime -startTime;
+      console.log(timerCount);
       return (
         <>
           <p>
@@ -271,6 +281,8 @@ const VisualizeGraph = ({pdfTitle}) => {
       <>
         <Button 
           onClick={() => {
+            //setStartTime(performance.now());
+            //console.time("timer");
             const title_with_pulses = makeTitlePlus();
             console.log(title_with_pulses);
             findCitations_withTitle(title_with_pulses)
@@ -286,7 +298,7 @@ const VisualizeGraph = ({pdfTitle}) => {
           variant='secondary'
           className="m-5"
           >
-          Generate Knowledge Map
+          Generate Knowledge Graph
         </Button>
         
         <Modal
@@ -297,7 +309,7 @@ const VisualizeGraph = ({pdfTitle}) => {
         >
           <Modal.Header closeButton>
             <Modal.Title>
-              Knowledge Map
+              Knowledge Graph
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>

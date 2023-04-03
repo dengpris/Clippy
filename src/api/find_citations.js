@@ -133,19 +133,16 @@ export const findCitations_withTitle = async (pdfTitle) => {
     const res = await axios.get(
       urlRequest
     );
+    const org_doi = res.data.message.items[0].DOI;
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
     //var connected_references = await getRefDataByDOI(referenced_dois);
+    referenced_dois.push(org_doi);
     citationData.connected_references = await getRefDataByDOI(referenced_dois);
 
-    var new_referenced_dois = referenced_dois;
-
-    const org_doi = res.data.message.items[0].DOI;
     citationData.origDOI = org_doi;
     //console.log("Originial DOI: ",org_doi);
-    new_referenced_dois.push(org_doi);
 
-
-    citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois);
+    citationData.fosAndAbstract = await getFieldsOfStudy(referenced_dois);
     //console.log("fosAndAbstract: ", citationData.fosAndAbstract);
 
     console.log(citationData);
