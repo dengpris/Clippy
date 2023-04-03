@@ -66,9 +66,10 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
   useEffect(() => {
     if(!nodes || Object.keys(nodes).length == 0) {
       setLoading(true);
-      //setEndTime(Date.now())
-      //console.log(endTime-startTime);
     } else {
+      console.log(Date.now());
+      setEndTime(Date.now())
+      console.log((endTime-startTime)/1000);
       setLoading(false);
     }
   }, [nodes]);
@@ -78,7 +79,8 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
       console.log("citation info is null so edges is null");
       return [];
     }
-    
+    console.log(Object.keys(citationInfo).length);
+    console.log(Object.keys(abstractFosInfo).length);
     //console.log(citationInfo["10.1002/fee.1950"]);
     //console.log(abstractFosInfo[Object.keys(citationInfo)[0]].fos[0]);
     let fosToDoi_setup = {};
@@ -97,7 +99,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       var field="";
       if(abstractFosInfo[Object.keys(citationInfo)[i]] == null || abstractFosInfo[Object.keys(citationInfo)[i]].fos == null) {
-        field = "Unknown";
+        field = "";
       }
       else{
         // If the citation has two fos, and one of them is the fos of the original doi, then use that as the default fos instead
@@ -141,7 +143,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
         for(let j = 0; j < Object.values(citationInfo)[i].connected_refs.length; j++) {
           field="";
           if(abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]] == null || abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos == null) {
-            field = "Unknown";
+            field = "";
           }
           else {
             var fosCurr = "";
@@ -177,7 +179,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
     nodes: nodes,
     edges: edges
   };
-  console.log(graph);
+  //console.log(graph);
 
   const options = {
     interaction: {
@@ -248,9 +250,9 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
   const renderConditionalGraph = () => {
     if(!loading) {
       //console.timeEnd("timer");
-      //setEndTime(performance.now())
-      const timerCount = endTime -startTime;
-      console.log(timerCount);
+      //setEndTime(Date.now())
+      //const timerCount = endTime -startTime;
+      //console.log(timerCount);
       return (
         <>
           <p>
@@ -284,8 +286,8 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
       <>
         <Button 
           onClick={() => {
-            //setStartTime(performance.now());
-            //console.time("timer");
+            console.log(Date.now());
+            setStartTime(Date.now());
             const title_with_pulses = makeTitlePlus();
             const author_with_pulses = makeAuthorPlus(0);
             console.log(title_with_pulses);
@@ -297,6 +299,8 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
               //getFosToDoi();
               //getFOS();
             });
+            //const DoneApiTime = Date.now();
+            //console.log(startTime-DoneApiTime/1000);
             setShowModal(true);
           }}
           variant='secondary'

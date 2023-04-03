@@ -119,10 +119,9 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
 
   async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
-    //console.log(result);
+    console.log(result);
     setPdfTitle(result['TITLE']); 
     const author = result['AUTHOR'].replace(/[0-9]/g, '').replace('*','').split(",");
-    //console.log(author[0]);
     setPdfAuthor(author);
     setBody(result['BODY_CONTENT']);
     getAbstract(result['TITLE']);
