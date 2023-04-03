@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { findCitations_withTitle } from "../../api/find_citations";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import Spinner from 'react-bootstrap/Spinner';
+import ProgressBar from "./progress-bar.component";
 import loading_logo from '../citationMapping/book_loading.gif';
 import './citationMappingStyle.css'
 
@@ -31,6 +31,8 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
   const [loading, setLoading] = useState(true);
   const [startTime, setStartTime] = useState(true);
   const [endTime, setEndTime] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [startProgress, setStartProgress] = useState(false);
 
   const makeTitlePlus = () => {
     var title_with_pulses = pdfTitle.split(' ').join('+');
@@ -270,16 +272,37 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
         </>
       )
     } else {
+
+
       return (
         //<p>Loading...</p>
         //<Spinner animation="border" variant="primary"/>
         <>
           <span className="loading-caption">We're still generating the map...Please come back later!</span>
           <img src={loading_logo} alt="Generating map..." className="loading-img"/>
+          <ProgressBar bgcolor={"#22985a"} completed={progress} centered/>
         </>
       )
     }
   }
+
+  let timer = React.useRef(undefined);
+
+  useEffect(() => {
+    if (!timer.current && startProgress) {
+      timer.current = setInterval(() => {
+        setProgress((prev) => {
+          if (prev < 99) {
+            return prev + 5; //5 because I want it to finish in 20 seconds // + 100*(NUmber of seconds we think it will take)
+          }
+          if (prev === 100) {
+            clearInterval(timer.current);
+          }
+          return prev/2; // divided by 2 because the bar only takes up 50% of the modal
+        });
+      }, 500);
+    }
+  }, [startTime]);
 
   const renderModal = () => {
     return (
@@ -288,6 +311,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
           onClick={() => {
             console.log(Date.now());
             setStartTime(Date.now());
+            setStartProgress(true);
             const title_with_pulses = makeTitlePlus();
             const author_with_pulses = makeAuthorPlus(0);
             console.log(title_with_pulses);
