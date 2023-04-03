@@ -29,6 +29,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [summaryArray, setSummaryArray] = useState([]);
   const [body, setBody] = useState("");
+  const [cerm_abstract, setCermAbstract] = useState("");
   const [abstract, setAbstract] = useState("not ready");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
   const [textContent, setTextContent] = useState();
@@ -137,6 +138,7 @@ async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
     setPdfTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
+    setCermAbstract(result['ABSTRACT']);
     getAbstract(result['TITLE']);
     //setAbstract(abstract_temp1);
 }
@@ -147,12 +149,27 @@ async function onSummaryClick() {
       return; 
     }
     const payload = new FormData()
-    var numSentences = 5;
-    //Tokenizes body into sentence array.
-    var formattedBodyArray = summaryTokenize(body);
-    //Removes invalid sentences from body text to be put in summarizer.
-    var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
-    //console.log(formatted_body);
+    var numSentences = 0;
+    //Set to 1 if Verifying ROUGE Scores
+    var summaryVerificationFlag = 0;
+    if (summaryVerificationFlag && abstract != ""){
+      var tokenizer = require('sbd');
+      console.log(tokenizer.sentences(abstract));
+      var numAbstractArray = tokenizer.sentences(abstract);
+      numSentences = numAbstractArray.length;
+      //Using abstract in body for testing summarizer
+      var new_body = cerm_abstract + body;
+      var formattedBodyArray = summaryTokenize(new_body);
+      var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
+    }
+    else{
+      numSentences = 5;
+      //Tokenizes body into sentence array.
+      var formattedBodyArray = summaryTokenize(body);
+      //Removes invalid sentences from body text to be put in summarizer.
+      var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
+      //console.log(formatted_body);
+    }
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", formatted_body);
     //When testing summary, use number of sentences equal to abstract.
@@ -182,11 +199,14 @@ async function onSummaryClick() {
         setSummaryArray(generated_summary);
         //console.log(generated_summary);
         toggleSidebar();
-        let rouge_scores = getRougeScore(reference_summary, generated_summary.join(' '));
-        //ROUGE Scores output to console
-        console.log("Rouge Score - Unigram: ", rouge_scores[0]);
-        console.log("Rouge Score - Bigram: ", rouge_scores[1]);
-        console.log("Rouge Score - Trigram: ", rouge_scores[2]);
+        //For ROUGE score verification...
+        if(summaryVerificationFlag){
+          let rouge_scores = getRougeScore(reference_summary, generated_summary.join(' '));
+          //ROUGE Scores output to console
+          console.log("Rouge Score - Unigram: ", rouge_scores[0]);
+          console.log("Rouge Score - Bigram: ", rouge_scores[1]);
+          console.log("Rouge Score - Trigram: ", rouge_scores[2]);
+        }
     })
     .catch((error) => {
         console.log('error', error);

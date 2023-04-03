@@ -55,6 +55,7 @@ const server = http.createServer(async (req, res) => {
 
     var text_dict = [];
     var title_array = [];
+    var abstract_array = [];
     var lastHeading = "";
 
     var r = readline.createInterface({
@@ -73,6 +74,9 @@ const server = http.createServer(async (req, res) => {
       if(heading_text == "MET_TITLE"){
         title_array.push(input_text[2].trim());
       }
+      if(heading_text == "MET_ABSTRACT"){
+        abstract_array.push(input_text[2].trim());
+      }
     }
     else if(text.match(/<zone label="*(.*)/)){
       test = text.match(/<zone label="*(.*)/);
@@ -84,6 +88,9 @@ const server = http.createServer(async (req, res) => {
       }
       if(heading_text == "MET_TITLE"){
         title_array.push(input_text[2].trim());
+      }
+      if(heading_text == "MET_ABSTRACT"){
+        abstract_array.push(input_text[2].trim());
       }
     }
     else if ((text.match(/<document>/)) || (text.match(/<\/document>/))){
@@ -104,6 +111,11 @@ const server = http.createServer(async (req, res) => {
         last_title_content = last_title_content.concat(" ");
         title_array[title_array.length-1] = last_title_content.concat(input_text);
       }
+      if(lastHeading == "MET_ABSTRACT"){
+        last_body_content = abstract_array[abstract_array.length-1];
+        last_body_content = last_body_content.concat(" ");
+        abstract_array[abstract_array.length-1] = last_body_content.concat(input_text);
+      }
     }
     });
 
@@ -112,6 +124,9 @@ const server = http.createServer(async (req, res) => {
       pdf_info = {};
       pdf_info["TITLE"] = title_array[0];
       pdf_info["BODY_CONTENT"] = text_dict.join("");
+      //For verification...
+      pdf_info["ABSTRACT"] = abstract_array.join("");
+      //console.log(pdf_info["ABSTRACT"]);
       res.write(JSON.stringify(pdf_info), () => {
         res.end();
         // Delete temp file from server
