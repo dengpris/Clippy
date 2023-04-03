@@ -55,7 +55,7 @@ const server = http.createServer(async (req, res) => {
 
     var text_dict = [];
     var title_array = [];
-    var author_array = [];
+    var author_dict = [];
     var lastHeading = "";
 
     var r = readline.createInterface({
@@ -75,7 +75,7 @@ const server = http.createServer(async (req, res) => {
         title_array.push(input_text[2].trim());
       }
       if(heading_text == "MET_AUTHOR"){
-        author_array.push(input_text[2].trim());
+        author_dict.push(input_text[2].trim());
       }
     }
     else if(text.match(/<zone label="*(.*)/)){
@@ -90,7 +90,7 @@ const server = http.createServer(async (req, res) => {
         title_array.push(input_text[2].trim());
       }
       if(heading_text == "MET_AUTHOR"){
-        author_array.push(input_text[2].trim());
+        author_dict.push(input_text[2].trim());
       }
     }
     else if ((text.match(/<document>/)) || (text.match(/<\/document>/))){
@@ -112,9 +112,9 @@ const server = http.createServer(async (req, res) => {
         title_array[title_array.length-1] = last_title_content.concat(input_text);
       }
       if(lastHeading == "MET_AUTHOR"){
-        last_author_content = author_array[author_array.length-1];
+        last_author_content = author_dict[author_dict.length-1];
         last_author_content = last_author_content.concat(" ");
-        author_array[author_array.length-1] = last_author_content.concat(input_text);
+        author_dict[author_dict.length-1] = last_author_content.concat(input_text);
       }
     }
     });
@@ -124,7 +124,7 @@ const server = http.createServer(async (req, res) => {
       pdf_info = {};
       pdf_info["TITLE"] = title_array[0];
       pdf_info["BODY_CONTENT"] = text_dict.join("");
-      pdf_info["AUTHOR"] = author_array[0];
+      pdf_info["AUTHOR"] = author_dict.join("");
       console.log(pdf_info["AUTHOR"]);
       res.write(JSON.stringify(pdf_info), () => {
         res.end();
