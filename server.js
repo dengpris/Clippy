@@ -65,6 +65,7 @@ const server = http.createServer(async (req, res) => {
 
     if(text.match(/<zone label="*(.*)<\/zone>/)){
       test = text.match(/<zone label="*(.*)<\/zone>/);
+      //console.log(test);
       input_text = test[1].match(/(.*)">(.*)/)
       heading_text = input_text[1].trim();
       lastHeading = heading_text;
@@ -72,10 +73,13 @@ const server = http.createServer(async (req, res) => {
         text_dict.push(input_text[2].trim());
       }
       if(heading_text == "MET_TITLE"){
+        //console.log("we found the title");
         title_array.push(input_text[2].trim());
       }
       if(heading_text == "MET_AUTHOR"){
+        //console.log("we found the author");
         author_dict.push(input_text[2].trim());
+        //console.log(author_dict);
       }
     }
     else if(text.match(/<zone label="*(.*)/)){
@@ -125,7 +129,7 @@ const server = http.createServer(async (req, res) => {
       pdf_info["TITLE"] = title_array[0];
       pdf_info["BODY_CONTENT"] = text_dict.join("");
       pdf_info["AUTHOR"] = author_dict.join("");
-      console.log(pdf_info["AUTHOR"]);
+      //console.log(pdf_info["AUTHOR"]);
       res.write(JSON.stringify(pdf_info), () => {
         res.end();
         // Delete temp file from server
