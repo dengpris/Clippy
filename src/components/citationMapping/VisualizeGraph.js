@@ -31,8 +31,9 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
   const [loading, setLoading] = useState(true);
   const [startTime, setStartTime] = useState(true);
   const [endTime, setEndTime] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(2);
   const [startProgress, setStartProgress] = useState(false);
+  const [stopProgress, setStopProgress] = useState(false);
 
   const makeTitlePlus = () => {
     var title_with_pulses = pdfTitle.split(' ').join('+');
@@ -62,6 +63,9 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
       //}
     }
     console.log("graphNodes", graphNodes);
+    if(graphNodes!= null){
+      setStopProgress(true);
+    }
     return graphNodes;
   }, [citationInfo]);
 
@@ -272,11 +276,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
         </>
       )
     } else {
-
-
       return (
-        //<p>Loading...</p>
-        //<Spinner animation="border" variant="primary"/>
         <>
           <span className="loading-caption">We're still generating the map...Please come back later!</span>
           <img src={loading_logo} alt="Generating map..." className="loading-img"/>
@@ -289,18 +289,28 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
   let timer = React.useRef(undefined);
 
   useEffect(() => {
+    
     if (!timer.current && startProgress) {
+      console.log("progress bar has started");
       timer.current = setInterval(() => {
         setProgress((prev) => {
-          if (prev < 99) {
+          if(stopProgress){
+            prev = 98
+            return prev;
+          }
+          if (prev < 90) {
             return prev + 5; //5 because I want it to finish in 20 seconds // + 100*(NUmber of seconds we think it will take)
+          }
+          if(prev>90 && prev < 100){
+            prev =99;
+            return 99; //will make it stop at 99% if it's still loading
           }
           if (prev === 100) {
             clearInterval(timer.current);
           }
-          return prev/2; // divided by 2 because the bar only takes up 50% of the modal
+          return prev; // divided by 2 because the bar only takes up 50% of the modal
         });
-      }, 500);
+      }, 200);
     }
   }, [startTime]);
 
