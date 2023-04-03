@@ -34,6 +34,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
   const [progress, setProgress] = useState(2);
   const [startProgress, setStartProgress] = useState(false);
   const [stopProgress, setStopProgress] = useState(false);
+  const [progressInteval, setProgressInterval] = useState(5);
 
   const makeTitlePlus = () => {
     var title_with_pulses = pdfTitle.split(' ').join('+');
@@ -286,6 +287,22 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
     }
   }
 
+  //I dont think this works
+  function getProgressInterval(refs){
+    const progress_interval = 5; //default is 20 seconds, which is 100/20 = 5
+    const num_refs = Object.keys(refs).length;
+    if(num_refs < 75 ){
+      progress_interval = 100/20; //loading should end within 10 seconds
+    }
+    else if(num_refs<100){
+      progress_interval = Math.round(100/25);
+    }
+    else{
+      progress_interval = Math.round(100/30);
+    }
+    setProgressInterval(progress_interval);
+  }
+
   let timer = React.useRef(undefined);
 
   useEffect(() => {
@@ -299,7 +316,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
             return prev;
           }
           if (prev < 90) {
-            return prev + 5; //5 because I want it to finish in 20 seconds // + 100*(NUmber of seconds we think it will take)
+            return prev + progressInteval; //5 because I want it to finish in 20 seconds // + 100*(NUmber of seconds we think it will take)
           }
           if(prev>90 && prev < 100){
             prev =99;
@@ -310,7 +327,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
           }
           return prev; // divided by 2 because the bar only takes up 50% of the modal
         });
-      }, 200);
+      }, 1000);
     }
   }, [startTime]);
 
@@ -330,6 +347,7 @@ const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
               setDefaultDoi(res.origDOI);
               setCitationInfo(res.connected_references);
               setAbstractFosInfo(res.fosAndAbstract);
+              getProgressInterval(res.connected_references);
               //getFosToDoi();
               //getFOS();
             });
