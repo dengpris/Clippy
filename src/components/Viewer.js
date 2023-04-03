@@ -119,6 +119,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 
   async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
+    console.log(result);
     setPdfTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
     getAbstract(result['TITLE']);
