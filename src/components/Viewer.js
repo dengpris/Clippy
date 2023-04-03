@@ -14,7 +14,7 @@ PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 
 
-const Viewer = ({pdfData, setPdfTitle}) => {
+const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const url = useMemo(() => {
     getPDFText();
     return URL.createObjectURL(pdfData);
@@ -119,8 +119,11 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 
   async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
-    console.log(result);
-    setPdfTitle(result['TITLE']);
+    //console.log(result);
+    setPdfTitle(result['TITLE']); 
+    const author = result['AUTHOR'].replace(/[0-9]/g, '').replace('*','').split(",");
+    //console.log(author[0]);
+    setPdfAuthor(author);
     setBody(result['BODY_CONTENT']);
     getAbstract(result['TITLE']);
     //setAbstract(abstract_temp1);
@@ -253,6 +256,7 @@ function checkValidSentence(str){
 Viewer.propTypes = {
   pdfData: PropTypes.instanceOf(File),
   setPdfTitle: PropTypes.func.isRequired,
+  setPdfAuthor: PropTypes.func.isRequired
 };
 
 export default Viewer;

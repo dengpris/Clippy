@@ -32,9 +32,9 @@ function getDOIofReferences(pdf_data){
   var list_of_references = pdf_data.reference;
   let list_of_doi_refs = [];
   if(list_of_references == null){
-    return;
+    return null;
   }
-  console.log(list_of_references.length);
+  //console.log(list_of_references.length);
   for(let i = 0; i < list_of_references.length; i++){
     if(list_of_references[i].DOI !== undefined){
       list_of_doi_refs.push(list_of_references[i].DOI);
@@ -128,9 +128,9 @@ const getFieldsOfStudy = async(ref_dois) => {
 // const url_query = "https://api.crossref.org/works";
 // const url_title_query = url_query + "?query.title=" + pdf_title;
 
-export const findCitations_withTitle = async (pdfTitle) => {
+export const findCitations_withTitle = async (pdfTitle,pdfAuthor) => {
   //console.log(pdfTitle)
-  let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
+  let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle+ "&query.author="+pdfAuthor;
   let citationData = {}
   let sortedData = {}
   //const org_doi = "10.1371/journal.pclm.0000093"
@@ -140,13 +140,14 @@ export const findCitations_withTitle = async (pdfTitle) => {
       urlRequest
     );
     const org_doi = res.data.message.items[0].DOI;
+    console.log("Originial DOI: ",org_doi);
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
     //var connected_references = await getRefDataByDOI(referenced_dois);
     referenced_dois.push(org_doi);
     citationData.connected_references = await getRefDataByDOI(referenced_dois);
 
     citationData.origDOI = org_doi;
-    console.log("Originial DOI: ",org_doi);
+  
 
     citationData.fosAndAbstract = await getFieldsOfStudy(referenced_dois);
     //console.log("fosAndAbstract: ", citationData.fosAndAbstract);

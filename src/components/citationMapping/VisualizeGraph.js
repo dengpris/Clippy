@@ -17,7 +17,7 @@ import './citationMappingStyle.css'
 //const doi = '10.1371/journal.pclm.0000093';
 
 
-const VisualizeGraph = ({pdfTitle}) => {
+const VisualizeGraph = ({pdfTitle, pdfAuthor}) => {
 
   const [citationInfo, setCitationInfo] = useState(null);
   const [abstractFosInfo, setAbstractFosInfo] = useState(null);
@@ -38,18 +38,18 @@ const VisualizeGraph = ({pdfTitle}) => {
     return title_with_pulses;
   }
   
+  const makeAuthorPlus = (index) => {
+    var author_with_pulses = pdfAuthor[index].split(' ').join('+');
+    //console.log(title_with_pulses)
+    return author_with_pulses;
+  }
+
   const nodes = useMemo(() => { // creates the node in the graph
     if(citationInfo == null) {
       console.log("citation info is null so nodes is null");
       return [];
     }
     let graphNodes = [];
-    // var defaultNode = {
-    //   id: defaultDoi,
-    //   title: defaultDoi,
-    //   label: pdfTitle
-    // };
-    // graphNodes.push(defaultNode);
     for(let i = 0; i < Object.keys(citationInfo).length; i++) {
       //if(Object.keys(citationInfo)[i].doi != defaultDoi){
       var tmpNode = {};
@@ -287,8 +287,9 @@ const VisualizeGraph = ({pdfTitle}) => {
             //setStartTime(performance.now());
             //console.time("timer");
             const title_with_pulses = makeTitlePlus();
+            const author_with_pulses = makeAuthorPlus(0);
             console.log(title_with_pulses);
-            findCitations_withTitle(title_with_pulses)
+            findCitations_withTitle(title_with_pulses, author_with_pulses)
             .then((res) => {
               setDefaultDoi(res.origDOI);
               setCitationInfo(res.connected_references);
