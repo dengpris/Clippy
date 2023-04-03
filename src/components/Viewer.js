@@ -104,13 +104,14 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const hideSidebar = () => setShowSidebar(false);
 
   async function getAbstract(pdfTitle){
-    let doiRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle;
-    const doi = (await axios.get(doiRequest)).data.message.items[0].DOI;
-    let abstractRequest = 'https://api.semanticscholar.org/graph/v1/paper/' + doi + '?fields=abstract';
-    let abstract_temp = (await axios.get(abstractRequest)).data.abstract;
-    if(abstract_temp == null){
-      abstract_temp = "";
-    }
+    // let doiRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle;
+    // const doi = (await axios.get(doiRequest)).data.message.items[0].DOI;
+    // let abstractRequest = 'https://api.semanticscholar.org/graph/v1/paper/' + doi + '?fields=abstract';
+    // let abstract_temp = (await axios.get(abstractRequest)).data.abstract;
+    // if(abstract_temp == null){
+    //   abstract_temp = "";
+    // }
+    let abstract_temp = pdfTitle;
     setAbstract(abstract_temp);
     console.log("done getting abstract");
     //return abstract_temp;

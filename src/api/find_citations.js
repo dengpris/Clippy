@@ -31,6 +31,10 @@ function getListOfConnectedRefs(pdf_refs, temp_refs,index){
 function getDOIofReferences(pdf_data){
   var list_of_references = pdf_data.reference;
   let list_of_doi_refs = [];
+  if(list_of_references == null){
+    return;
+  }
+  console.log(list_of_references.length);
   for(let i = 0; i < list_of_references.length; i++){
     if(list_of_references[i].DOI !== undefined){
       list_of_doi_refs.push(list_of_references[i].DOI);
@@ -57,10 +61,12 @@ const getRefDataByDOI = async(referenced_dois) => {
         ref_info.author = res.data.message.author;
         ref_info.title = res.data.message.title;
         ref_info.doi = res.data.message.DOI;
-        ref_info.references = temp_referenced_dois;
-        // Takes the references of current doi and compares it with the references on the pdf
-        var connected_refs_for_i = getListOfConnectedRefs(referenced_dois, temp_referenced_dois,i);
-        ref_info.connected_refs = connected_refs_for_i;
+        if(temp_referenced_dois!= null){
+          ref_info.references = temp_referenced_dois;
+          // Takes the references of current doi and compares it with the references on the pdf
+          var connected_refs_for_i = getListOfConnectedRefs(referenced_dois, temp_referenced_dois,i);
+          ref_info.connected_refs = connected_refs_for_i;
+        }
         //Add this doi's info on the connected_refs list
         connected_refs[referenced_dois[i]] = ref_info;  
         //console.log(i)
@@ -140,7 +146,7 @@ export const findCitations_withTitle = async (pdfTitle) => {
     citationData.connected_references = await getRefDataByDOI(referenced_dois);
 
     citationData.origDOI = org_doi;
-    //console.log("Originial DOI: ",org_doi);
+    console.log("Originial DOI: ",org_doi);
 
     citationData.fosAndAbstract = await getFieldsOfStudy(referenced_dois);
     //console.log("fosAndAbstract: ", citationData.fosAndAbstract);

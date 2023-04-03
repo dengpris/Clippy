@@ -136,32 +136,35 @@ const VisualizeGraph = ({pdfTitle}) => {
 
       // loop through each connected ref
       var tmpFrom = Object.keys(citationInfo)[i];
-      for(let j = 0; j < Object.values(citationInfo)[i].connected_refs.length; j++) {
-        field="";
-        if(abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]] == null || abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos == null) {
-          field = "Unknown";
-        }
-        else {
-          var fosCurr = "";
-          if (abstractFosInfo[Object.keys(citationInfo)[i]].fos != null){
-            fosCurr = abstractFosInfo[Object.keys(citationInfo)[i]].fos[0];
+      if(Object.values(citationInfo)[i].connected_refs != null){
+      
+        for(let j = 0; j < Object.values(citationInfo)[i].connected_refs.length; j++) {
+          field="";
+          if(abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]] == null || abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos == null) {
+            field = "Unknown";
           }
-  
-          field = abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos[0];
-          for(let k = 0 ; k< abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos.length ; k++){
-            if (fosCurr == abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos[k]){
-              //console.log(Object.values(citationInfo)[i].connected_refs[j]);
-              field = fosCurr;
-              break;
+          else {
+            var fosCurr = "";
+            if (abstractFosInfo[Object.keys(citationInfo)[i]] != null && abstractFosInfo[Object.keys(citationInfo)[i]].fos != null){
+              fosCurr = abstractFosInfo[Object.keys(citationInfo)[i]].fos[0];
+            }
+    
+            field = abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos[0];
+            for(let k = 0 ; k< abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos.length ; k++){
+              if (fosCurr == abstractFosInfo[Object.values(citationInfo)[i].connected_refs[j]].fos[k]){
+                //console.log(Object.values(citationInfo)[i].connected_refs[j]);
+                field = fosCurr;
+                break;
+              }
             }
           }
+          var tmpEdge = {};
+          //tmpEdge.id = "nextLay_"+tmpFrom;
+          tmpEdge.from = tmpFrom;
+          tmpEdge.to = Object.values(citationInfo)[i].connected_refs[j];
+          tmpEdge.label = field;
+          graphEdges.push(tmpEdge);
         }
-        var tmpEdge = {};
-        //tmpEdge.id = "nextLay_"+tmpFrom;
-        tmpEdge.from = tmpFrom;
-        tmpEdge.to = Object.values(citationInfo)[i].connected_refs[j];
-        tmpEdge.label = field;
-        graphEdges.push(tmpEdge);
       }
     }
     
