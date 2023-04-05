@@ -55,6 +55,7 @@ const server = http.createServer(async (req, res) => {
 
     var text_dict = [];
     var title_array = [];
+    var author_dict = [];
     var lastHeading = "";
 
     var r = readline.createInterface({
@@ -64,6 +65,7 @@ const server = http.createServer(async (req, res) => {
 
     if(text.match(/<zone label="*(.*)<\/zone>/)){
       test = text.match(/<zone label="*(.*)<\/zone>/);
+      //console.log(test);
       input_text = test[1].match(/(.*)">(.*)/)
       heading_text = input_text[1].trim();
       lastHeading = heading_text;
@@ -71,7 +73,13 @@ const server = http.createServer(async (req, res) => {
         text_dict.push(input_text[2].trim());
       }
       if(heading_text == "MET_TITLE"){
+        //console.log("we found the title");
         title_array.push(input_text[2].trim());
+      }
+      if(heading_text == "MET_AUTHOR"){
+        //console.log("we found the author");
+        author_dict.push(input_text[2].trim());
+        //console.log(author_dict);
       }
     }
     else if(text.match(/<zone label="*(.*)/)){
@@ -84,6 +92,9 @@ const server = http.createServer(async (req, res) => {
       }
       if(heading_text == "MET_TITLE"){
         title_array.push(input_text[2].trim());
+      }
+      if(heading_text == "MET_AUTHOR"){
+        author_dict.push(input_text[2].trim());
       }
     }
     else if ((text.match(/<document>/)) || (text.match(/<\/document>/))){
@@ -104,6 +115,11 @@ const server = http.createServer(async (req, res) => {
         last_title_content = last_title_content.concat(" ");
         title_array[title_array.length-1] = last_title_content.concat(input_text);
       }
+      if(lastHeading == "MET_AUTHOR"){
+        last_author_content = author_dict[author_dict.length-1];
+        last_author_content = last_author_content.concat(" ");
+        author_dict[author_dict.length-1] = last_author_content.concat(input_text);
+      }
     }
     });
 
@@ -112,6 +128,8 @@ const server = http.createServer(async (req, res) => {
       pdf_info = {};
       pdf_info["TITLE"] = title_array[0];
       pdf_info["BODY_CONTENT"] = text_dict.join("");
+      pdf_info["AUTHOR"] = author_dict.join("");
+      //console.log(pdf_info["AUTHOR"]);
       res.write(JSON.stringify(pdf_info), () => {
         res.end();
         // Delete temp file from server
