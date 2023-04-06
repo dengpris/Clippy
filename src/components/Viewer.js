@@ -6,9 +6,11 @@ import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import { Button } from 'react-bootstrap';
 
 import Sidebar from './viewerComponents/Sidebar';
 import { getPdf } from '../pdfLibrary/getPdf';
+// import GetImages from './hovering/GetImages';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
@@ -25,7 +27,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   }, [pdfData])
 
   const canvasRef = useRef();
-  const textRef = useRef();
+  const textLayerRef = useRef();
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,6 +36,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const [summary, setSummary] = useState("");
   const [body, setBody] = useState("");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
+  const [references, setReferences] = useState()
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -53,15 +56,18 @@ const Viewer = ({pdfData, setPdfTitle}) => {
         return page.getTextContent();
     })
     .then(function(textContent) {
+        const textLay = textLayerRef.current
+        while(textLay.firstChild) {
+          textLay.removeChild(textLay.firstChild)
+        }
 
-         // PDF canvas
+        // PDF canvas
         // const textLayer = textRef.current;
         var textLayer = document.querySelector(".textLayer");
         textLayer.style.left = canvas.offsetLeft + 'px';
         textLayer.style.top = canvas.offsetTop + 'px';
         textLayer.style.height = canvas.offsetHeight + 'px';
         textLayer.style.width = canvas.offsetWidth + 'px';
-        console.log('henlo these are the sizes ', textLayer.style.left,textLayer.style.top, textLayer.style.height, textLayer.style.top);
         // Pass the data to the method for rendering of text over the pdf canvas.
         PDFJS.renderTextLayer({
             textContent: textContent,
@@ -69,12 +75,79 @@ const Viewer = ({pdfData, setPdfTitle}) => {
             viewport: viewport,
             textDivs: []
         });
-        textLayer.setTextContent(textContent);
 
+        // textLayer.setTextContent(textContent);
+        let matches = [];
+        const citationRegex = /\b\w+(?:\d+|[^\d\s]*\d+[^\d\s]*)\b/
+        for (let i = 0; i < textContent.items.length; i++) {
+          const textItem = textContent.items[i];
+          if (textItem.str.match(citationRegex) && textItem.transform[0] > 0) {
+            matches.push(textItem.str);
+          }
+        }
+        const citationArr = []
+        // in-text citations
+        for(let i = 0; i < matches.length; i++) {
+          const thing = matches[i].split(',')
+          for(let j = 0; j < thing.length; j++) {
+            if(Number.isInteger(+thing[j])) {
+              if(!citationArr.includes(thing[j])) {
+                citationArr.push(thing[j])
+              }
+              
+            }
+          }
+        }
+        for(let i = 0; i < matches.length; i++) {
+          const thing = matches[i].split('–')
+          for(let j = 0; j < thing.length; j++) {
+            if(Number.isInteger(+thing[j])) {
+              if(!citationArr.includes(thing[j])) {
+                citationArr.push(thing[j])
+              }
+              
+            }
+          }
+        }
+
+        matches = []
+        // const figureRegex = /(Fig(?:ure)?\.?\s*\d+[a-z]?)/gi
+
+        const figureRegex = /\b(Fig(?:\.|ure) \d+[a-z]?)/g;
+        for (let i = 0; i < textContent.items.length; i++) {
+          const textItem = textContent.items[i];
+          if (textItem.str.match(figureRegex) && textItem.transform[0] > 0) {
+            matches.push(textItem.str);
+          }
+        }
+        
+        const figureArr = []
+        for(let i = 0; i < matches.length; i++) {
+          const individuals = [...matches[i].matchAll(figureRegex)].map(match => match[1])
+          // console.log(individuals)
+          if(!figureArr.includes(individuals[0])) {
+            figureArr.push(individuals[0])
+          }
+        }
       });
-
     });   
   }, [pdfRef, zoomScale]);
+
+  const getReferences = useCallback((pageNum, pdf=pdfRef) => {
+    pdf && pdf.getPage(pageNum).then(function(page) {
+      return page.getTextContent()
+    })
+    .then(function(textContent) {
+      console.log('textContent for page ', pageNum)
+      console.log('text content is ', textContent)
+    })
+  })
+
+  useEffect(() => {
+    for(let i = 0; i < totalPages; i++) {
+      getReferences(i)
+    }
+  }, [getReferences, totalPages])
 
     
   useEffect(() => {
@@ -108,7 +181,7 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 
 
   async function getPDFText() {
-    const result = (await axios.post('http://localhost:3001/', pdfData)).data;
+    const result = (await axios.post('http://localhost:3000/', pdfData)).data;
     setPdfTitle(result['TITLE']);
     setBody(result['BODY_CONTENT']);
 }
@@ -227,7 +300,8 @@ function checkValidSentence(str){
         : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
-      {/* <div className="textLayer"></div> */}
+      <div className="textLayer" ref={ textLayerRef }></div>
+      {/* <GetImages /> */}
     </>
     
   );
