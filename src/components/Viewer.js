@@ -14,7 +14,7 @@ PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 
 
-const Viewer = ({pdfData, setPdfTitle}) => {
+const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const url = useMemo(() => {
     getPDFText();
     return URL.createObjectURL(pdfData);
@@ -114,7 +114,13 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   const firstPage = () => currentPage !== 1 && setCurrentPage(1);
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
   
-  const toggleSidebar = () => setShowSidebar(true);
+
+  const toggleSidebar = () => {
+    setShowSidebar(true);
+    const textLayer = document.querySelector(".textLayer");
+    highlightSummary(textLayer);
+  }
+
   const hideSidebar = () => {
     setShowSidebar(false);
     const textLayer = document.querySelector(".textLayer")
@@ -122,13 +128,14 @@ const Viewer = ({pdfData, setPdfTitle}) => {
   }
 
   async function getAbstract(pdfTitle){
-    let doiRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle;
-    const doi = (await axios.get(doiRequest)).data.message.items[0].DOI;
-    let abstractRequest = 'https://api.semanticscholar.org/graph/v1/paper/' + doi + '?fields=abstract';
-    let abstract_temp = (await axios.get(abstractRequest)).data.abstract;
-    if(abstract_temp == null){
-      abstract_temp = "";
-    }
+    // let doiRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle;
+    // const doi = (await axios.get(doiRequest)).data.message.items[0].DOI;
+    // let abstractRequest = 'https://api.semanticscholar.org/graph/v1/paper/' + doi + '?fields=abstract';
+    // let abstract_temp = (await axios.get(abstractRequest)).data.abstract;
+    // if(abstract_temp == null){
+    //   abstract_temp = "";
+    // }
+    let abstract_temp = pdfTitle;
     setAbstract(abstract_temp);
     console.log("done getting abstract");
     //return abstract_temp;
@@ -136,7 +143,10 @@ const Viewer = ({pdfData, setPdfTitle}) => {
 
 async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
-    setPdfTitle(result['TITLE']);
+    console.log(result);
+    setPdfTitle(result['TITLE']); 
+    const author = result['AUTHOR'].replace(/[0-9]/g, '').replace('*','').split(",");
+    setPdfAuthor(author);
     setBody(result['BODY_CONTENT']);
     setCermAbstract(result['ABSTRACT']);
     getAbstract(result['TITLE']);
@@ -163,7 +173,7 @@ async function onSummaryClick() {
       var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
     }
     else{
-      numSentences = 5;
+      numSentences = 8;
       //Tokenizes body into sentence array.
       var formattedBodyArray = summaryTokenize(body);
       //Removes invalid sentences from body text to be put in summarizer.
@@ -177,6 +187,7 @@ async function onSummaryClick() {
 
     axios.post(summaryURL, payload)
     .then((response) => {
+
         console.log(abstract);
         var reference_summary;
         //No abstract available
@@ -198,20 +209,22 @@ async function onSummaryClick() {
         var generated_summary = summaryTokenize(response.data.summary);
         setSummaryArray(generated_summary);
         //console.log(generated_summary);
+
         toggleSidebar();
         //For ROUGE score verification...
-        if(summaryVerificationFlag){
+        //if(summaryVerificationFlag){
           let rouge_scores = getRougeScore(reference_summary, generated_summary.join(' '));
           //ROUGE Scores output to console
           console.log("Rouge Score - Unigram: ", rouge_scores[0]);
           console.log("Rouge Score - Bigram: ", rouge_scores[1]);
           console.log("Rouge Score - Trigram: ", rouge_scores[2]);
-        }
+        //}
     })
     .catch((error) => {
         console.log('error', error);
     })
 }
+
 
 //Calculates the ROUGE score for the given summary
 function getRougeScore(reference_summary, generated_summary){
@@ -234,21 +247,35 @@ function highlightSummary(textLayer) {
 
     const highlightLines = [];
     while (currentWord < words.length && currentLine < textLines.length) {
+
+      // If span only has numbers, brackets, or [.,-], assume it is a super/subscript and skip it
+      if (textLines[currentLine].textContent.match(/^[\d\.\,\-\–\[\]\(\)\{\}]+$/)) { 
+        currentLine++;
+        continue;
+      }
+
       const wordsInLine = textLines[currentLine].textContent.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').split(' ');
       const textLine = textLines[currentLine].cloneNode();
 
       let matched = false;
       for (let wordIdx = 0; wordIdx < wordsInLine.length; wordIdx++) {
         const word = wordsInLine[wordIdx];
+
+        if (!word) { continue; }
         if (currentWord === words.length) {
           matched = true;
-          // need to add unhighlighted words following this wordw
+          // need to add unhighlighted words following this word
+
           textLine.innerHTML += wordsInLine.slice(wordIdx).join(" ");
           highlightLines.push(textLine);
           break;
         }
 
+        
         matched = word === words[currentWord];
+        // Sometimes textContent will lack a period
+        if (words[currentWord].replace(word, '').match(/^[\.\?\!]*$/)) { matched = true; }
+
         if (!matched && wordIdx == wordsInLine.length - 1) { // last word on a line may contain a hyphen
           if (word[word.length - 1] === '-' && word.slice(0, word.length - 1) === words[currentWord].slice(0, word.length - 1)) {
             matched = true;
@@ -297,11 +324,13 @@ function removeHighlight(textLayer) {
 
 //Tokenizes summary into sentences with proper formatting.
 function summaryTokenize(summary){
+
   //Using new tokenizer for cleaner sentence parsing
   var tokenizer = require('sbd');
   console.log(tokenizer.sentences(summary));
   var summarySentencesArray = tokenizer.sentences(summary);
   var finalSummaryArray = [];
+
 
   const TextCleaner = require('text-cleaner');
   for(let i = 0; i < summarySentencesArray.length; i++){
@@ -321,6 +350,7 @@ function removeInvalidSentence(summarySentencesArray){
       }
     }
     return tempSentenceArray;
+
 }
 
 // Code from: https://www.geeksforgeeks.org/check-given-sentence-given-set-simple-grammer-rules/
@@ -406,6 +436,7 @@ function checkValidSentence(str){
 Viewer.propTypes = {
   pdfData: PropTypes.instanceOf(File),
   setPdfTitle: PropTypes.func.isRequired,
+  setPdfAuthor: PropTypes.func.isRequired
 };
 
 export default Viewer;
