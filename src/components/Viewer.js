@@ -29,6 +29,7 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [summaryArray, setSummaryArray] = useState([]);
   const [body, setBody] = useState("");
+  const [cerm_abstract, setCermAbstract] = useState("");
   const [abstract, setAbstract] = useState("not ready");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
   const [textContent, setTextContent] = useState();
@@ -113,11 +114,13 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const firstPage = () => currentPage !== 1 && setCurrentPage(1);
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
   
+
   const toggleSidebar = () => {
     setShowSidebar(true);
     const textLayer = document.querySelector(".textLayer");
     highlightSummary(textLayer);
   }
+
   const hideSidebar = () => {
     setShowSidebar(false);
     const textLayer = document.querySelector(".textLayer")
@@ -145,6 +148,7 @@ async function getPDFText() {
     const author = result['AUTHOR'].replace(/[0-9]/g, '').replace('*','').split(",");
     setPdfAuthor(author);
     setBody(result['BODY_CONTENT']);
+    setCermAbstract(result['ABSTRACT']);
     getAbstract(result['TITLE']);
     //setAbstract(abstract_temp1);
 }
@@ -154,20 +158,81 @@ async function onSummaryClick() {
       toggleSidebar();
       return; 
     }
-    console.log(abstract);
     const payload = new FormData()
+    var numSentences = 0;
+    //Set to 1 if Verifying ROUGE Scores
+    var summaryVerificationFlag = 0;
+    if (summaryVerificationFlag && abstract != ""){
+      var tokenizer = require('sbd');
+      console.log(tokenizer.sentences(abstract));
+      var numAbstractArray = tokenizer.sentences(abstract);
+      numSentences = numAbstractArray.length;
+      //Using abstract in body for testing summarizer
+      var new_body = cerm_abstract + body;
+      var formattedBodyArray = summaryTokenize(new_body);
+      var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
+    }
+    else{
+      numSentences = 8;
+      //Tokenizes body into sentence array.
+      var formattedBodyArray = summaryTokenize(body);
+      //Removes invalid sentences from body text to be put in summarizer.
+      var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
+      //console.log(formatted_body);
+    }
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
-    payload.append("txt", body);
-    payload.append("sentences", 5);
+    payload.append("txt", formatted_body);
+    //When testing summary, use number of sentences equal to abstract.
+    payload.append("sentences", numSentences);
 
     axios.post(summaryURL, payload)
     .then((response) => {
-        setSummaryArray(summaryTokenize(response.data.summary));
+
+        console.log(abstract);
+        var reference_summary;
+        //No abstract available
+        if(abstract == ""){
+          var abstractBodyArray = summaryTokenize(body);
+          var newAbstractArray = [];
+          for(let i = 0; i < numSentences; i++){
+            newAbstractArray.push(abstractBodyArray[i]);
+          }
+          //console.log(newAbstractArray);
+          reference_summary = newAbstractArray.join(' ');
+        }
+        //Abstract available
+        else{
+          reference_summary = abstract;
+        }
+        //console.log(response.data.summary)
+        //Tokenizes summary but does not remove improper sentences.
+        var generated_summary = summaryTokenize(response.data.summary);
+        setSummaryArray(generated_summary);
+        //console.log(generated_summary);
+
         toggleSidebar();
+        //For ROUGE score verification...
+        //if(summaryVerificationFlag){
+          let rouge_scores = getRougeScore(reference_summary, generated_summary.join(' '));
+          //ROUGE Scores output to console
+          console.log("Rouge Score - Unigram: ", rouge_scores[0]);
+          console.log("Rouge Score - Bigram: ", rouge_scores[1]);
+          console.log("Rouge Score - Trigram: ", rouge_scores[2]);
+        //}
     })
     .catch((error) => {
         console.log('error', error);
     })
+}
+
+
+//Calculates the ROUGE score for the given summary
+function getRougeScore(reference_summary, generated_summary){
+  var rouge = require('rouge');
+  var rouge_score_unigram = rouge.n(generated_summary,reference_summary,1);
+  var rouge_score_bigram = rouge.n(generated_summary,reference_summary,2);
+  var rouge_score_trigram = rouge.n(generated_summary,reference_summary,3);
+  return [rouge_score_unigram, rouge_score_bigram, rouge_score_trigram];
 }
 
 function highlightSummary(textLayer) {
@@ -182,25 +247,30 @@ function highlightSummary(textLayer) {
 
     const highlightLines = [];
     while (currentWord < words.length && currentLine < textLines.length) {
+
       // If span only has numbers, brackets, or [.,-], assume it is a super/subscript and skip it
       if (textLines[currentLine].textContent.match(/^[\d\.\,\-\–\[\]\(\)\{\}]+$/)) { 
         currentLine++;
         continue;
       }
+
       const wordsInLine = textLines[currentLine].textContent.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').split(' ');
       const textLine = textLines[currentLine].cloneNode();
 
       let matched = false;
       for (let wordIdx = 0; wordIdx < wordsInLine.length; wordIdx++) {
         const word = wordsInLine[wordIdx];
+
         if (!word) { continue; }
         if (currentWord === words.length) {
           matched = true;
           // need to add unhighlighted words following this word
+
           textLine.innerHTML += wordsInLine.slice(wordIdx).join(" ");
           highlightLines.push(textLine);
           break;
         }
+
         
         matched = word === words[currentWord];
         // Sometimes textContent will lack a period
@@ -252,25 +322,35 @@ function removeHighlight(textLayer) {
   }
 }
 
+//Tokenizes summary into sentences with proper formatting.
 function summaryTokenize(summary){
-  var Tokenizer = require('sentence-tokenizer');
-  var tokenizer = new Tokenizer();
-  tokenizer.setEntry(summary);
-  var summarySentencesArray = tokenizer.getSentences();
-  const summaryArray = [];
+
+  //Using new tokenizer for cleaner sentence parsing
+  var tokenizer = require('sbd');
+  console.log(tokenizer.sentences(summary));
+  var summarySentencesArray = tokenizer.sentences(summary);
+  var finalSummaryArray = [];
+
 
   const TextCleaner = require('text-cleaner');
   for(let i = 0; i < summarySentencesArray.length; i++){
      summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
    }
   
-  for(let i = 0; i<summarySentencesArray.length;i++){
-    if (checkValidSentence(summarySentencesArray[i])){
-      summaryArray.push(summarySentencesArray[i]);
-    };
-  }
+  //console.log(summarySentencesArray);
+  return summarySentencesArray;
+}
 
-  return summaryArray;
+function removeInvalidSentence(summarySentencesArray){
+    var tempSentenceArray = [];
+    //Checking for valid sentences and removes sentences that are not valid sentences.
+    for(let i = 0; i<summarySentencesArray.length;i++){
+      if (checkValidSentence(summarySentencesArray[i])){
+        tempSentenceArray.push(summarySentencesArray[i]);
+      }
+    }
+    return tempSentenceArray;
+
 }
 
 // Code from: https://www.geeksforgeeks.org/check-given-sentence-given-set-simple-grammer-rules/
