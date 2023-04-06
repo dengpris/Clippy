@@ -31,6 +31,10 @@ function getListOfConnectedRefs(pdf_refs, temp_refs,index){
 function getDOIofReferences(pdf_data){
   var list_of_references = pdf_data.reference;
   let list_of_doi_refs = [];
+  if(list_of_references == null){
+    return null;
+  }
+  //console.log(list_of_references.length);
   for(let i = 0; i < list_of_references.length; i++){
     if(list_of_references[i].DOI !== undefined){
       list_of_doi_refs.push(list_of_references[i].DOI);
@@ -57,10 +61,12 @@ const getRefDataByDOI = async(referenced_dois) => {
         ref_info.author = res.data.message.author;
         ref_info.title = res.data.message.title;
         ref_info.doi = res.data.message.DOI;
-        ref_info.references = temp_referenced_dois;
-        // Takes the references of current doi and compares it with the references on the pdf
-        var connected_refs_for_i = getListOfConnectedRefs(referenced_dois, temp_referenced_dois,i);
-        ref_info.connected_refs = connected_refs_for_i;
+        if(temp_referenced_dois!= null){
+          ref_info.references = temp_referenced_dois;
+          // Takes the references of current doi and compares it with the references on the pdf
+          var connected_refs_for_i = getListOfConnectedRefs(referenced_dois, temp_referenced_dois,i);
+          ref_info.connected_refs = connected_refs_for_i;
+        }
         //Add this doi's info on the connected_refs list
         connected_refs[referenced_dois[i]] = ref_info;  
         //console.log(i)
@@ -122,9 +128,17 @@ const getFieldsOfStudy = async(ref_dois) => {
 // const url_query = "https://api.crossref.org/works";
 // const url_title_query = url_query + "?query.title=" + pdf_title;
 
-export const findCitations_withTitle = async (pdfTitle) => {
+export const findCitations_withTitle = async (pdfTitle,pdfAuthor) => {
   //console.log(pdfTitle)
-  let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle
+  var urlRequest_p2 = "";
+  if(pdfAuthor == "" || pdfAuthor == " "){
+    urlRequest_p2 = "";
+  }
+  else{
+    urlRequest_p2 = "&query.author="+pdfAuthor;
+  }
+  let urlRequest = 'https://api.crossref.org/works?query.title=' + pdfTitle+ urlRequest_p2;
+  console.log(urlRequest);
   let citationData = {}
   let sortedData = {}
   //const org_doi = "10.1371/journal.pclm.0000093"
@@ -133,21 +147,20 @@ export const findCitations_withTitle = async (pdfTitle) => {
     const res = await axios.get(
       urlRequest
     );
+    const org_doi = res.data.message.items[0].DOI;
+    console.log("Originial DOI: ",org_doi);
     var referenced_dois = getDOIofReferences(res.data.message.items[0]);
     //var connected_references = await getRefDataByDOI(referenced_dois);
+    console.log(referenced_dois.length);
+    referenced_dois.push(org_doi);
     citationData.connected_references = await getRefDataByDOI(referenced_dois);
-
-    var new_referenced_dois = referenced_dois;
-
-    const org_doi = res.data.message.items[0].DOI;
+    //console.log(Object.keys(citationData.connected_references).length);
     citationData.origDOI = org_doi;
-    //console.log("Originial DOI: ",org_doi);
-    new_referenced_dois.push(org_doi);
+    console.log("Originial DOI: ",citationData.origDOI);
 
-
-    citationData.fosAndAbstract = await getFieldsOfStudy(new_referenced_dois);
+    citationData.fosAndAbstract = await getFieldsOfStudy(referenced_dois);
     //console.log("fosAndAbstract: ", citationData.fosAndAbstract);
-
+    //console.log(Object.keys(citationData.fosAndAbstract.length).length);
     console.log(citationData);
    // sortedData = sortData(citationData);
     //var abstracts_from_dois = await getAbstracts(new_referenced_dois);

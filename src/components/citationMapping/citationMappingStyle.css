@@ -1,3 +1,16 @@
 .vis-graph {
     height: 600px;
 }
+.my-modal .modal-content{
+    background-color: #f6f8f7;
+    position: relative;
+}
+.loading-img {
+    display: block;
+    margin: auto;
+}
+
+.loading-caption{
+    display: block;
+    margin: auto;
+}
