@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Button } from 'react-bootstrap';
 
 import Sidebar from './viewerComponents/Sidebar';
+import CrossRef from './hovering/CrossRef';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
@@ -40,6 +41,10 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const [gotRef, setGotRef] = useState(false)
   const [textContent, setTextContent] = useState();
   const [viewport, setViewport] = useState();
+  const [showCrossRef, setShowCrossRef] = useState(false)
+  const [pageRefs, setPageRefs] = useState([])
+  const [allPageContent, setAllPageContent] = useState([])
+  const [crossRefInfo, setCrossRefInfo] = useState([])
   
   const summary = useMemo(() => {
     return summaryArray.join(' ');
@@ -66,9 +71,61 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
     })
     .then(function(textContent) {
       setTextContent(textContent);
+
+      let combinedText = '';
+      for (let i = 0; i < textContent.items.length; i++) {
+        const textItem = textContent.items[i];
+        combinedText += textItem.str;
+      }
+
+      var citationRefs = getCitationRefs(textContent)
+      var squareRefs = getSquareCitations(combinedText)
+      if(squareRefs.length > 0) {
+        citationRefs = []
+      }
+      var figureRefs = getFigureRefs(textContent)
+      // console.log('refs are ', citationRefs, squareRefs, figureRefs)
+      setPageRefs(citationRefs.concat(squareRefs).concat(figureRefs))
+      setEnd(Date.now())
+
       });
     });   
   }, [pdfRef, zoomScale]);
+
+  function hideCrossRefInfo () {
+    setShowCrossRef(false)
+  }
+
+
+  function onCrossRefClick () {
+    // console.log('cross refs are ', allPageContent)
+
+    const referenceRegex = /(References|Bibliography)/i;
+    for(let i = 0; i < allPageContent.length; i++) {
+      let combinedText = '';
+      for (let j = 0; j < allPageContent[i].items.length; j++) {
+        const textItem = allPageContent[i].items[j];
+        combinedText += textItem.str;
+        if (referenceRegex.test(combinedText)) {
+          getReferences(combinedText, i)
+        }
+        if(currentPage > lastRef && gotRef) {
+          getReferences(combinedText, i)
+        }
+      }
+    }
+    
+    const result = [];
+
+    for (let i = 0; i < pageRefs.length; i++) {
+      const match = references.find(str => str.startsWith(`[${pageRefs[i]}]`));
+      result.push(match);
+    }
+    console.log('results are ', result)
+    setCrossRefInfo(result)
+    setShowCrossRef(true)
+  }
+
 
   useEffect(() => {
     if (!textContent || !viewport) {
@@ -93,63 +150,8 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
       if (showSidebar) { highlightSummary(textLayer); }
     });
   }, [textContent, viewport, summaryArray]);
-        // PDF canvas
-        // const textLayer = textRef.current;
-        var textLayer = document.querySelector(".textLayer");
-        textLayer.style.left = canvas.offsetLeft + 'px';
-        textLayer.style.top = canvas.offsetTop + 'px';
-        textLayer.style.height = canvas.offsetHeight + 'px';
-        textLayer.style.width = canvas.offsetWidth + 'px';
-        // Pass the data to the method for rendering of text over the pdf canvas.
-        PDFJS.renderTextLayer({
-            textContent: textContent,
-            container: textLayer,
-            viewport: viewport,
-            textDivs: []
-        });
-
-        // textLayer.setTextContent(textContent);
-
-        let combinedText = '';
-        for (let i = 0; i < textContent.items.length; i++) {
-          const textItem = textContent.items[i];
-          combinedText += textItem.str;
-        }
-
-        // console.log('combined text is ', combinedText)
-
-        var citationRefs = getCitationRefs(textContent)
-        var squareRefs = getSquareCitations(combinedText)
-        var figureRefs = getFigureRefs(textContent)
         
-        const referenceRegex = /(References|Bibliography)/i;
-        if (referenceRegex.test(combinedText)) {
-          getReferences(combinedText, pageNum)
-        }
-        if(currentPage > lastRef && gotRef) {
-          getReferences(combinedText, pageNum)
-        }
-    
 
-        setEnd(Date.now())
-
-      });
-    });   
-  }, [pdfRef, zoomScale]);
-
-  function findMaxReferenceNumber(text) {
-    const regex = /\[(\d+)\]|\b(\d+)\.\s/mg;
-    let match;
-    let maxNumber = 0;
-
-    while ((match = regex.exec(text)) !== null) {
-      const number = match[1] || match[2];
-      if (number > maxNumber) {
-        maxNumber = number;
-      }
-    }
-    return maxNumber
-  }
 
 
   const getReferences = (combinedText, pageNum) => {
@@ -176,6 +178,7 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
         tmpRef.push(allReferences[i])
       }
     }
+    // console.log('got these references', tmpRef)
     setReferences(tmpRef)
     setLastRef(pageNum)
     setGotRef(true)
@@ -259,29 +262,14 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
     }
     return figureArr
   }
-  
-
-  // const getReferences = useCallback((pageNum, pdf=pdfRef) => {
-  //   pdf && pdf.getPage(pageNum).then(function(page) {
-  //     return page.getTextContent()
-  //   })
-  //   .then(function(textContent) {
-  //     console.log('textContent for page ', pageNum)
-  //     console.log('text content is ', textContent)
-  //   })
-  // })
-
-  // useEffect(() => {
-  //   for(let i = 0; i < totalPages; i++) {
-  //     getReferences(i)
-  //   }
-  // }, [getReferences, totalPages])
 
   useEffect(() => {
     if(start && end) {
       // console.log('Time taken is ', (end-start)/1000)
     }
   }, [start, end])
+
+
 
     
   useEffect(() => {
@@ -297,6 +285,20 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
     loadingTask.promise.then(loadedPdf => {
       setPdfRef(loadedPdf);
       setTotalPages(loadedPdf.numPages);
+
+      const pagePromises = []
+
+      for (let i = 1; i <= loadedPdf.numPages; i++) {
+        const pagePromise = loadedPdf.getPage(i).then(function(page) {
+          return page.getTextContent();
+        });
+        pagePromises.push(pagePromise);
+      }
+
+      Promise.all(pagePromises).then(function(newPages) {
+        setAllPageContent(prevPages => [...prevPages, ...newPages]);
+      });
+
     }, function (reason) {
       console.error(reason);
     });
@@ -615,6 +617,8 @@ function checkValidSentence(str){
         onZoomIn={ onZoomIn }
         onZoomOut={ onZoomOut }
         zoomScale={ zoomScale }
+        onCrossRefClick={ onCrossRefClick }
+        crossRefInfo={ crossRefInfo }
       />
       { showSidebar ? 
         <Sidebar 
@@ -622,6 +626,13 @@ function checkValidSentence(str){
           hideSidebar={ hideSidebar }
         /> 
         : null
+      }
+      {
+        showCrossRef ?
+        <CrossRef
+          info={ crossRefInfo }
+          hideCrossRefInfo={ hideCrossRefInfo }
+        /> : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
       <div className="textLayer"></div>
