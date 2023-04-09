@@ -32,7 +32,11 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const [body, setBody] = useState(null);
   const [abstract, setAbstract] = useState("not ready");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
-  const [references, setReferences] = useState()
+  const [references, setReferences] = useState([])
+  const [start, setStart] = useState()
+  const [end, setEnd] = useState()
+  const [lastRef, setLastRef] = useState(0)
+  const [gotRef, setGotRef] = useState(false)
 
   // Code from: https://stackoverflow.com/questions/64181879/rendering-pdf-with-pdf-js
   const renderPage = useCallback((pageNum, pdf=pdfRef) => {
@@ -56,6 +60,7 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
         while(textLay.firstChild) {
           textLay.removeChild(textLay.firstChild)
         }
+        // console.log('got this text content ', textContent)
 
         // PDF canvas
         // const textLayer = textRef.current;
@@ -73,80 +78,183 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
         });
 
         // textLayer.setTextContent(textContent);
-        let matches = [];
-        const citationRegex = /\b\w+(?:\d+|[^\d\s]*\d+[^\d\s]*)\b/
+
+        let combinedText = '';
         for (let i = 0; i < textContent.items.length; i++) {
           const textItem = textContent.items[i];
-          if (textItem.str.match(citationRegex) && textItem.transform[0] > 0) {
-            matches.push(textItem.str);
-          }
-        }
-        const citationArr = []
-        // in-text citations
-        for(let i = 0; i < matches.length; i++) {
-          const thing = matches[i].split(',')
-          for(let j = 0; j < thing.length; j++) {
-            if(Number.isInteger(+thing[j])) {
-              if(!citationArr.includes(thing[j])) {
-                citationArr.push(thing[j])
-              }
-              
-            }
-          }
-        }
-        for(let i = 0; i < matches.length; i++) {
-          const thing = matches[i].split('–')
-          for(let j = 0; j < thing.length; j++) {
-            if(Number.isInteger(+thing[j])) {
-              if(!citationArr.includes(thing[j])) {
-                citationArr.push(thing[j])
-              }
-              
-            }
-          }
+          combinedText += textItem.str;
         }
 
-        matches = []
-        // const figureRegex = /(Fig(?:ure)?\.?\s*\d+[a-z]?)/gi
+        // console.log('combined text is ', combinedText)
 
-        const figureRegex = /\b(Fig(?:\.|ure) \d+[a-z]?)/g;
-        for (let i = 0; i < textContent.items.length; i++) {
-          const textItem = textContent.items[i];
-          if (textItem.str.match(figureRegex) && textItem.transform[0] > 0) {
-            matches.push(textItem.str);
-          }
-        }
+        var citationRefs = getCitationRefs(textContent)
+        var squareRefs = getSquareCitations(combinedText)
+        var figureRefs = getFigureRefs(textContent)
         
-        const figureArr = []
-        for(let i = 0; i < matches.length; i++) {
-          const individuals = [...matches[i].matchAll(figureRegex)].map(match => match[1])
-          // console.log(individuals)
-          if(!figureArr.includes(individuals[0])) {
-            figureArr.push(individuals[0])
-          }
+        const referenceRegex = /(References|Bibliography)/i;
+        if (referenceRegex.test(combinedText)) {
+          getReferences(combinedText, pageNum)
         }
+        if(currentPage > lastRef && gotRef) {
+          getReferences(combinedText, pageNum)
+        }
+    
+
+        setEnd(Date.now())
+
       });
     });   
   }, [pdfRef, zoomScale]);
 
-  const getReferences = useCallback((pageNum, pdf=pdfRef) => {
-    pdf && pdf.getPage(pageNum).then(function(page) {
-      return page.getTextContent()
-    })
-    .then(function(textContent) {
-      console.log('textContent for page ', pageNum)
-      console.log('text content is ', textContent)
-    })
-  })
+  function findMaxReferenceNumber(text) {
+    const regex = /\[(\d+)\]|\b(\d+)\.\s/mg;
+    let match;
+    let maxNumber = 0;
+
+    while ((match = regex.exec(text)) !== null) {
+      const number = match[1] || match[2];
+      if (number > maxNumber) {
+        maxNumber = number;
+      }
+    }
+    return maxNumber
+  }
+
+
+  const getReferences = (combinedText, pageNum) => {
+    // for 1.ref 2.ref format
+    const refRegex = /(\d+)\.\s(.*?)(?=\d+\.\s|$)/g;
+    const refMatches = combinedText.matchAll(refRegex);
+    var allReferences = [];
+
+    for(const match of refMatches) {
+      const index = match[1];
+      const reference = match[2];
+      allReferences.push(`[${index}] ${reference}`);
+    }
+
+    // in format of [1] author, [2] author, etc
+    var allReferences2 = []
+    const squareRegex = /\[(\d+)\]\s*(.+?)(?=\[\d+\]|$)/gs;
+    const squareMatches = [...combinedText.matchAll(squareRegex)];
+    allReferences2 = squareMatches.map(match => `[${match[1]}] ${match[2].trim()}`);
+    allReferences = allReferences.concat(allReferences2)
+    var tmpRef = references
+    for(let i = 0; i < allReferences.length; i++) {
+      if(!references.includes(allReferences[i])) {
+        tmpRef.push(allReferences[i])
+      }
+    }
+    setReferences(tmpRef)
+    setLastRef(pageNum)
+    setGotRef(true)
+  }
+
+  const getCitationRefs = (textContent) => {
+    let matches = []; // for superscripts
+    const citationRegex = /\b\w+(?:\d+|[^\d\s]*\d+[^\d\s]*)\b/
+    for (let i = 0; i < textContent.items.length; i++) {
+      const textItem = textContent.items[i];
+      if (textItem.str.match(citationRegex) && textItem.transform[0] > 0) {
+        matches.push(textItem.str);
+      }
+    }
+    const citationArr = []
+    // in-text citations
+    for(let i = 0; i < matches.length; i++) {
+      const thing = matches[i].split(',')
+      for(let j = 0; j < thing.length; j++) {
+        if(Number.isInteger(+thing[j])) {
+          if(!citationArr.includes(thing[j])) {
+            citationArr.push(thing[j])
+          }
+          
+        }
+      }
+    }
+    for(let i = 0; i < matches.length; i++) {
+      const thing = matches[i].split('–')
+      for(let j = 0; j < thing.length; j++) {
+        if(Number.isInteger(+thing[j])) {
+          if(!citationArr.includes(thing[j])) {
+            citationArr.push(thing[j])
+          }
+          
+        }
+      }
+    }
+    return citationArr
+  }
+
+  const getSquareCitations = (combinedText) => {
+    const referencesRegex = /\[\s*\d+(?:\s*,\s*\d+)*\s*\]/g
+    const referencesMatches = [...combinedText.matchAll(referencesRegex)];
+    const referencesArr = referencesMatches.map(match => match[0]).filter(x => x);
+    
+    const squareRefArr = [];
+    
+    for (let i = 0; i < referencesArr.length; i++) {
+      const refs = referencesArr[i].match(/\d+/g);
+      if(refs) {
+        for (let j = 0; j < refs.length; j++) {
+          if(!squareRefArr.includes(parseInt(refs[j]))) {
+            squareRefArr.push(parseInt(refs[j]));
+          }
+        }
+      }
+    }
+    return squareRefArr
+  }
+
+  const getFigureRefs = (textContent) => {
+    var matches = []
+    // const figureRegex = /(Fig(?:ure)?\.?\s*\d+[a-z]?)/gi
+
+    const figureRegex = /\b(Fig(?:\.|ure) \d+[a-z]?)/g;
+    for (let i = 0; i < textContent.items.length; i++) {
+      const textItem = textContent.items[i];
+      if (textItem.str.match(figureRegex) && textItem.transform[0] > 0) {
+        matches.push(textItem.str);
+      }
+    }
+        
+    const figureArr = []
+    for(let i = 0; i < matches.length; i++) {
+      const individuals = [...matches[i].matchAll(figureRegex)].map(match => match[1])
+      // console.log(individuals)
+      if(!figureArr.includes(individuals[0])) {
+        figureArr.push(individuals[0])
+      }
+    }
+    return figureArr
+  }
+  
+
+  // const getReferences = useCallback((pageNum, pdf=pdfRef) => {
+  //   pdf && pdf.getPage(pageNum).then(function(page) {
+  //     return page.getTextContent()
+  //   })
+  //   .then(function(textContent) {
+  //     console.log('textContent for page ', pageNum)
+  //     console.log('text content is ', textContent)
+  //   })
+  // })
+
+  // useEffect(() => {
+  //   for(let i = 0; i < totalPages; i++) {
+  //     getReferences(i)
+  //   }
+  // }, [getReferences, totalPages])
 
   useEffect(() => {
-    for(let i = 0; i < totalPages; i++) {
-      getReferences(i)
+    if(start && end) {
+      // console.log('Time taken is ', (end-start)/1000)
     }
-  }, [getReferences, totalPages])
+  }, [start, end])
 
     
   useEffect(() => {
+    setStart(Date.now())
     renderPage(currentPage, pdfRef);
   },[pdfRef, currentPage, renderPage]);
   // End code
