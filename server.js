@@ -79,6 +79,7 @@ const server = http.createServer(async (req, res) => {
       }
       if(heading_text == "MET_ABSTRACT"){
         abstract_array.push(input_text[2].trim());
+      }
       if(heading_text == "MET_AUTHOR"){
         //console.log("we found the author");
         author_dict.push(input_text[2].trim());
@@ -98,6 +99,7 @@ const server = http.createServer(async (req, res) => {
       }
       if(heading_text == "MET_ABSTRACT"){
         abstract_array.push(input_text[2].trim());
+      }
       if(heading_text == "MET_AUTHOR"){
         author_dict.push(input_text[2].trim());
       }
@@ -124,6 +126,7 @@ const server = http.createServer(async (req, res) => {
         last_body_content = abstract_array[abstract_array.length-1];
         last_body_content = last_body_content.concat(" ");
         abstract_array[abstract_array.length-1] = last_body_content.concat(input_text);
+      }
       if(lastHeading == "MET_AUTHOR"){
         last_author_content = author_dict[author_dict.length-1];
         last_author_content = last_author_content.concat(" ");
