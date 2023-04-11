@@ -6,8 +6,11 @@ import './style.css'
 const CrossRef = (props) => {
   const {
     info,
-    hideCrossRefInfo
+    hideCrossRefInfo,
+    setShowCrossRef,
   } = props;
+
+  const handleClose = () => setShowCrossRef(false)
   
   return(
     <div className="sidebar p-4">
@@ -21,7 +24,7 @@ const CrossRef = (props) => {
 
       <Button 
         id="close"
-        onClick={() => { hideCrossRefInfo() }}
+        onClick={() => handleClose() }
       >Close
       </Button>
       </div>
@@ -30,7 +33,7 @@ const CrossRef = (props) => {
 
 CrossRef.propTypes = {
     info: PropTypes.array,
-    hideSidebar: PropTypes.func
+    hideCrossRefInfo: PropTypes.func
 }
 
 export default CrossRef;

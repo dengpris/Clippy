@@ -125,8 +125,8 @@ const ViewerNavbar = (props) => {
         <Nav>
           { renderPageCounts() }
           { renderSummaryButton() }
-          { renderZoomButtons() }
           { renderCrossRefBtn() }
+          { renderZoomButtons() }
         </Nav>
       </Navbar>
     </>

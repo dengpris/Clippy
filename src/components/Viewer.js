@@ -631,7 +631,7 @@ function checkValidSentence(str){
         showCrossRef ?
         <CrossRef
           info={ crossRefInfo }
-          hideCrossRefInfo={ hideCrossRefInfo }
+          setShowCrossRef={ setShowCrossRef }
         /> : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
