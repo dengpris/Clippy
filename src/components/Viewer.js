@@ -34,6 +34,7 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
   const [textContent, setTextContent] = useState();
   const [viewport, setViewport] = useState();
+  const [loading, setLoading] = useState(1);
   
   const summary = useMemo(() => {
     return summaryArray.join(' ');
@@ -113,7 +114,6 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
   const firstPage = () => currentPage !== 1 && setCurrentPage(1);
   const lastPage = () => currentPage < totalPages && setCurrentPage(totalPages);
-  
 
   const toggleSidebar = () => {
     setShowSidebar(true);
@@ -150,6 +150,7 @@ async function getPDFText() {
     setBody(result['BODY_CONTENT']);
     setCermAbstract(result['ABSTRACT']);
     getAbstract(result['TITLE']);
+    setLoading(0);
     //setAbstract(abstract_temp1);
 }
 
@@ -403,7 +404,8 @@ function checkValidSentence(str){
 
   return (
     <>
-      <ViewerNavbar 
+      <ViewerNavbar
+        loading = {loading}
         url = {url}
         showSidebar={ showSidebar }
         summary = { summary }
