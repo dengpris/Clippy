@@ -6,10 +6,11 @@ import PropTypes from 'prop-types';
 
 import { BsArrowRight, BsArrowLeft, BsArrowBarRight, BsArrowBarLeft } from 'react-icons/bs';
 import { AiOutlineZoomIn, AiOutlineZoomOut } from 'react-icons/ai';
-import { Button, Nav, Navbar } from 'react-bootstrap';
+import { Button, Nav, Navbar, Spinner } from 'react-bootstrap';
 
 const ViewerNavbar = (props) => {
   const {
+    loading,
     onSummaryClick,
     currentPage,
     totalPageCount,
@@ -95,14 +96,16 @@ const ViewerNavbar = (props) => {
 
   const renderSummaryButton = () => (
     <div>
-      <Button
-        className='mx-3'
-        variant='outline-secondary'
-        size='sm'
-        onClick={ () => onSummaryClick() }    
-      >
-      Generate Summary
-      </Button>
+      { loading ? <Spinner animation="border" /> : 
+        <Button
+          className='mx-3'
+          variant='outline-secondary'
+          size='sm'
+          onClick={ () => onSummaryClick() }    
+        >
+        Generate Summary
+        </Button>
+      }
     </div>
   )
 
@@ -123,6 +126,7 @@ const ViewerNavbar = (props) => {
     <>
       <Navbar bg='dark' variant='dark' className="justify-content-center mb-3">
         <Nav>
+          
           { renderPageCounts() }
           { renderSummaryButton() }
           { renderCrossRefBtn() }
@@ -134,6 +138,7 @@ const ViewerNavbar = (props) => {
 }
 
 ViewerNavbar.propTypes = {
+  loading: PropTypes.number,
   currentPage: PropTypes.number,
   totalPageCount: PropTypes.number,
   nextPage: PropTypes.func.isRequired,
