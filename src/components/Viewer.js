@@ -86,7 +86,6 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
         citationRefs = []
       }
       var figureRefs = getFigureRefs(textContent)
-      // console.log('refs are ', citationRefs, squareRefs, figureRefs)
       setPageRefs(citationRefs.concat(squareRefs).concat(figureRefs))
       setEnd(Date.now())
 
@@ -100,7 +99,6 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
 
 
   function onCrossRefClick () {
-    // console.log('cross refs are ', allPageContent)
 
     const referenceRegex = /(References|Bibliography)/i;
     for(let i = 0; i < allPageContent.length; i++) {
@@ -181,7 +179,6 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
         tmpRef.push(allReferences[i])
       }
     }
-    // console.log('got these references', tmpRef)
     setReferences(tmpRef)
     setLastRef(pageNum)
     setGotRef(true)
@@ -258,7 +255,6 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
     const figureArr = []
     for(let i = 0; i < matches.length; i++) {
       const individuals = [...matches[i].matchAll(figureRegex)].map(match => match[1])
-      // console.log(individuals)
       if(!figureArr.includes(individuals[0])) {
         figureArr.push(individuals[0])
       }
@@ -268,7 +264,6 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
 
   useEffect(() => {
     if(start && end) {
-      // console.log('Time taken is ', (end-start)/1000)
     }
   }, [start, end])
 
@@ -344,7 +339,6 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
 
 async function getPDFText() {
     const result = (await axios.post('http://localhost:3001/', pdfData)).data;
-    console.log(result);
     setPdfTitle(result['TITLE']); 
     const author = result['AUTHOR'].replace(/[0-9]/g, '').replace('*','').split(",");
     setPdfAuthor(author);
@@ -366,7 +360,6 @@ async function onSummaryClick() {
     var summaryVerificationFlag = 0;
     if (summaryVerificationFlag && abstract != ""){
       var tokenizer = require('sbd');
-      console.log(tokenizer.sentences(abstract));
       var numAbstractArray = tokenizer.sentences(abstract);
       numSentences = numAbstractArray.length;
       //Using abstract in body for testing summarizer
@@ -380,8 +373,8 @@ async function onSummaryClick() {
       var formattedBodyArray = summaryTokenize(body);
       //Removes invalid sentences from body text to be put in summarizer.
       var formatted_body = removeInvalidSentence(formattedBodyArray).join(' ');
-      //console.log(formatted_body);
     }
+    formatted_body = formatted_body.replace('di erent', 'different');
     payload.append("key", process.env.REACT_APP_MEANINGCLOUD_API_KEY);
     payload.append("txt", formatted_body);
     //When testing summary, use number of sentences equal to abstract.
@@ -389,8 +382,6 @@ async function onSummaryClick() {
 
     axios.post(summaryURL, payload)
     .then((response) => {
-
-        console.log(abstract);
         var reference_summary;
         //No abstract available
         if(abstract == ""){
@@ -399,22 +390,18 @@ async function onSummaryClick() {
           for(let i = 0; i < numSentences; i++){
             newAbstractArray.push(abstractBodyArray[i]);
           }
-          //console.log(newAbstractArray);
           reference_summary = newAbstractArray.join(' ');
         }
         //Abstract available
         else{
           reference_summary = abstract;
         }
-        //console.log(response.data.summary)
         //Tokenizes summary but does not remove improper sentences.
         var generated_summary = summaryTokenize(response.data.summary);
         setSummaryArray(generated_summary);
-        //console.log(generated_summary);
 
         toggleSidebar();
         //For ROUGE score verification...
-        //if(summaryVerificationFlag){
           let rouge_scores = getRougeScore(reference_summary, generated_summary.join(' '));
           //ROUGE Scores output to console
           console.log("Rouge Score - Unigram: ", rouge_scores[0]);
@@ -539,7 +526,6 @@ function summaryTokenize(summary){
      summarySentencesArray[i] = (TextCleaner(summarySentencesArray[i]).condense().removeChars({ exclude: "'-,’"}).trim().valueOf()+".").replace("- ","");
    }
   
-  //console.log(summarySentencesArray);
   return summarySentencesArray;
 }
 
