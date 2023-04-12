@@ -21,6 +21,7 @@ const ViewerNavbar = (props) => {
     onZoomIn,
     onZoomOut,
     zoomScale,
+    onCrossRefClick,
   } = props;
 
 
@@ -108,6 +109,19 @@ const ViewerNavbar = (props) => {
     </div>
   )
 
+  const renderCrossRefBtn = () => (
+    <div>
+      <Button
+        className='mx-3'
+        variant='outline-secondary'
+        size='sm'
+        onClick={ () => onCrossRefClick() }    
+      >
+      Get Cross-References
+      </Button>
+    </div>
+  )
+
   return (
     <>
       <Navbar bg='dark' variant='dark' className="justify-content-center mb-3">
@@ -115,6 +129,7 @@ const ViewerNavbar = (props) => {
           
           { renderPageCounts() }
           { renderSummaryButton() }
+          { renderCrossRefBtn() }
           { renderZoomButtons() }
         </Nav>
       </Navbar>
@@ -132,7 +147,8 @@ ViewerNavbar.propTypes = {
   lastPage: PropTypes.func,
   onZoomIn: PropTypes.func.isRequired,
   onZoomOut: PropTypes.func.isRequired,
-  zoomScale: PropTypes.number
+  zoomScale: PropTypes.number,
+  onCrossRefClick: PropTypes.func,
 }
 
 export default ViewerNavbar;

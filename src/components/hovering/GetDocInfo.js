@@ -1,7 +1,10 @@
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+import pdfjsLib from 'pdfjs-dist'
+
 PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 
 // get superscripts
 export async function getTitle (url) {
@@ -23,3 +26,5 @@ export async function getTitle (url) {
   });
   return;
 };
+
+

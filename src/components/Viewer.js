@@ -3,8 +3,10 @@ import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import { Button } from 'react-bootstrap';
 
 import Sidebar from './viewerComponents/Sidebar';
+import CrossRef from './hovering/CrossRef';
 
 import * as PDFJS from 'pdfjs-dist';
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
@@ -21,7 +23,7 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   }, [pdfData])
 
   const canvasRef = useRef();
-  const textRef = useRef();
+  const textLayerRef = useRef();
   const [pdfRef, setPdfRef] = useState();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,8 +34,17 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
   const [cerm_abstract, setCermAbstract] = useState("");
   const [abstract, setAbstract] = useState("not ready");
   const summaryURL = 'https://api.meaningcloud.com/summarization-1.0';
+  const [references, setReferences] = useState([])
+  const [start, setStart] = useState()
+  const [end, setEnd] = useState()
+  const [lastRef, setLastRef] = useState(0)
+  const [gotRef, setGotRef] = useState(false)
   const [textContent, setTextContent] = useState();
   const [viewport, setViewport] = useState();
+  const [showCrossRef, setShowCrossRef] = useState(false)
+  const [pageRefs, setPageRefs] = useState([])
+  const [allPageContent, setAllPageContent] = useState([])
+  const [crossRefInfo, setCrossRefInfo] = useState([])
   const [loading, setLoading] = useState(1);
   
   const summary = useMemo(() => {
@@ -61,9 +72,61 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
     })
     .then(function(textContent) {
       setTextContent(textContent);
+
+      let combinedText = '';
+      for (let i = 0; i < textContent.items.length; i++) {
+        const textItem = textContent.items[i];
+        combinedText += textItem.str;
+      }
+
+      var citationRefs = getCitationRefs(textContent)
+      var squareRefs = getSquareCitations(combinedText)
+      if(squareRefs.length > 0) {
+        citationRefs = []
+      }
+      var figureRefs = getFigureRefs(textContent)
+      // console.log('refs are ', citationRefs, squareRefs, figureRefs)
+      setPageRefs(citationRefs.concat(squareRefs).concat(figureRefs))
+      setEnd(Date.now())
+
       });
     });   
   }, [pdfRef, zoomScale]);
+
+  function hideCrossRefInfo () {
+    setShowCrossRef(false)
+  }
+
+
+  function onCrossRefClick () {
+    // console.log('cross refs are ', allPageContent)
+
+    const referenceRegex = /(References|Bibliography)/i;
+    for(let i = 0; i < allPageContent.length; i++) {
+      let combinedText = '';
+      for (let j = 0; j < allPageContent[i].items.length; j++) {
+        const textItem = allPageContent[i].items[j];
+        combinedText += textItem.str;
+        if (referenceRegex.test(combinedText)) {
+          getReferences(combinedText, i)
+        }
+        if(currentPage > lastRef && gotRef) {
+          getReferences(combinedText, i)
+        }
+      }
+    }
+    
+    const result = [];
+
+    for (let i = 0; i < pageRefs.length; i++) {
+      const match = references.find(str => str.startsWith(`[${pageRefs[i]}]`));
+      result.push(match);
+    }
+    console.log('results are ', result)
+    setCrossRefInfo(result)
+    setShowCrossRef(true)
+  }
+
 
   useEffect(() => {
     if (!textContent || !viewport) {
@@ -88,8 +151,130 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
       if (showSidebar) { highlightSummary(textLayer); }
     });
   }, [textContent, viewport, summaryArray]);
+        
+
+
+
+  const getReferences = (combinedText, pageNum) => {
+    // for 1.ref 2.ref format
+    const refRegex = /(\d+)\.\s(.*?)(?=\d+\.\s|$)/g;
+    const refMatches = combinedText.matchAll(refRegex);
+    var allReferences = [];
+
+    for(const match of refMatches) {
+      const index = match[1];
+      const reference = match[2];
+      allReferences.push(`[${index}] ${reference}`);
+    }
+
+    // in format of [1] author, [2] author, etc
+    var allReferences2 = []
+    const squareRegex = /\[(\d+)\]\s*(.+?)(?=\[\d+\]|$)/gs;
+    const squareMatches = [...combinedText.matchAll(squareRegex)];
+    allReferences2 = squareMatches.map(match => `[${match[1]}] ${match[2].trim()}`);
+    allReferences = allReferences.concat(allReferences2)
+    var tmpRef = references
+    for(let i = 0; i < allReferences.length; i++) {
+      if(!references.includes(allReferences[i])) {
+        tmpRef.push(allReferences[i])
+      }
+    }
+    // console.log('got these references', tmpRef)
+    setReferences(tmpRef)
+    setLastRef(pageNum)
+    setGotRef(true)
+  }
+
+  const getCitationRefs = (textContent) => {
+    let matches = []; // for superscripts
+    const citationRegex = /\b\w+(?:\d+|[^\d\s]*\d+[^\d\s]*)\b/
+    for (let i = 0; i < textContent.items.length; i++) {
+      const textItem = textContent.items[i];
+      if (textItem.str.match(citationRegex) && textItem.transform[0] > 0) {
+        matches.push(textItem.str);
+      }
+    }
+    const citationArr = []
+    // in-text citations
+    for(let i = 0; i < matches.length; i++) {
+      const thing = matches[i].split(',')
+      for(let j = 0; j < thing.length; j++) {
+        if(Number.isInteger(+thing[j])) {
+          if(!citationArr.includes(thing[j])) {
+            citationArr.push(thing[j])
+          }
+          
+        }
+      }
+    }
+    for(let i = 0; i < matches.length; i++) {
+      const thing = matches[i].split('–')
+      for(let j = 0; j < thing.length; j++) {
+        if(Number.isInteger(+thing[j])) {
+          if(!citationArr.includes(thing[j])) {
+            citationArr.push(thing[j])
+          }
+          
+        }
+      }
+    }
+    return citationArr
+  }
+
+  const getSquareCitations = (combinedText) => {
+    const referencesRegex = /\[\s*\d+(?:\s*,\s*\d+)*\s*\]/g
+    const referencesMatches = [...combinedText.matchAll(referencesRegex)];
+    const referencesArr = referencesMatches.map(match => match[0]).filter(x => x);
+    
+    const squareRefArr = [];
+    
+    for (let i = 0; i < referencesArr.length; i++) {
+      const refs = referencesArr[i].match(/\d+/g);
+      if(refs) {
+        for (let j = 0; j < refs.length; j++) {
+          if(!squareRefArr.includes(parseInt(refs[j]))) {
+            squareRefArr.push(parseInt(refs[j]));
+          }
+        }
+      }
+    }
+    return squareRefArr
+  }
+
+  const getFigureRefs = (textContent) => {
+    var matches = []
+    // const figureRegex = /(Fig(?:ure)?\.?\s*\d+[a-z]?)/gi
+
+    const figureRegex = /\b(Fig(?:\.|ure) \d+[a-z]?)/g;
+    for (let i = 0; i < textContent.items.length; i++) {
+      const textItem = textContent.items[i];
+      if (textItem.str.match(figureRegex) && textItem.transform[0] > 0) {
+        matches.push(textItem.str);
+      }
+    }
+        
+    const figureArr = []
+    for(let i = 0; i < matches.length; i++) {
+      const individuals = [...matches[i].matchAll(figureRegex)].map(match => match[1])
+      // console.log(individuals)
+      if(!figureArr.includes(individuals[0])) {
+        figureArr.push(individuals[0])
+      }
+    }
+    return figureArr
+  }
+
+  useEffect(() => {
+    if(start && end) {
+      // console.log('Time taken is ', (end-start)/1000)
+    }
+  }, [start, end])
+
+
+
     
   useEffect(() => {
+    setStart(Date.now())
     renderPage(currentPage, pdfRef);
   },[pdfRef, currentPage, renderPage]);
   // End code
@@ -101,6 +286,20 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
     loadingTask.promise.then(loadedPdf => {
       setPdfRef(loadedPdf);
       setTotalPages(loadedPdf.numPages);
+
+      const pagePromises = []
+
+      for (let i = 1; i <= loadedPdf.numPages; i++) {
+        const pagePromise = loadedPdf.getPage(i).then(function(page) {
+          return page.getTextContent();
+        });
+        pagePromises.push(pagePromise);
+      }
+
+      Promise.all(pagePromises).then(function(newPages) {
+        setAllPageContent(prevPages => [...prevPages, ...newPages]);
+      });
+
     }, function (reason) {
       console.error(reason);
     });
@@ -420,6 +619,8 @@ function checkValidSentence(str){
         onZoomIn={ onZoomIn }
         onZoomOut={ onZoomOut }
         zoomScale={ zoomScale }
+        onCrossRefClick={ onCrossRefClick }
+        crossRefInfo={ crossRefInfo }
       />
       { showSidebar ? 
         <Sidebar 
@@ -427,6 +628,13 @@ function checkValidSentence(str){
           hideSidebar={ hideSidebar }
         /> 
         : null
+      }
+      {
+        showCrossRef ?
+        <CrossRef
+          info={ crossRefInfo }
+          setShowCrossRef={ setShowCrossRef }
+        /> : null
       }
       <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
       <div className="textLayer"></div>
