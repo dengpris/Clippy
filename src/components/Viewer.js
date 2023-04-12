@@ -1,6 +1,7 @@
 
 import ViewerNavbar from './viewerComponents/ViewerNavbar';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import './../viewer.css';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
@@ -623,22 +624,24 @@ function checkValidSentence(str){
         onCrossRefClick={ onCrossRefClick }
         crossRefInfo={ crossRefInfo }
       />
-      { showSidebar ? 
-        <Sidebar 
-          summary={ summary }
-          hideSidebar={ hideSidebar }
-        /> 
-        : null
-      }
-      {
-        showCrossRef ?
-        <CrossRef
-          info={ crossRefInfo }
-          setShowCrossRef={ setShowCrossRef }
-        /> : null
-      }
-      <canvas id='viewer-canvas' ref={ canvasRef }></canvas>
-      <div className="textLayer"></div>
+      <div style={{'position':'relative'}}><canvas id='viewer-canvas' ref={ canvasRef }></canvas>
+        <div className="textLayer"></div>
+      
+        { showSidebar ? 
+          <Sidebar 
+            summary={ summary }
+            hideSidebar={ hideSidebar }
+          /> 
+          : null
+        }
+        {
+          showCrossRef ?
+          <CrossRef
+            info={ crossRefInfo }
+            setShowCrossRef={ setShowCrossRef }
+          /> : null
+        }
+      </div>
     </>
     
   );
