@@ -29,12 +29,12 @@ p {
 }
 
 .sidebar {
-  height: 100vh;
+  /* height: 100vh; */
   padding-left: 20px;
   background-color: #16181f;
   color: white;
   width: 500px;
-  position: absolute;
+  position: fixed;
   top: 50px;
   left: 0px;
 }
