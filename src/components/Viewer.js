@@ -106,12 +106,13 @@ const Viewer = ({pdfData, setPdfTitle, setPdfAuthor}) => {
       for (let j = 0; j < allPageContent[i].items.length; j++) {
         const textItem = allPageContent[i].items[j];
         combinedText += textItem.str;
-        if (referenceRegex.test(combinedText)) {
-          getReferences(combinedText, i)
-        }
-        if(currentPage > lastRef && gotRef) {
-          getReferences(combinedText, i)
-        }
+        
+      }
+      if (referenceRegex.test(combinedText)) {
+        getReferences(combinedText, i)
+      }
+      if(currentPage > lastRef && gotRef) {
+        getReferences(combinedText, i)
       }
     }
     
